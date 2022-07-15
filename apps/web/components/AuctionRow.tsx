@@ -52,9 +52,25 @@ export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
   );
 
   return (
-    <Box style={{ height: "100%", display: "flex", alignItems: "stretch" }}>
-      <div style={{ flex: 2, minWidth: 0 }}>
-        <Box className={AuctionRowRoot} style={{ padding: "4rem 0 0" }}>
+    <Box
+      style={{
+        height: "100%",
+        display: "flex",
+        alignItems: "stretch",
+        background: "rgb(25 25 25)",
+      }}
+    >
+      <div
+        style={{
+          flex: 2,
+          minWidth: 0,
+          borderRight: "0.3rem solid rgb(241, 206, 24)",
+        }}
+      >
+        <Box
+          className={AuctionRowRoot}
+          style={{ padding: "4rem 0 0", minHeight: "70vh" }}
+        >
           <Box
             as="a"
             href={`${config.externalBaseURI}/${auction.noun.id}`}
