@@ -13,7 +13,7 @@ export const AuctionRowRoot = style({
     // },
     [mq("md")]: {
       // gridTemplateColumns: "1fr",
-      gridTemplateColumns: "minmax(0,4fr) minmax(0,5fr)",
+      gridTemplateColumns: "repeat(2, minmax(0,1fr))",
     },
     // [mq("lg")]: {
     //   gridTemplateColumns: "repeat(2, 1fr)",

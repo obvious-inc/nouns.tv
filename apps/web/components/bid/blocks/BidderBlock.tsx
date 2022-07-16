@@ -23,7 +23,7 @@ export function BidderBlock({
       rel="noreferrer"
     >
       <Box display="flex" flexDirection="row" justifyContent="flex-start">
-        {avatarURI ? (
+        {avatarURI && (
           <Avatar
             label="Avatar"
             src={avatarURI}
@@ -35,39 +35,8 @@ export function BidderBlock({
             }}
             shape="square"
           />
-        ) : (
-          <Box
-            width={{
-              xs: "4",
-              md: "4",
-              lg: "5",
-              xl: "6",
-            }}
-            height={{
-              xs: "4",
-              md: "4",
-              lg: "5",
-              xl: "6",
-            }}
-            backgroundColor="yellow"
-            borderRadius={{
-              xs: "medium",
-              md: "medium",
-              lg: "large",
-              xl: "2xLarge",
-            }}
-          />
         )}
-        <Box
-          display="flex"
-          flexDirection="column"
-          marginLeft={{
-            xs: "1",
-            sm: "1",
-            lg: "2",
-            xl: "2.5",
-          }}
-        >
+        <Box display="flex" flexDirection="column">
           <Text
             font="mono"
             transform={bidderENS ? "uppercase" : undefined}
@@ -75,9 +44,9 @@ export function BidderBlock({
           >
             {bidderENS || shortenAddress(bidderAddress)}
           </Text>
-          <Text variant="small" color="textSecondary">
-            {tokenBalance} Nouns
-          </Text>
+          {/* <Text variant="small" color="textSecondary"> */}
+          {/*   {tokenBalance} Nouns */}
+          {/* </Text> */}
         </Box>
       </Box>
     </a>

@@ -19,11 +19,11 @@
   --colors-foregroundTertiary: rgba(255, 255, 255, 0.04);
   --colors-groupBackground: rgb(10, 10, 10);
   --colors-groupBorder: rgba(255, 255, 255, 0);
-  --colors-text: var(--colors-white);
+  --colors-text: var(--colors-black);
   --colors-textPrimary: rgba(255, 255, 255, 1);
   --colors-textSecondary: rgba(179, 179, 179, 1);
-  --colors-textTertiary: rgba(100, 100, 100, 1);
-  --colors-yellow: rgb(241, 206, 24);
+  --colors-textTertiary: var(--colors-black); // rgba(100, 100, 100, 1);
+  --colors-yellow: #ffc110; // rgb(241, 206, 24);
 
   --fonts-mono: "Azeret Mono", Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
