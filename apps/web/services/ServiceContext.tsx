@@ -1,4 +1,4 @@
-import { createContext, useCallback, useMemo, useState } from "react";
+import { createContext, useMemo } from "react";
 import { LIL_NOUN_TOKEN_ADDRESS, NOUN_TOKEN_ADDRESS } from "../utils/address";
 import { NounService } from "./interfaces/noun.service";
 import { SubgraphService } from "./subgraph.service";

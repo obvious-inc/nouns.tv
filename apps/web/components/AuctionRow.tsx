@@ -1,3 +1,4 @@
+import { getNounData } from "@nouns/assets";
 import { Box } from "degen";
 import { Auction } from "../services/interfaces/noun.service";
 import { AuctionRowRoot } from "./AuctionRow.css";
@@ -39,6 +40,13 @@ export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
   //   [auction]
   // );
   const nounName = `${config.name} ${auction.noun.id}`;
+
+  const { parts, background } = getNounData(auction.noun.seed);
+
+  const backgroundName = {
+    e1d7d5: "warm",
+    d5d7e1: "cold",
+  }[background.toLowerCase()];
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -161,7 +169,7 @@ export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
             className={AuctionRowRoot}
             style={{
               // minHeight: "70vh",
-              background: "#E1D7D5",
+              background: `#${background}`,
             }}
           >
             <Box
@@ -179,6 +187,20 @@ export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
                 alt={`Noun ${auction.noun.id}`}
               />
             </Box>
+            <div
+              style={{
+                display: "grid",
+                gridAutoFlow: "row",
+                gridGap: "1rem",
+                textTransform: "capitalize",
+                paddingBottom: "2rem",
+              }}
+            >
+              {parts.map((part, i) => (
+                <div key={i}>{part.filename.split("-").slice(1).join(" ")}</div>
+              ))}
+              <div>{backgroundName}</div>
+            </div>
           </Box>
           <Banner bids={auction.bids} />
           {/* <BidTable bids={auction.bids} /> */}

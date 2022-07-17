@@ -4,7 +4,8 @@ import { atoms, vars } from "degen";
 
 export const AuctionRowRoot = style({
   display: "grid",
-  gridTemplateColumns: "1fr",
+  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+  // gridTemplateColumns: "1fr",
   // gridGap: "2rem",
   alignItems: "flex-end",
   "@media": {

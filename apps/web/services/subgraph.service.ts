@@ -40,6 +40,13 @@ const BID_FRAGMENT = gql`
 const NOUN_FRAGMENT = gql`
   fragment NounFragment on Noun {
     id
+    seed {
+      background
+      body
+      accessory
+      head
+      glasses
+    }
     owner {
       ...AccountFragment
     }

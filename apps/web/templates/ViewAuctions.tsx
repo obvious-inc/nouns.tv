@@ -1,51 +1,14 @@
-import { useNounService } from "../hooks/useNounService";
-import { useServiceContext } from "../hooks/useServiceContext";
-import React, { useCallback } from "react";
+import React from "react";
 import { Auction } from "../services/interfaces/noun.service";
-import useSWRInfinite from "swr/infinite";
 // import { useInView } from "react-intersection-observer";
 // import { ContractSwitcher } from "../compositions/ContractSwitcher";
-import { AuctionRow } from "../components/AuctionRow";
-import { Box } from "degen";
+import { AuctionRow as AuctionPage } from "../components/AuctionRow";
+// import { Box } from "degen";
 // import { Text } from "../elements/Text";
 // import { Banner } from "../components/Banner";
-import { PAGE_SIZE } from "../utils/pagination";
+// import { PAGE_SIZE } from "../utils/pagination";
 
-type ViewAuctionsTemplateProps = {
-  initialPage?: Auction[];
-};
-
-export function ViewAuctionsTemplate({
-  initialPage = [],
-}: ViewAuctionsTemplateProps) {
-  const service = useNounService();
-  const {
-    address,
-    // config
-  } = useServiceContext();
-
-  const getKey = useCallback(
-    (
-      pageIndex: number,
-      previousPageData: Auction[]
-    ): [string, string, number, number] | null => {
-      if (previousPageData && !previousPageData.length) return null;
-      return [address, "DESC", PAGE_SIZE, pageIndex * PAGE_SIZE];
-    },
-    [address]
-  );
-
-  const {
-    data,
-    // error, size, setSize, isValidating
-  } = useSWRInfinite<Auction[]>(getKey, {
-    fetcher: (_, ...args: ["DESC" | "ASC", number, number]) =>
-      service.getAuctions(...args),
-    refreshInterval: 1000 * 60,
-    fallbackData: [initialPage],
-    initialSize: initialPage.length,
-  });
-
+export function ViewAuctionsTemplate({ auction }: { auction: Auction }) {
   // const { ref } = useInView({
   //   threshold: 0.15,
   //   delay: 100,
@@ -69,21 +32,7 @@ export function ViewAuctionsTemplate({
   //   [data?.length, isValidating, size]
   // );
 
-  return (
-    <>
-      {/* <ContractSwitcher isWorking={isLoadingInitialData || isRefreshing} /> */}
-      {data?.[0]?.[0] != null && <AuctionRow auction={data?.[0]?.[0]} />}
-      {/* {!isRefreshing && !isLoadingInitialData && !isReachingEnd && ( */}
-      {/*   <Box ref={ref} as="div" display="flex" width="full" height="10" /> */}
-      {/* )} */}
-      {/* {!isLoadingInitialData && isLoadingMore && ( */}
-      {/*   <Box position="fixed" bottom="6" left="0" right="0"> */}
-      {/*     <Text variant="label" paddingX="3"> */}
-      {/*       Loading... */}
-      {/*     </Text> */}
-      {/*   </Box> */}
-      {/* )} */}
-      {/* <Banner /> */}
-    </>
-  );
+  // if (auction == null) return null;
+
+  return <AuctionPage auction={auction} />;
 }

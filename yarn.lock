@@ -277,7 +277,7 @@
     "@ethersproject/bytes" "^5.6.1"
     "@ethersproject/properties" "^5.6.0"
 
-"@ethersproject/bignumber@5.6.2", "@ethersproject/bignumber@^5.6.2":
+"@ethersproject/bignumber@5.6.2", "@ethersproject/bignumber@^5.5.0", "@ethersproject/bignumber@^5.6.2":
   version "5.6.2"
   resolved "https://registry.yarnpkg.com/@ethersproject/bignumber/-/bignumber-5.6.2.tgz#72a0717d6163fab44c47bcc82e0c550ac0315d66"
   integrity sha512-v7+EEUbhGqT3XJ9LMPsKvXYHFc8eHxTowFCG/HgJErmq4XHJ2WR7aeyICg3uTOAQ7Icn0GFHAohXEhxQHq4Ubw==
@@ -465,7 +465,7 @@
     elliptic "6.5.4"
     hash.js "1.1.7"
 
-"@ethersproject/solidity@5.6.1":
+"@ethersproject/solidity@5.6.1", "@ethersproject/solidity@^5.5.0":
   version "5.6.1"
   resolved "https://registry.yarnpkg.com/@ethersproject/solidity/-/solidity-5.6.1.tgz#5845e71182c66d32e6ec5eefd041fca091a473e2"
   integrity sha512-KWqVLkUUoLBfL1iwdzUVlkNqAUIFMpbbeH0rgCfKmJp0vFtY4AsaN91gHKo9ZZLkC4UOm3cI3BmMV4N53BOq4g==
@@ -726,6 +726,14 @@
   dependencies:
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
+
+"@nouns/assets@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@nouns/assets/-/assets-0.2.0.tgz#556be65037e8c3db28d64f6cf245b80d04ae4f03"
+  integrity sha512-LwMY4HLFmyVsF4Qw5SxKTs/B3c1clrGzPzIvtcGWMIae41mS587PPkQ0I7siAInZZ9wgQKe1DRGhXA/p5/nAqA==
+  dependencies:
+    "@ethersproject/bignumber" "^5.5.0"
+    "@ethersproject/solidity" "^5.5.0"
 
 "@pedrouid/environment@^1.0.1":
   version "1.0.1"

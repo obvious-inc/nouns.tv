@@ -12,9 +12,18 @@ export type Bid = {
   amount: string;
 };
 
+export type Seed = {
+  background: number;
+  body: number;
+  accessory: number;
+  head: number;
+  glasses: number;
+};
+
 export type Noun = {
   id: string;
   owner: Account;
+  seed: Seed;
 };
 
 export type Auction = {

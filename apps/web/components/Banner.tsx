@@ -33,16 +33,15 @@ const BidBlock = ({ bid }: { bid: Bid }) => {
               borderRadius: "50%",
               overflow: "hidden",
               marginRight: "0.5rem",
+              background: "rgb(0 0 0 / 10%)",
             }}
           >
-            <Image src={avatarURI} alt="Avatar" width={36} height={36} />
+            <img src={avatarURI} alt="Avatar" width={36} height={36} />
           </div>
         )}
         <Box display="flex" flexDirection="column">
           <Text font="mono" transform="uppercase" weight="medium">
-            <span style={{ color: "#AE3208" }}>
-              ETH {toFixed(formatEther(bid.amount), 2)}
-            </span>
+            ETH {toFixed(formatEther(bid.amount), 2)}
           </Text>
           <Text
             font="mono"
@@ -61,7 +60,7 @@ const BidBlock = ({ bid }: { bid: Bid }) => {
 export function Banner({ bids }: { bids: Bid[] }) {
   return (
     <Marquee className={MarqueeRoot} pauseOnHover gradient={false} speed={60}>
-      <div style={{ padding: "0.5rem 0" }}>
+      <div style={{ padding: "0.6rem 0" }}>
         <Box display="flex" flexDirection="row" alignItems="center">
           {bids
             .sort((a, b) => b.blockTimestamp - a.blockTimestamp)
@@ -75,11 +74,11 @@ export function Banner({ bids }: { bids: Bid[] }) {
                       margin: "0 1.35rem",
                       width: "1px",
                       height: "2rem",
-                      background: "#AE3208",
+                      background: "rgb(0 0 0 / 25%)",
                     }}
                   />
                 ) : (
-                  <div style={{ width: "5.4rem" }} />
+                  <div style={{ width: "25vw" }} />
                 )}
               </React.Fragment>
             ))}

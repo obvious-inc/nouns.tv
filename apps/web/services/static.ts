@@ -11,9 +11,9 @@ export type StaticParams = {
 };
 
 export type StaticProps = {
-  nounAddress: string;
   config: NounishConfig;
-  initialPage: Auction[];
+  address: string;
+  auction: Auction;
 };
 
 export const getStaticAuctionProps: GetStaticProps<
@@ -32,7 +32,7 @@ export const getStaticAuctionProps: GetStaticProps<
   const auctions: Auction[] = await service.getAuctions("DESC", PAGE_SIZE, 0);
 
   return {
-    props: { nounAddress: address, config, initialPage: auctions },
+    props: { address, config, auction: auctions[0] },
     revalidate: 30,
   };
 };

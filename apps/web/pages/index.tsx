@@ -1,17 +1,13 @@
 import type { NextPage } from "next";
 import React from "react";
-import { ViewAuctionsTemplate } from "../templates/ViewAuctions";
 import { ServiceCtxProvider } from "../services/ServiceContext";
 import { useRouter } from "next/router";
 import { getStaticAuctionProps, StaticProps } from "../services/static";
 import { Page } from "../components/Page";
+import { AuctionRow as AuctionPage } from "../components/AuctionRow";
 import { FallbackPage } from "../templates/FallbackPage";
 
-const ViewNouns: NextPage<StaticProps> = ({
-  initialPage,
-  nounAddress,
-  config,
-}) => {
+const ViewNouns: NextPage<StaticProps> = ({ auction, address, config }) => {
   const { isFallback } = useRouter();
 
   if (isFallback) {
@@ -20,12 +16,8 @@ const ViewNouns: NextPage<StaticProps> = ({
 
   return (
     <Page>
-      <ServiceCtxProvider
-        key={nounAddress}
-        address={nounAddress}
-        config={config}
-      >
-        <ViewAuctionsTemplate initialPage={initialPage} />
+      <ServiceCtxProvider key={address} address={address} config={config}>
+        <AuctionPage auction={auction} />
       </ServiceCtxProvider>
     </Page>
   );
