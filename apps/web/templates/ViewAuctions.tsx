@@ -2,7 +2,7 @@ import React from "react";
 import { Auction } from "../services/interfaces/noun.service";
 // import { useInView } from "react-intersection-observer";
 // import { ContractSwitcher } from "../compositions/ContractSwitcher";
-import { AuctionRow as AuctionPage } from "../components/AuctionRow";
+import { AuctionPage } from "../components/AuctionPage";
 // import { Box } from "degen";
 // import { Text } from "../elements/Text";
 // import { Banner } from "../components/Banner";

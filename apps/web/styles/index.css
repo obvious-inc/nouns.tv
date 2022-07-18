@@ -4,7 +4,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  font-family: var(--fonts-mono);
+  font-family: var(--fonts-sans);
   background: var(--colors-black);
   color: var(--colors-text);
   -webkit-font-smoothing: antialiased;

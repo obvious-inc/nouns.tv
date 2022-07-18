@@ -4,7 +4,7 @@ import { ServiceCtxProvider } from "../services/ServiceContext";
 import { useRouter } from "next/router";
 import { getStaticAuctionProps, StaticProps } from "../services/static";
 import { Page } from "../components/Page";
-import { AuctionRow as AuctionPage } from "../components/AuctionRow";
+import { AuctionPage } from "../components/AuctionPage";
 import { FallbackPage } from "../templates/FallbackPage";
 
 const ViewNouns: NextPage<StaticProps> = ({ auction, address, config }) => {

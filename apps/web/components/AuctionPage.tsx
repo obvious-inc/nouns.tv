@@ -1,7 +1,5 @@
 import { getNounData } from "@nouns/assets";
-import { Box } from "degen";
 import { Auction } from "../services/interfaces/noun.service";
-import { AuctionRowRoot } from "./AuctionRow.css";
 import { useNoun } from "../hooks/useNoun";
 import { useProfile } from "../hooks/useProfile";
 import { Text } from "../elements/Text";
@@ -13,11 +11,11 @@ import { CountdownDisplay } from "./CountdownDisplay";
 import { Banner } from "./Banner";
 import { formatEther } from "ethers/lib/utils";
 
-type AuctionRowProps = {
+type AuctionPageProps = {
   auction: Auction;
 };
 
-export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
+export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
   const { config } = useServiceContext();
   const { auction = initialAuction } = useAuction(initialAuction.noun.id, {
     fallbackData: initialAuction,
@@ -79,7 +77,7 @@ export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
 
         <div>NOUNS.TV</div>
       </div>
-      <Box
+      <div
         style={{
           flex: 1,
           display: "flex",
@@ -165,28 +163,26 @@ export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
               </div>
             </div>
           </div>
-          <Box
-            className={AuctionRowRoot}
+          <div
             style={{
-              // minHeight: "70vh",
+              display: "grid",
+              gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+              alignItems: "flex-end",
               background: `#${background}`,
             }}
           >
-            <Box
-              as="a"
+            <a
               href={`${config.externalBaseURI}/${auction.noun.id}`}
               target="_blank"
               rel="noreferrer"
               style={{ paddingLeft: "2rem" }}
             >
-              <Box
-                as="img"
-                // className={NounImage}
-                style={{ display: "block", width: "100%" }}
+              <img
                 src={imageURL || "../assets/loading-skull-noun.gif"}
                 alt={`Noun ${auction.noun.id}`}
+                style={{ display: "block", width: "100%" }}
               />
-            </Box>
+            </a>
             <div
               style={{
                 display: "grid",
@@ -204,7 +200,7 @@ export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
               ))}
               <div>Background: {backgroundName}</div>
             </div>
-          </Box>
+          </div>
           <Banner bids={auction.bids} />
           {/* <BidTable bids={auction.bids} /> */}
         </div>
@@ -219,7 +215,7 @@ export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
             }}
           />
         </div>
-      </Box>
+      </div>
     </div>
   );
 }
