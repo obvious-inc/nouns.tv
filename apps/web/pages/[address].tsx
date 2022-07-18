@@ -12,11 +12,7 @@ import { Page } from "../components/Page";
 import { SITE_TITLE } from "../utils/seo";
 import { FallbackPage } from "../templates/FallbackPage";
 
-const ViewAuctions: NextPage<StaticProps> = ({
-  initialPage,
-  nounAddress,
-  config,
-}) => {
+const ViewAuctions: NextPage<StaticProps> = ({ auction, address, config }) => {
   const { isFallback } = useRouter();
 
   if (isFallback) {
@@ -25,12 +21,8 @@ const ViewAuctions: NextPage<StaticProps> = ({
 
   return (
     <Page title={`${SITE_TITLE} | ${config.name.toLowerCase()}s`}>
-      <ServiceCtxProvider
-        key={nounAddress}
-        address={nounAddress}
-        config={config}
-      >
-        <ViewAuctionsTemplate initialPage={initialPage} />
+      <ServiceCtxProvider key={address} address={address} config={config}>
+        <ViewAuctionsTemplate auction={auction} />
       </ServiceCtxProvider>
     </Page>
   );
