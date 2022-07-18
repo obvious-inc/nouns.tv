@@ -1,4 +1,3 @@
-export const SITE_DESCRIPTION =
-  "an opensource noun + noun derivative auction explorer";
-export const SITE_TITLE = "« nounsverse »";
-export const SITE_URL = "https://nounsverse.wtf";
+export const SITE_DESCRIPTION = "twitch-like experience for nouns";
+export const SITE_TITLE = "nouns.tv";
+export const SITE_URL = "https://nouns-tv.vercel.app/";

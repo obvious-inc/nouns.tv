@@ -38,7 +38,6 @@ export function Page({
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
         <meta name="twitter:site" content={SITE_URL} />
-        <meta name="twitter:creator" content="@ethandaya" />
 
         <link rel="icon" type="image/png" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/favicon.ico" />
