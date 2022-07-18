@@ -197,9 +197,12 @@ export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
               }}
             >
               {parts.map((part, i) => (
-                <div key={i}>{part.filename.split("-").slice(1).join(" ")}</div>
+                <div key={i}>
+                  {part.filename.split("-")[0]}:{" "}
+                  {part.filename.split("-").slice(1).join(" ")}
+                </div>
               ))}
-              <div>{backgroundName}</div>
+              <div>Background: {backgroundName}</div>
             </div>
           </Box>
           <Banner bids={auction.bids} />
