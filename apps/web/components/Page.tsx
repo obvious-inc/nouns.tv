@@ -42,8 +42,8 @@ export function Page({
         <link rel="icon" type="image/png" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/favicon.ico" />
 
-        <meta property="og:image" content={image} />
-        <meta name="twitter:image" content={image} />
+        {/* <meta property="og:image" content={image} />
+        <meta name="twitter:image" content={image} /> */}
       </Head>
       {children}
     </>
