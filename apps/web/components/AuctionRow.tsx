@@ -12,6 +12,8 @@ import { shortenAddress } from "../utils/address";
 import { CountdownDisplay } from "./CountdownDisplay";
 import { Banner } from "./Banner";
 import { formatEther } from "ethers/lib/utils";
+import { useState } from "react";
+import useInterval from "../hooks/useInterval";
 
 type AuctionRowProps = {
   auction: Auction;
@@ -19,12 +21,26 @@ type AuctionRowProps = {
 
 export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
   const { config } = useServiceContext();
+  const [audience, setAudience] = useState(null);
   const { auction = initialAuction } = useAuction(initialAuction.noun.id, {
     fallbackData: initialAuction,
     ...(!initialAuction.settled && {
       refreshInterval: 1000 * 30,
     }),
   });
+
+  useInterval(() => {
+    fetch("/api/audience")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Something went wrong");
+        }
+        return response.json();
+      })
+      .then(({ sessions }) => {
+        setAudience(sessions);
+      });
+  }, 3000);
 
   const { noun, imageURL } = useNoun(auction.noun.id, {
     fallbackData: auction.noun,
@@ -201,6 +217,7 @@ export function AuctionRow({ auction: initialAuction }: AuctionRowProps) {
               ))}
               <div>{backgroundName}</div>
             </div>
+            <div>{audience && <div>{audience} viewer(s)</div>}</div>
           </Box>
           <Banner bids={auction.bids} />
           {/* <BidTable bids={auction.bids} /> */}
