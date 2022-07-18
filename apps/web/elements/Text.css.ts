@@ -31,24 +31,16 @@ const variant = {
       fontWeight: "700",
     }),
   ]),
-  medium: style([
-    atoms({
-      fontSize: "large",
-    }),
-    style({
-      fontWeight: "700",
-    }),
-  ]),
-  base: atoms({
-    fontSize: {
-      xs: "small",
-      sm: "small",
-      md: "small",
-      lg: "small",
-      xl: "base",
-    },
-    fontWeight: "normal",
-  }),
+  // medium: style([
+  //   atoms({
+  //     fontSize: "large",
+  //   }),
+  //   style({
+  //     fontWeight: "700",
+  //   }),
+  // ]),
+  base: style({ fontSize: "1rem", fontWeight: "500" }),
+  medium: style({ fontSize: "1.3rem", fontWeight: "700" }),
   small: style([
     atoms({
       fontSize: {
