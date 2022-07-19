@@ -62,7 +62,7 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
           height="30"
           viewBox="0 0 50 30"
           fill="none"
-          style={{ marginRight: "1rem" }}
+          style={{ marginRight: "0.6rem" }}
         >
           <rect width="50" height="30" fill="#FF1AD2" />
           <rect x="5" y="5" width="10" height="10" fill="black" />
@@ -75,7 +75,9 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
           <rect x="35" y="15" width="10" height="10" fill="black" />
         </svg>
 
-        <div>NOUNS.TV</div>
+        <div style={{ color: "white", fontSize: "1.1rem", fontWeight: "800" }}>
+          NOUNS.TV
+        </div>
       </div>
       <div
         style={{
@@ -206,7 +208,7 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <iframe
-            src="https://app.newshades.xyz/c/62c81262ceb3b1d36c1bd457?theme=nouns-tv"
+            src={process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL}
             style={{
               display: "block",
               width: "100%",
