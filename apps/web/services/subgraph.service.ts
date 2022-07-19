@@ -63,7 +63,12 @@ const AUCTION_FRAGMENT = gql`
     settled
     startTime
     endTime
-    bids {
+    bids(
+      orderBy: blockNumber
+      orderDirection: desc
+      orderBy: txIndex
+      orderDirection: desc
+    ) {
       ...BidFragment
     }
     bidder {
@@ -113,6 +118,8 @@ const GET_BIDS = gql`
       where: { bidder: $address }
       block: { number: $blockNumber }
       skip: $offset
+      orderBy: txIndex
+      orderDirection: desc
     ) {
       ...BidFragment
     }
