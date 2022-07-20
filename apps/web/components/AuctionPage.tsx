@@ -101,9 +101,10 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
               display: "flex",
               alignItems: "center",
               padding: "0 20px",
+              whiteSpace: "nowrap",
             }}
           >
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, paddingRight: "1rem" }}>
               <Text variant="large" transform="uppercase">
                 {nounName}
               </Text>
@@ -117,8 +118,22 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
                 gridGap: "2rem",
               }}
             >
-              <div>
-                <Text variant="label">High-Bidder</Text>
+              <div
+                style={{
+                  minWidth: 0,
+                  overflow: "hidden",
+                }}
+              >
+                <Text
+                  variant="label"
+                  style={{
+                    minWidth: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  High-Bidder
+                </Text>
                 <Text
                   // color="textSecondary"
                   variant="medium"
@@ -126,6 +141,11 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
                   transform={
                     bidderENSName || ownerENSName ? "uppercase" : undefined
                   }
+                  style={{
+                    minWidth: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
                 >
                   {auction.settled
                     ? ownerENSName || shortenAddress(noun.owner.address)
