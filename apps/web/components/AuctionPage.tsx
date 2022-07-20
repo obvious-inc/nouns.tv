@@ -1,4 +1,5 @@
 import { getNounData } from "@nouns/assets";
+import { useRouter } from "next/router";
 import { Auction } from "../services/interfaces/noun.service";
 import { useNoun } from "../hooks/useNoun";
 import { useProfile } from "../hooks/useProfile";
@@ -16,6 +17,7 @@ type AuctionPageProps = {
 };
 
 export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
+  const router = useRouter();
   const { config } = useServiceContext();
   const { auction = initialAuction } = useAuction(initialAuction.noun.id, {
     fallbackData: initialAuction,
@@ -33,10 +35,6 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
   } = useProfile(noun.owner.address);
   const { ensName: bidderENSName } = useProfile(auction.bidder?.address);
 
-  // const isEnded = useMemo(
-  //   () => isPast(fromUnixTime(auction.endTime)),
-  //   [auction]
-  // );
   const nounName = `${config.name} ${auction.noun.id}`;
 
   const { parts, background } = getNounData(auction.noun.seed);
@@ -208,7 +206,12 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <iframe
-            src={process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL}
+            src={[
+              process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL,
+              router.query.compact ? "compact=1" : undefined,
+            ]
+              .filter(Boolean)
+              .join("?")}
             style={{
               display: "block",
               width: "100%",
