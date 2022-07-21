@@ -232,6 +232,7 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
             ]
               .filter(Boolean)
               .join("?")}
+            allow="clipboard-read; clipboard-write"
             style={{
               display: "block",
               width: "100%",
