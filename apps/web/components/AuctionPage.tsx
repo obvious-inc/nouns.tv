@@ -1,4 +1,9 @@
-import React from "react";
+import React, { RefObject } from "react";
+import { useAccount, useProvider, useNetwork, useSignMessage } from "wagmi";
+import {
+  ConnectButton as RainbowConnectButton,
+  useConnectModal,
+} from "@rainbow-me/rainbowkit";
 import { getNounData } from "@nouns/assets";
 import { useRouter } from "next/router";
 import { Auction } from "../services/interfaces/noun.service";
@@ -13,10 +18,138 @@ import { CountdownDisplay } from "./CountdownDisplay";
 import { Banner } from "./Banner";
 import { formatEther } from "ethers/lib/utils";
 
-const chatUrl =
-  process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL != null
-    ? new URL(process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL)
-    : null;
+const chatUrl = new URL(process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL as string);
+
+const useLatestCallback = (callback: any) => {
+  const ref = React.useRef();
+
+  React.useLayoutEffect(() => {
+    ref.current = callback;
+  });
+
+  const stableCallback = React.useCallback((...args: any[]) => {
+    // @ts-ignore
+    ref.current(...args);
+  }, []);
+
+  return stableCallback;
+};
+
+const useEmbeddedChatMessager = (iFrameRef: RefObject<HTMLIFrameElement>) => {
+  const provider = useProvider();
+  const { address: walletAccountAddress, connector: walletConnector } =
+    useAccount({
+      onConnect: () => {
+        postMessage({ method: "connect" });
+      },
+    });
+  const { chain } = useNetwork();
+  const { signMessageAsync: signMessage } = useSignMessage();
+  const { openConnectModal } = useConnectModal();
+
+  const postMessage = useLatestCallback(
+    ({ id, method, params, result, error }: any) => {
+      const payload = {
+        jsonrpc: "2.0",
+        id,
+        method,
+        params,
+        result,
+      };
+      // @ts-ignore
+      if (error != null) payload.error = error;
+      iFrameRef.current!.contentWindow!.postMessage(payload, chatUrl!.origin);
+    }
+  );
+
+  const processWalletMessage = useLatestCallback(
+    async <
+      Message extends { id: number; method: string; params?: any[] },
+      RPCError extends { code: number; message: string }
+    >(
+      message: Message
+    ) => {
+      const { id, method, params } = message;
+
+      switch (method) {
+        case "eth_accounts":
+          postMessage({ id, result: [walletAccountAddress].filter(Boolean) });
+          break;
+
+        case "eth_requestAccounts": {
+          if (walletAccountAddress) {
+            postMessage({ id, result: [walletAccountAddress] });
+            break;
+          }
+          // @ts-ignore wtf?
+          openConnectModal();
+          postMessage({ id, result: [] });
+          break;
+        }
+
+        case "eth_chainId":
+          postMessage({ id, result: chain?.id });
+          break;
+
+        case "personal_sign": {
+          try {
+            const { utils: ethersUtils } = await import("ethers");
+            const message = ethersUtils.toUtf8String(params![0]);
+            const signature = await signMessage({ message });
+            postMessage({ id, result: signature });
+          } catch (error) {
+            postMessage({ id, error: error as RPCError });
+          }
+          break;
+        }
+
+        default: {
+          try {
+            // @ts-ignore no send??
+            const result = await provider.send(method, params);
+            postMessage({ id, result });
+          } catch (error) {
+            postMessage({ id, error: error as RPCError });
+          }
+        }
+      }
+    }
+  );
+
+  // Post wallet connection changes
+  React.useEffect(() => {
+    const changeHandler = (e: { account?: string }) => {
+      if (e.account == null) return;
+      postMessage({ method: "accountsChanged", params: [[e.account]] });
+    };
+    const disconnectHandler = () => {
+      postMessage({ method: "disconnect" });
+    };
+
+    walletConnector?.on("change", changeHandler);
+    walletConnector?.on("disconnect", disconnectHandler);
+    return () => {
+      walletConnector?.removeListener("change", changeHandler);
+      walletConnector?.removeListener("disconnect", disconnectHandler);
+    };
+  }, [walletConnector, postMessage]);
+
+  // React to incoming messages
+  React.useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.origin !== chatUrl.origin || event.data.jsonrpc !== "2.0")
+        return;
+
+      processWalletMessage(event.data);
+    };
+
+    window.addEventListener("message", handler);
+
+    return () => {
+      window.removeEventListener("message", handler);
+    };
+  }, [processWalletMessage]);
+};
 
 export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
   const router = useRouter();
@@ -46,13 +179,8 @@ export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
     d5d7e1: "cold",
   }[background.toLowerCase()];
 
-  React.useEffect(() => {
-    if (chatUrl == null) return;
-    window.addEventListener("message", (event) => {
-      if (event.origin !== chatUrl.origin) return;
-      console.log("Chat event:", event.data);
-    });
-  }, []);
+  const iFrameRef = React.useRef<HTMLIFrameElement>(null);
+  useEmbeddedChatMessager(iFrameRef);
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -63,6 +191,7 @@ export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
           height: "60px",
           alignItems: "center",
           padding: "0 20px",
+          paddingRight: "15px", // To match the chat
         }}
       >
         <svg
@@ -85,6 +214,10 @@ export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
 
         <div style={{ color: "white", fontSize: "1.1rem", fontWeight: "800" }}>
           NOUNS.TV
+        </div>
+        <div style={{ flex: 1 }} />
+        <div>
+          <RainbowConnectButton />
         </div>
       </div>
       <div
@@ -232,11 +365,11 @@ export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
             </div>
           </div>
           <Banner bids={auction.bids} />
-          {/* <BidTable bids={auction.bids} /> */}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           {chatUrl != null && (
             <iframe
+              ref={iFrameRef}
               src={[
                 chatUrl.href,
                 router.query.compact ? "compact=1" : undefined,

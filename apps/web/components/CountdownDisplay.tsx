@@ -105,6 +105,13 @@ export const CountdownDisplay = (props: CountdownDisplayProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null;
+
   if (!timeLeft) {
     return <Fragment />;
   }

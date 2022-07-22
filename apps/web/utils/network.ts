@@ -16,7 +16,7 @@ export const { chains, provider } = configureChains(
 );
 
 const { connectors } = getDefaultWallets({
-  appName: "Nounspro",
+  appName: "nouns.tv",
   chains,
 });
 

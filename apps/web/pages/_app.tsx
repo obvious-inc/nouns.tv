@@ -1,11 +1,12 @@
 import "degen/styles";
+import "@rainbow-me/rainbowkit/styles.css";
 import "../styles/index.css";
 import "../styles/theme.scss";
 import { ThemeProvider, vars } from "degen";
 import type { AppProps } from "next/app";
 import { WagmiConfig } from "wagmi";
 import { chains, wagmiClient } from "../utils/network";
-import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import NextNProgress from "nextjs-progressbar";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
@@ -28,7 +29,15 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider chains={chains}>
+      <RainbowKitProvider
+        chains={chains}
+        theme={darkTheme({
+          accentColor: "#007ab3",
+          // accentColorForeground: "white",
+          borderRadius: "small",
+          fontStack: "system",
+        })}
+      >
         <ThemeProvider defaultMode="dark" defaultAccent="yellow">
           <Script
             strategy="afterInteractive"
