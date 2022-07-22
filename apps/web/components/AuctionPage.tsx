@@ -1,3 +1,4 @@
+import React from "react";
 import { getNounData } from "@nouns/assets";
 import { useRouter } from "next/router";
 import { Auction } from "../services/interfaces/noun.service";
@@ -12,11 +13,12 @@ import { CountdownDisplay } from "./CountdownDisplay";
 import { Banner } from "./Banner";
 import { formatEther } from "ethers/lib/utils";
 
-type AuctionPageProps = {
-  auction: Auction;
-};
+const chatUrl =
+  process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL != null
+    ? new URL(process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL)
+    : null;
 
-export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
+export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
   const router = useRouter();
   const { config } = useServiceContext();
   const { auction = initialAuction } = useAuction(initialAuction.noun.id, {
@@ -43,6 +45,14 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
     e1d7d5: "warm",
     d5d7e1: "cold",
   }[background.toLowerCase()];
+
+  React.useEffect(() => {
+    if (chatUrl == null) return;
+    window.addEventListener("message", (event) => {
+      if (event.origin !== chatUrl.origin) return;
+      console.log("Chat event:", event.data);
+    });
+  }, []);
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -225,21 +235,23 @@ export function AuctionPage({ auction: initialAuction }: AuctionPageProps) {
           {/* <BidTable bids={auction.bids} /> */}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <iframe
-            src={[
-              process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL,
-              router.query.compact ? "compact=1" : undefined,
-            ]
-              .filter(Boolean)
-              .join("?")}
-            allow="clipboard-read; clipboard-write"
-            style={{
-              display: "block",
-              width: "100%",
-              height: "100%",
-              border: 0,
-            }}
-          />
+          {chatUrl != null && (
+            <iframe
+              src={[
+                chatUrl.href,
+                router.query.compact ? "compact=1" : undefined,
+              ]
+                .filter(Boolean)
+                .join("?")}
+              allow="clipboard-read; clipboard-write"
+              style={{
+                display: "block",
+                width: "100%",
+                height: "100%",
+                border: 0,
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
