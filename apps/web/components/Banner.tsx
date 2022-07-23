@@ -12,14 +12,11 @@ import { shortenAddress } from "../utils/address";
 import { MarqueeRoot } from "./Banner.css";
 
 const BidBlock = ({ bid }: { bid: Bid }) => {
-  const { ensName, avatarURI } = useProfile(
-    bid.bidder.address,
-    bid.blockNumber
-  );
+  const { ensName, avatarURI } = useProfile(bid.bidderAddress, bid.blockNumber);
 
   return (
     <a
-      href={getEtherscanLink(EtherscanPageType.ADDRESS, bid.bidder.address)}
+      href={getEtherscanLink(EtherscanPageType.ADDRESS, bid.bidderAddress)}
       target="_blank"
       rel="noreferrer"
       style={{ display: "block" }}
@@ -49,7 +46,7 @@ const BidBlock = ({ bid }: { bid: Bid }) => {
             transform={ensName ? "uppercase" : undefined}
             underline="hover"
           >
-            {ensName || shortenAddress(bid.bidder.address)}
+            {ensName || shortenAddress(bid.bidderAddress)}
           </Text>
         </Box>
       </Box>
