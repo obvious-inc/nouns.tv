@@ -19,24 +19,23 @@ import { CountdownDisplay } from "./CountdownDisplay";
 import { Banner } from "./Banner";
 import { formatEther } from "ethers/lib/utils";
 
-const chatUrl = new URL(process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL as string);
+const chatUrl = new URL(process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL);
 
-const useLatestCallback = (callback: any) => {
+const useLatestCallback = (callback) => {
   const ref = React.useRef();
 
   React.useLayoutEffect(() => {
     ref.current = callback;
   });
 
-  const stableCallback = React.useCallback((...args: any[]) => {
-    // @ts-ignore
+  const stableCallback = React.useCallback((...args) => {
     ref.current(...args);
   }, []);
 
   return stableCallback;
 };
 
-const useEmbeddedChatMessager = (iFrameRef: RefObject<HTMLIFrameElement>) => {
+const useEmbeddedChatMessager = (iFrameRef) => {
   const provider = useProvider();
   const { address: walletAccountAddress, connector: walletConnector } =
     useAccount({
@@ -49,7 +48,7 @@ const useEmbeddedChatMessager = (iFrameRef: RefObject<HTMLIFrameElement>) => {
   const { openConnectModal } = useConnectModal();
 
   const postMessage = useLatestCallback(
-    ({ id, method, params, result, error }: any) => {
+    ({ id, method, params, result, error }) => {
       const payload = {
         jsonrpc: "2.0",
         id,
@@ -57,69 +56,59 @@ const useEmbeddedChatMessager = (iFrameRef: RefObject<HTMLIFrameElement>) => {
         params,
         result,
       };
-      // @ts-ignore
       if (error != null) payload.error = error;
-      iFrameRef.current!.contentWindow!.postMessage(payload, chatUrl!.origin);
+      iFrameRef.current.contentWindow.postMessage(payload, chatUrl.origin);
     }
   );
 
-  const processWalletMessage = useLatestCallback(
-    async <
-      Message extends { id: number; method: string; params?: any[] },
-      RPCError extends { code: number; message: string }
-    >(
-      message: Message
-    ) => {
-      const { id, method, params } = message;
+  const processWalletMessage = useLatestCallback(async (message) => {
+    const { id, method, params } = message;
 
-      switch (method) {
-        case "eth_accounts":
-          postMessage({ id, result: [walletAccountAddress].filter(Boolean) });
-          break;
+    switch (method) {
+      case "eth_accounts":
+        postMessage({ id, result: [walletAccountAddress].filter(Boolean) });
+        break;
 
-        case "eth_requestAccounts": {
-          if (walletAccountAddress) {
-            postMessage({ id, result: [walletAccountAddress] });
-            break;
-          }
-          // @ts-ignore wtf?
-          openConnectModal();
-          postMessage({ id, result: [] });
+      case "eth_requestAccounts": {
+        if (walletAccountAddress) {
+          postMessage({ id, result: [walletAccountAddress] });
           break;
         }
+        openConnectModal();
+        postMessage({ id, result: [] });
+        break;
+      }
 
-        case "eth_chainId":
-          postMessage({ id, result: chain?.id });
-          break;
+      case "eth_chainId":
+        postMessage({ id, result: chain?.id });
+        break;
 
-        case "personal_sign": {
-          try {
-            const { utils: ethersUtils } = await import("ethers");
-            const message = ethersUtils.toUtf8String(params![0]);
-            const signature = await signMessage({ message });
-            postMessage({ id, result: signature });
-          } catch (error) {
-            postMessage({ id, error: error as RPCError });
-          }
-          break;
+      case "personal_sign": {
+        try {
+          const { utils: ethersUtils } = await import("ethers");
+          const message = ethersUtils.toUtf8String(params[0]);
+          const signature = await signMessage({ message });
+          postMessage({ id, result: signature });
+        } catch (error) {
+          postMessage({ id, error });
         }
+        break;
+      }
 
-        default: {
-          try {
-            // @ts-ignore no send??
-            const result = await provider.send(method, params);
-            postMessage({ id, result });
-          } catch (error) {
-            postMessage({ id, error: error as RPCError });
-          }
+      default: {
+        try {
+          const result = await provider.send(method, params);
+          postMessage({ id, result });
+        } catch (error) {
+          postMessage({ id, error });
         }
       }
     }
-  );
+  });
 
   // Post wallet connection changes
   React.useEffect(() => {
-    const changeHandler = (e: { account?: string }) => {
+    const changeHandler = (e) => {
       if (e.account == null) return;
       postMessage({ method: "accountsChanged", params: [[e.account]] });
     };
@@ -137,7 +126,7 @@ const useEmbeddedChatMessager = (iFrameRef: RefObject<HTMLIFrameElement>) => {
 
   // React to incoming messages
   React.useEffect(() => {
-    const handler = (event: MessageEvent) => {
+    const handler = (event) => {
       if (event.origin !== chatUrl.origin || event.data.jsonrpc !== "2.0")
         return;
 
@@ -163,7 +152,7 @@ export function AuctionPage() {
   } = useProfile(auction?.noun?.ownerAddress);
   const { ensName: bidderENSName } = useProfile(auction?.bidderAddress);
 
-  const iFrameRef = React.useRef<HTMLIFrameElement>(null);
+  const iFrameRef = React.useRef(null);
   useEmbeddedChatMessager(iFrameRef);
 
   if (auction == null) return null;
@@ -359,7 +348,7 @@ export function AuctionPage() {
                 paddingBottom: "2rem",
               }}
             >
-              {parts.map((part, i: number) => (
+              {parts.map((part, i) => (
                 <div key={i}>
                   {part.filename.split("-")[0]}:{" "}
                   {part.filename.split("-").slice(1).join(" ")}

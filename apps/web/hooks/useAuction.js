@@ -6,7 +6,7 @@ import { buildSVG, getContractAddressesForChainOrThrow } from "@nouns/sdk";
 
 const contractAddresses = getContractAddressesForChainOrThrow(1);
 
-const parseAuction = (auction: any) => ({
+const parseAuction = (auction) => ({
   nounId: parseInt(auction.nounId),
   amount: auction.amount,
   bidderAddress: auction.bidder,
@@ -15,7 +15,7 @@ const parseAuction = (auction: any) => ({
   settled: auction.settled,
 });
 
-const parseBid = (bid: any) => ({
+const parseBid = (bid) => ({
   id: `${bid.blockNumber}-${bid.transactionIndex}`,
   blockNumber: bid.blockNumber,
   transactionIndex: bid.transactionIndex,
@@ -27,7 +27,7 @@ const parseBid = (bid: any) => ({
 export const useAuction = () => {
   const provider = useProvider();
 
-  const [activeNounId, setActiveNounId] = React.useState<number | null>(null);
+  const [activeNounId, setActiveNounId] = React.useState(null);
   const [auctionsByNounId, setAuctionsByNounId] = React.useState({});
   const [seedsByNounId, setSeedsByNounId] = React.useState({});
   const [bids, setBids] = React.useState([]);
@@ -105,6 +105,10 @@ export const useAuction = () => {
         },
       }));
     });
+
+    return () => {
+      c.removeAllListeners();
+    };
   }, [auctionHouseContract]);
 
   const auction = React.useMemo(() => {
@@ -115,7 +119,6 @@ export const useAuction = () => {
 
     if (auction == null || seed == null) return null;
 
-    // @ts-ignore
     const { parts, background } = getNounData(seed);
 
     const svgBinary = buildSVG(parts, ImageData.palette, background);
@@ -134,7 +137,11 @@ export const useAuction = () => {
       noun,
       bids: bids
         .filter((b) => b.nounId === auction.nounId)
-        .sort((b1, b2) => b2.transactionIndex - b1.transactionIndex),
+        .sort((b1, b2) => {
+          if (b2.blockNumber - b1.blockNumber === 0)
+            return b2.transactionIndex - b1.transactionIndex;
+          return b2.blockNumber - b1.blockNumber;
+        }),
     };
   }, [activeNounId, auctionsByNounId, seedsByNounId, bids]);
 
