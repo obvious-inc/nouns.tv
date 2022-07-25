@@ -1,18 +1,18 @@
-import type { NextPage } from "next";
+// import type { NextPage } from "next";
 import React from "react";
 import { ServiceCtxProvider } from "../services/ServiceContext";
-import { useRouter } from "next/router";
-import { getStaticAuctionProps, StaticProps } from "../services/static";
+// import { useRouter } from "next/router";
+import { getStaticAuctionProps } from "../services/static";
 import { Page } from "../components/Page";
 import { AuctionPage } from "../components/AuctionPage";
-import { FallbackPage } from "../templates/FallbackPage";
+// import { FallbackPage } from "../templates/FallbackPage";
 
-const ViewNouns: NextPage<StaticProps> = ({ auction, address, config }) => {
-  const { isFallback } = useRouter();
+const ViewNouns = ({ auction, address, config }) => {
+  // const { isFallback } = useRouter();
 
-  if (isFallback) {
-    return <FallbackPage />;
-  }
+  // if (isFallback) {
+  //   return <FallbackPage />;
+  // }
 
   return (
     <Page>
