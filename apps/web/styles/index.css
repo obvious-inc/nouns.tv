@@ -1,5 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500;600;700;800;900&display=swap");
 
+html {
+  font-size: 0.625em;
+}
+body {
+  font-size: 1.5rem;
+}
+
 html,
 body {
   margin: 0;
@@ -25,4 +32,16 @@ a {
 #__next,
 #__next [data-rk] {
   height: 100%;
+}
+
+[data-noun-trait] {
+  opacity: 0;
+  transition: 0.1s opacity ease-out;
+}
+.noun-container:hover [data-noun-trait] {
+  opacity: 1;
+}
+
+a:hover [data-address] {
+  text-decoration: underline;
 }

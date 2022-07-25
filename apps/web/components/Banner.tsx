@@ -12,14 +12,11 @@ import { shortenAddress } from "../utils/address";
 import { MarqueeRoot } from "./Banner.css";
 
 const BidBlock = ({ bid }: { bid: Bid }) => {
-  const { ensName, avatarURI } = useProfile(
-    bid.bidder.address,
-    bid.blockNumber
-  );
+  const { ensName, avatarURI } = useProfile(bid.bidderAddress, bid.blockNumber);
 
   return (
     <a
-      href={getEtherscanLink(EtherscanPageType.ADDRESS, bid.bidder.address)}
+      href={getEtherscanLink(EtherscanPageType.ADDRESS, bid.bidderAddress)}
       target="_blank"
       rel="noreferrer"
       style={{ display: "block" }}
@@ -32,26 +29,26 @@ const BidBlock = ({ bid }: { bid: Bid }) => {
               height: "36px",
               borderRadius: "50%",
               overflow: "hidden",
-              marginRight: "0.5rem",
+              marginRight: "0.5em",
               background: "rgb(0 0 0 / 10%)",
             }}
           >
             <img src={avatarURI} alt="Avatar" width={36} height={36} />
           </div>
         )}
-        <Box display="flex" flexDirection="column">
-          <Text font="mono" transform="uppercase" weight="medium">
-            ETH {toFixed(formatEther(bid.amount), 2)}
-          </Text>
-          <Text
-            font="mono"
-            weight="medium"
-            transform={ensName ? "uppercase" : undefined}
-            underline="hover"
+        <div style={{ fontSize: "1.1em" }}>
+          <div
+            style={{
+              fontWeight: "600",
+              // color: "#AE3208"
+            }}
           >
-            {ensName || shortenAddress(bid.bidder.address)}
-          </Text>
-        </Box>
+            {"Ξ"} {toFixed(formatEther(bid.amount), 2)}
+          </div>
+          <div data-address style={{ fontWeight: "400" }}>
+            {ensName || shortenAddress(bid.bidderAddress)}
+          </div>
+        </div>
       </Box>
     </a>
   );
@@ -60,7 +57,7 @@ const BidBlock = ({ bid }: { bid: Bid }) => {
 export function Banner({ bids }: { bids: Bid[] }) {
   return (
     <Marquee className={MarqueeRoot} pauseOnHover gradient={false} speed={60}>
-      <div style={{ padding: "0.6rem 0" }}>
+      <div style={{ padding: "0.6em 0", minHeight: "5.7rem" }}>
         <Box display="flex" flexDirection="row" alignItems="center">
           {bids
             .sort((a, b) => b.blockTimestamp - a.blockTimestamp)
@@ -71,9 +68,9 @@ export function Banner({ bids }: { bids: Bid[] }) {
                   <div
                     key={i}
                     style={{
-                      margin: "0 1.35rem",
+                      margin: "0 1.5em",
                       width: "1px",
-                      height: "2rem",
+                      height: "2.2em",
                       background: "rgb(0 0 0 / 25%)",
                     }}
                   />
