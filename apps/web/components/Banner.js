@@ -11,7 +11,7 @@ import { Text } from "../elements/Text";
 import { shortenAddress } from "../utils/address";
 import { MarqueeRoot } from "./Banner.css";
 
-const BidBlock = ({ bid }: { bid: Bid }) => {
+const BidBlock = ({ bid }) => {
   const { ensName, avatarURI } = useProfile(bid.bidderAddress, bid.blockNumber);
 
   return (
@@ -54,7 +54,7 @@ const BidBlock = ({ bid }: { bid: Bid }) => {
   );
 };
 
-export function Banner({ bids }: { bids: Bid[] }) {
+export function Banner({ bids }) {
   return (
     <Marquee className={MarqueeRoot} pauseOnHover gradient={false} speed={60}>
       <div style={{ padding: "0.6em 0", minHeight: "5.7rem" }}>
