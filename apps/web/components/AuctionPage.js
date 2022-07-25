@@ -14,7 +14,7 @@ import { useRouter } from "next/router";
 import { useProfile } from "../hooks/useProfile";
 import { Text } from "../elements/Text";
 import { useAuction } from "../hooks/useAuction";
-import { useServiceContext } from "../hooks/useServiceContext";
+// import { useServiceContext } from "../hooks/useServiceContext";
 import { toFixed } from "../utils/numbers";
 import { shortenAddress } from "../utils/address";
 import { CountdownDisplay } from "./CountdownDisplay";
@@ -402,7 +402,7 @@ const iconByPartName = {
   ),
 };
 
-const parseParts = (parts) => {
+const parseParts = (parts = []) => {
   const [body, accessory, head, glasses] = parts.map((p) => {
     const name = p.filename.split("-").slice(1).join(" ");
     return name[0].toUpperCase() + name.slice(1);
@@ -412,35 +412,15 @@ const parseParts = (parts) => {
 
 export function AuctionPage() {
   const router = useRouter();
-  const { config } = useServiceContext();
+  // const { config } = useServiceContext();
   const {
     auction,
     activeBlock,
-    fomo: { isFomo, isVotingActive },
+    // fomo: { isFomo, isVotingActive },
   } = useAuction();
 
   const iFrameRef = React.useRef(null);
   useEmbeddedChatMessager(iFrameRef);
-
-  const nounId = auction?.noun.id;
-
-  const nextNoun = React.useMemo(() => {
-    if (nounId == null || activeBlock?.hash == null) return null;
-    const seed = getNounSeedFromBlockHash(nounId + 1, activeBlock.hash);
-    const { parts, background } = getNounData(seed);
-    const svgBinary = buildSVG(parts, ImageData.palette, background);
-    const imageUrl = `data:image/svg+xml;base64,${btoa(svgBinary)}`;
-    return { id: nounId + 1, parts: parseParts(parts), background, imageUrl };
-  }, [nounId, activeBlock]);
-
-  const noun = nextNoun;
-
-  if (auction == null || noun == null) return null;
-
-  const backgroundName = {
-    e1d7d5: "Warm",
-    d5d7e1: "Cold",
-  }[noun.background.toLowerCase()];
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -455,38 +435,8 @@ export function AuctionPage() {
       >
         <div style={{ flex: 2, minWidth: 0, background: "rgb(38 38 38)" }}>
           <AuctionScreenHeader auction={auction} />
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-              alignItems: "flex-end",
-              background: `#${noun.background}`,
-            }}
-          >
-            <div style={{ paddingLeft: "2rem" }}>
-              <div style={{ position: "relative" }}>
-                {/* eslint-disable-next-line */}
-                <img
-                  src={noun.imageUrl || "../assets/loading-skull-noun.gif"}
-                  alt={`Noun ${noun.id}`}
-                  style={{ display: "block", width: "100%" }}
-                />
-                {/* <FloatingLabel position={{}} /> */}
-                {Object.entries(noun.parts).map(([name, title]) => (
-                  <FloatingNounTraitLabel
-                    key={name}
-                    name={name}
-                    title={title}
-                  />
-                ))}
-                <FloatingNounTraitLabel
-                  name="background"
-                  title={backgroundName}
-                />
-              </div>
-            </div>
-          </div>
-          <Banner bids={auction.bids} />
+          <AuctionScreen auction={auction} activeBlock={activeBlock} />
+          <Banner bids={auction?.bids ?? []} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           {chatUrl != null && (
@@ -513,6 +463,60 @@ export function AuctionPage() {
   );
 }
 
+const AuctionScreen = ({
+  auction,
+  // activeBlock
+}) => {
+  // const nounId = auction?.noun.id;
+
+  // const nextNoun = React.useMemo(() => {
+  //   if (nounId == null || activeBlock?.hash == null) return null;
+  //   const seed = getNounSeedFromBlockHash(nounId + 1, activeBlock.hash);
+  //   const { parts, background } = getNounData(seed);
+  //   const svgBinary = buildSVG(parts, ImageData.palette, background);
+  //   const imageUrl = `data:image/svg+xml;base64,${btoa(svgBinary)}`;
+  //   return { id: nounId + 1, parts: parseParts(parts), background, imageUrl };
+  // }, [nounId, activeBlock]);
+
+  const noun = auction?.noun;
+  const parts = parseParts(auction?.noun.parts);
+
+  const backgroundName = {
+    e1d7d5: "Warm",
+    d5d7e1: "Cold",
+  }[noun?.background.toLowerCase()];
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+        alignItems: "flex-end",
+        transition: "0.2s background ease-out",
+        background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
+      }}
+    >
+      <div style={{ paddingLeft: "2rem" }}>
+        <div style={{ position: "relative" }} className="noun-container">
+          {/* eslint-disable-next-line */}
+          <img
+            src={noun?.imageUrl ?? "../assets/loading-skull-noun.gif"}
+            alt={`Noun ${noun?.id}`}
+            style={{ display: "block", width: "100%" }}
+          />
+          {/* <FloatingLabel position={{}} /> */}
+          {Object.entries(parts).map(([name, title]) => (
+            <FloatingNounTraitLabel key={name} name={name} title={title} />
+          ))}
+          {backgroundName != null && (
+            <FloatingNounTraitLabel name="background" title={backgroundName} />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Header = () => (
   <div
     style={{
@@ -530,7 +534,7 @@ const Header = () => (
       height="30"
       viewBox="0 0 50 30"
       fill="none"
-      style={{ marginRight: "0.6rem" }}
+      style={{ marginRight: "0.7em" }}
     >
       <rect width="50" height="30" fill="#FF1AD2" />
       <rect x="5" y="5" width="10" height="10" fill="black" />
@@ -543,7 +547,7 @@ const Header = () => (
       <rect x="35" y="15" width="10" height="10" fill="black" />
     </svg>
 
-    <div style={{ color: "white", fontSize: "1.1rem", fontWeight: "800" }}>
+    <div style={{ color: "white", fontSize: "1.25em", fontWeight: "800" }}>
       NOUNS.TV
     </div>
     <div style={{ flex: 1, padding: "0 1rem" }}>
@@ -584,29 +588,29 @@ const AuctionScreenHeader = ({ auction }) => {
   return (
     <ScreenHeader>
       <div style={{ flex: 1, paddingRight: "1rem" }}>
-        {auction.noun != null && (
+        {auction?.noun != null && (
           <Text variant="large" transform="uppercase">
             Noun {auction.noun.id}
           </Text>
         )}
       </div>
-      <div
-        style={{
-          display: "grid",
-          gridAutoFlow: "column",
-          gridAutoColumns: "auto",
-          alignItems: "center",
-          gridGap: "2em",
-        }}
-      >
+      {auction != null && (
         <div
           style={{
-            minWidth: 0,
-            overflow: "hidden",
+            display: "grid",
+            gridAutoFlow: "column",
+            gridAutoColumns: "auto",
+            alignItems: "center",
+            gridGap: "2em",
           }}
         >
-          <Label>High-Bidder</Label>
-          {auction.noun != null && (
+          <div
+            style={{
+              minWidth: 0,
+              overflow: "hidden",
+            }}
+          >
+            <Label>High-Bidder</Label>
             <Heading2>
               {auction.settled
                 ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
@@ -614,32 +618,33 @@ const AuctionScreenHeader = ({ auction }) => {
                 ? bidderENSName || shortenAddress(auction.bidderAddress)
                 : "NO BIDS YET"}
             </Heading2>
-          )}
+          </div>
+          <div>
+            <Label>Current bid</Label>
+            <Heading2>
+              {"Ξ"} {toFixed(formatEther(auction.amount), 2)}
+            </Heading2>
+          </div>
+          <div>
+            <Label>Auction ends in</Label>
+            <Heading2 style={{}}>
+              <CountdownDisplay to={auction.endTime} />
+              <div
+                aria-hidden="true"
+                style={{
+                  fontVariantNumeric: "tabular-nums",
+                  height: 0,
+                  opacity: 0,
+                  pointerEvents: "none",
+                }}
+              >
+                99h 99m 99s
+              </div>
+            </Heading2>
+          </div>
         </div>
-        <div>
-          <Label>Current bid</Label>
-          <Heading2>
-            {"Ξ"} {toFixed(formatEther(auction.amount), 2)}
-          </Heading2>
-        </div>
-        <div>
-          <Label>Auction ends in</Label>
-          <Heading2 style={{}}>
-            <CountdownDisplay to={auction.endTime} />
-            <div
-              aria-hidden="true"
-              style={{
-                fontVariantNumeric: "tabular-nums",
-                height: 0,
-                opacity: 0,
-                pointerEvents: "none",
-              }}
-            >
-              99h 99m 99s
-            </div>
-          </Heading2>
-        </div>
-      </div>
+      )}
+
       <div
         style={{
           background: "#EB4C2B",
@@ -691,6 +696,7 @@ const Heading2 = ({ style, ...props }) => (
 
 const FloatingNounTraitLabel = ({ name, title }) => (
   <div
+    data-noun-trait
     style={{
       display: "flex",
       alignItems: "center",
@@ -701,6 +707,7 @@ const FloatingNounTraitLabel = ({ name, title }) => (
       fontSize: "1.5rem",
       fontWeight: "500",
       borderRadius: "0.3rem",
+      cursor: "default",
       transform: "translateY(-50%) translateX(-1rem)",
       ...positionByPartName[name],
     }}

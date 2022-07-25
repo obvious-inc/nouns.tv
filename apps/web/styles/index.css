@@ -33,3 +33,15 @@ a {
 #__next [data-rk] {
   height: 100%;
 }
+
+[data-noun-trait] {
+  opacity: 0;
+  transition: 0.1s opacity ease-out;
+}
+.noun-container:hover [data-noun-trait] {
+  opacity: 1;
+}
+
+a:hover [data-address] {
+  text-decoration: underline;
+}
