@@ -1,13 +1,14 @@
 import React, { RefObject } from "react";
 import { useAccount, useProvider, useNetwork, useSignMessage } from "wagmi";
+// import { readContract } from "@wagmi/core";
 import {
   ConnectButton as RainbowConnectButton,
   useConnectModal,
 } from "@rainbow-me/rainbowkit";
-import { getNounData } from "@nouns/assets";
+// import { getNounData } from "@nouns/assets";
 import { useRouter } from "next/router";
-import { Auction } from "../services/interfaces/noun.service";
-import { useNoun } from "../hooks/useNoun";
+// import { Auction } from "../services/interfaces/noun.service";
+// import { useNoun } from "../hooks/useNoun";
 import { useProfile } from "../hooks/useProfile";
 import { Text } from "../elements/Text";
 import { useAuction } from "../hooks/useAuction";
@@ -151,36 +152,29 @@ const useEmbeddedChatMessager = (iFrameRef: RefObject<HTMLIFrameElement>) => {
   }, [processWalletMessage]);
 };
 
-export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
+export function AuctionPage() {
   const router = useRouter();
   const { config } = useServiceContext();
-  const { auction = initialAuction } = useAuction(initialAuction.noun.id, {
-    fallbackData: initialAuction,
-    ...(!initialAuction.settled && {
-      refreshInterval: 1000 * 30,
-    }),
-  });
+  const { data: auction } = useAuction();
 
-  const { noun, imageURL } = useNoun(auction.noun.id, {
-    fallbackData: auction.noun,
-  });
   const {
     ensName: ownerENSName,
     // avatarURI: ownerAvatarURI
-  } = useProfile(noun.owner.address);
-  const { ensName: bidderENSName } = useProfile(auction.bidder?.address);
+  } = useProfile(auction?.noun?.ownerAddress);
+  const { ensName: bidderENSName } = useProfile(auction?.bidderAddress);
 
-  const nounName = `${config.name} ${auction.noun.id}`;
+  const iFrameRef = React.useRef<HTMLIFrameElement>(null);
+  useEmbeddedChatMessager(iFrameRef);
 
-  const { parts, background } = getNounData(auction.noun.seed);
+  if (auction == null) return null;
+
+  const parts = auction.noun?.parts ?? [];
+  const background = auction.noun?.background ?? "";
 
   const backgroundName = {
     e1d7d5: "warm",
     d5d7e1: "cold",
   }[background.toLowerCase()];
-
-  const iFrameRef = React.useRef<HTMLIFrameElement>(null);
-  useEmbeddedChatMessager(iFrameRef);
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -248,9 +242,11 @@ export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
             }}
           >
             <div style={{ flex: 1, paddingRight: "1rem" }}>
-              <Text variant="large" transform="uppercase">
-                {nounName}
-              </Text>
+              {auction.noun != null && (
+                <Text variant="large" transform="uppercase">
+                  Noun {auction.noun.id}
+                </Text>
+              )}
             </div>
             <div
               style={{
@@ -277,25 +273,29 @@ export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
                 >
                   High-Bidder
                 </Text>
-                <Text
-                  // color="textSecondary"
-                  variant="medium"
-                  // weight="medium"
-                  transform={
-                    bidderENSName || ownerENSName ? "uppercase" : undefined
-                  }
-                  style={{
-                    minWidth: 0,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {auction.settled
-                    ? ownerENSName || shortenAddress(noun.owner.address)
-                    : auction?.bidder
-                    ? bidderENSName || shortenAddress(auction.bidder.address)
-                    : "NO BIDS YET"}
-                </Text>
+                {auction.noun != null && (
+                  <Text
+                    // color="textSecondary"
+                    variant="medium"
+                    // weight="medium"
+                    transform={
+                      "uppercase"
+                      // bidderENSName || ownerENSName ? "uppercase" : undefined
+                    }
+                    style={{
+                      minWidth: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {auction.settled
+                      ? ownerENSName ||
+                        shortenAddress(auction.noun.ownerAddress)
+                      : auction.bidderAddress
+                      ? bidderENSName || shortenAddress(auction.bidderAddress)
+                      : "NO BIDS YET"}
+                  </Text>
+                )}
               </div>
               <div>
                 <Text variant="label">Current bid</Text>
@@ -335,16 +335,20 @@ export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
             }}
           >
             <a
-              href={`${config.externalBaseURI}/${auction.noun.id}`}
+              href={`${config.externalBaseURI}/${auction.noun?.id}`}
               target="_blank"
               rel="noreferrer"
               style={{ paddingLeft: "2rem" }}
             >
-              <img
-                src={imageURL || "../assets/loading-skull-noun.gif"}
-                alt={`Noun ${auction.noun.id}`}
-                style={{ display: "block", width: "100%" }}
-              />
+              {auction.noun != null && (
+                <img
+                  src={
+                    auction.noun.imageUrl || "../assets/loading-skull-noun.gif"
+                  }
+                  alt={`Noun ${auction.noun.id}`}
+                  style={{ display: "block", width: "100%" }}
+                />
+              )}
             </a>
             <div
               style={{
@@ -355,7 +359,7 @@ export function AuctionPage({ auction: initialAuction }: { auction: Auction }) {
                 paddingBottom: "2rem",
               }}
             >
-              {parts.map((part, i) => (
+              {parts.map((part, i: number) => (
                 <div key={i}>
                   {part.filename.split("-")[0]}:{" "}
                   {part.filename.split("-").slice(1).join(" ")}
