@@ -1,5 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@300;400;500;600;700;800;900&display=swap");
 
+html {
+  font-size: 0.625em;
+}
+body {
+  font-size: 1.5rem;
+}
+
 html,
 body {
   margin: 0;

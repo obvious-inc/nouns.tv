@@ -25,7 +25,7 @@ if (!ALCHEMY_API_KEY) {
 // });
 export const defaultProvider = alchemyProvider({ alchemyId: ALCHEMY_API_KEY });
 
-export const { chains, provider } = configureChains(
+export const { chains, provider, webSocketProvider } = configureChains(
   [chain.mainnet],
   // [localChain],
   [defaultProvider]
@@ -62,4 +62,5 @@ export const wagmiClient = createClient({
   autoConnect: true,
   connectors,
   provider,
+  webSocketProvider,
 });

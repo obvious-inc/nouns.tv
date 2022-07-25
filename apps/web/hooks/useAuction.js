@@ -24,6 +24,71 @@ const parseBid = (bid) => ({
   amount: bid.args.value,
 });
 
+const useFomo = (auction) => {
+  const provider = useProvider();
+
+  const [isFomo, setIsFomo] = React.useState(false);
+  const [isVotingActive, setVotingActive] = React.useState(false);
+
+  React.useEffect(() => {
+    if (auction == null || auction.settled) return;
+
+    const update = () => {
+      const nowMillis = parseInt(new Date().getTime() / 1000);
+      const isFomo = auction.endTime < nowMillis;
+      setIsFomo(isFomo);
+
+      if (isFomo) {
+        setVotingActive(true);
+        window.setTimeout(() => {
+          setVotingActive(false);
+        }, 6000);
+      }
+    };
+
+    provider.on("block", update);
+    return () => {
+      provider.off("block", update);
+    };
+  }, [provider, auction]);
+
+  return { isFomo, isVotingActive };
+};
+
+const useActiveBlock = () => {
+  const provider = useProvider();
+
+  const numberRef = React.useRef();
+
+  const [number, setNumber] = React.useState(null);
+  const [block, setBlock] = React.useState(null);
+
+  React.useEffect(() => {
+    provider.getBlock("latest").then((b_) => {
+      const b = { ...b_, localTimestamp: parseInt(new Date() / 1000) };
+      setNumber(b.number);
+      setBlock(b);
+    });
+
+    const blockHandler = (n) => {
+      if (numberRef.current > n) return;
+      setNumber(n);
+      provider.getBlock(n).then((b_) => {
+        const b = { ...b_, localTimestamp: parseInt(new Date() / 1000) };
+        setBlock(b);
+      });
+    };
+
+    provider.on("block", blockHandler);
+
+    return () => {
+      provider.off("block", blockHandler);
+    };
+  }, [provider]);
+
+  return block != null && block.number === number ? block : { number };
+};
+
 export const useAuction = () => {
   const provider = useProvider();
 
@@ -43,6 +108,43 @@ export const useAuction = () => {
     contractInterface: NounsTokenABI,
     signerOrProvider: provider,
   });
+
+  const auction = React.useMemo(() => {
+    if (activeNounId == null) return null;
+
+    const auction = auctionsByNounId[activeNounId];
+    const seed = seedsByNounId[auction.nounId];
+
+    if (auction == null || seed == null) return null;
+
+    const { parts, background } = getNounData(seed);
+
+    const svgBinary = buildSVG(parts, ImageData.palette, background);
+    const imageUrl = `data:image/svg+xml;base64,${btoa(svgBinary)}`;
+
+    const noun = {
+      id: auction.nounId,
+      ownerAddress: auction.winnerAddess,
+      parts,
+      background,
+      imageUrl,
+    };
+
+    return {
+      ...auction,
+      noun,
+      bids: bids
+        .filter((b) => b.nounId === auction.nounId)
+        .sort((b1, b2) => {
+          if (b2.blockNumber - b1.blockNumber === 0)
+            return b2.transactionIndex - b1.transactionIndex;
+          return b2.blockNumber - b1.blockNumber;
+        }),
+    };
+  }, [activeNounId, auctionsByNounId, seedsByNounId, bids]);
+
+  const { isFomo, isVotingActive } = useFomo(auction);
+  const activeBlock = useActiveBlock();
 
   React.useEffect(() => {
     auctionHouseContract
@@ -111,39 +213,5 @@ export const useAuction = () => {
     };
   }, [auctionHouseContract]);
 
-  const auction = React.useMemo(() => {
-    if (activeNounId == null) return null;
-
-    const auction = auctionsByNounId[activeNounId];
-    const seed = seedsByNounId[auction.nounId];
-
-    if (auction == null || seed == null) return null;
-
-    const { parts, background } = getNounData(seed);
-
-    const svgBinary = buildSVG(parts, ImageData.palette, background);
-    const imageUrl = `data:image/svg+xml;base64,${btoa(svgBinary)}`;
-
-    const noun = {
-      id: auction.nounId,
-      ownerAddress: auction.winnerAddess,
-      parts,
-      background,
-      imageUrl,
-    };
-
-    return {
-      ...auction,
-      noun,
-      bids: bids
-        .filter((b) => b.nounId === auction.nounId)
-        .sort((b1, b2) => {
-          if (b2.blockNumber - b1.blockNumber === 0)
-            return b2.transactionIndex - b1.transactionIndex;
-          return b2.blockNumber - b1.blockNumber;
-        }),
-    };
-  }, [activeNounId, auctionsByNounId, seedsByNounId, bids]);
-
-  return { data: auction };
+  return { auction, fomo: { isFomo, isVotingActive }, activeBlock };
 };
