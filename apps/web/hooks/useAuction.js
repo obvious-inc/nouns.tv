@@ -147,11 +147,19 @@ export const useAuction = () => {
   const activeBlock = useActiveBlock();
 
   React.useEffect(() => {
-    auctionHouseContract
-      .queryFilter(auctionHouseContract.filters.AuctionBid(), 0 - 6500)
-      .then((bids) => {
-        setBids(bids.map(parseBid));
-      });
+    const fetchBids = () =>
+      auctionHouseContract
+        .queryFilter(auctionHouseContract.filters.AuctionBid(), 0 - 6500)
+        .then((bids) => {
+          setBids(bids.map(parseBid));
+        });
+
+    fetchBids();
+
+    window.addEventListener("focus", fetchBids);
+    return () => {
+      window.removeEventListener("focus", fetchBids);
+    };
   }, [auctionHouseContract]);
 
   React.useEffect(() => {
@@ -164,11 +172,12 @@ export const useAuction = () => {
   React.useEffect(() => {
     const c = auctionHouseContract;
 
-    c.auction().then((a) => {
-      const auction = parseAuction(a);
-      setActiveNounId(auction.nounId);
-      setAuctionsByNounId((as) => ({ ...as, [auction.nounId]: auction }));
-    });
+    const fetchAuction = () =>
+      c.auction().then((a) => {
+        const auction = parseAuction(a);
+        setActiveNounId(auction.nounId);
+        setAuctionsByNounId((as) => ({ ...as, [auction.nounId]: auction }));
+      });
 
     c.on(c.filters.AuctionBid(), (nounId, sender, value, extended, event) => {
       setBids((bs) => [
@@ -208,8 +217,12 @@ export const useAuction = () => {
       }));
     });
 
+    window.addEventListener("focus", fetchAuction);
+    fetchAuction();
+
     return () => {
       c.removeAllListeners();
+      window.removeEventListener("focus", fetchAuction);
     };
   }, [auctionHouseContract]);
 
