@@ -39,7 +39,7 @@ const BidBlock = ({ bid }) => {
         <div style={{ fontSize: "1.1em" }}>
           <div
             style={{
-              fontWeight: "600",
+              fontWeight: "700",
               // color: "#AE3208"
             }}
           >
@@ -70,7 +70,7 @@ export function Banner({ bids }) {
                     style={{
                       margin: "0 1.5em",
                       width: "1px",
-                      height: "2.2em",
+                      height: "2.4em",
                       background: "rgb(0 0 0 / 25%)",
                     }}
                   />
