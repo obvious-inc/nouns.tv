@@ -1,9 +1,10 @@
-import {
-  ImageData,
-  getNounSeedFromBlockHash,
-  getNounData,
-} from "@nouns/assets";
-import { buildSVG } from "@nouns/sdk";
+import { css } from "@emotion/react";
+// import {
+//   ImageData,
+//   getNounSeedFromBlockHash,
+//   getNounData,
+// } from "@nouns/assets";
+// import { buildSVG } from "@nouns/sdk";
 import React from "react";
 import { useAccount, useProvider, useNetwork, useSignMessage } from "wagmi";
 import {
@@ -12,7 +13,6 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { useRouter } from "next/router";
 import { useProfile } from "../hooks/useProfile";
-import { Text } from "../elements/Text";
 import { useAuction } from "../hooks/useAuction";
 // import { useServiceContext } from "../hooks/useServiceContext";
 import { toFixed } from "../utils/numbers";
@@ -426,27 +426,47 @@ export function AuctionPage() {
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Header />
       <div
+        // className="test"
         style={{
           flex: 1,
           display: "flex",
           alignItems: "stretch",
           background: "rgb(25 25 25)",
         }}
+        css={css({
+          "@media (max-width: 1000px)": {
+            flexDirection: "column",
+          },
+        })}
       >
         <div
           style={{
-            flex: 2,
             minWidth: 0,
             display: "flex",
             flexDirection: "column",
             background: "rgb(38 38 38)",
+            minHeight: 0,
           }}
+          css={css({
+            flex: 2,
+            "@media (max-width: 1000px)": {
+              flex: 1,
+            },
+          })}
         >
           <AuctionScreenHeader auction={auction} />
           <AuctionScreen auction={auction} activeBlock={activeBlock} />
           <Banner bids={auction?.bids ?? []} />
-          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-            <div style={{ flex: 1 }}></div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div
+              css={css({
+                flex: 1,
+                minHeight: 0,
+                "@media (min-width: 1000px)": {
+                  minHeight: "10rem",
+                },
+              })}
+            ></div>
             <div
               style={{
                 background: "black",
@@ -468,6 +488,8 @@ export function AuctionPage() {
               </div>
               <div
                 style={{
+                  position: "relative",
+                  zIndex: 1,
                   alignSelf: "flex-end",
                   height: 0,
                   overflow: "visible",
@@ -481,7 +503,7 @@ export function AuctionPage() {
             </div>
           </div>
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
           {chatUrl != null && (
             <iframe
               ref={iFrameRef}
@@ -537,15 +559,34 @@ const AuctionScreen = ({
         alignItems: "flex-end",
         transition: "0.2s background ease-out",
         background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
+        flex: "1 1 0",
+        minHeight: 0,
       }}
     >
-      <div style={{ paddingLeft: "2rem" }}>
-        <div style={{ position: "relative" }} className="noun-container">
+      <div
+        style={{
+          paddingLeft: "2rem",
+          height: "100%",
+          minHeight: 0,
+          display: "flex",
+          alignItems: "flex-end",
+        }}
+      >
+        <div
+          style={{ position: "relative", height: "100%" }}
+          className="noun-container"
+        >
           {/* eslint-disable-next-line */}
           <img
             src={noun?.imageUrl ?? "../assets/loading-skull-noun.gif"}
             alt={`Noun ${noun?.id}`}
-            style={{ display: "block", width: "100%" }}
+            style={{
+              display: "block",
+              width: "auto",
+              height: "100%",
+              // objectFit: "contain",
+              // objectPosition: "left bottom",
+            }}
           />
           {/* <FloatingLabel position={{}} /> */}
           {Object.entries(parts).map(([name, title]) => (
@@ -556,6 +597,7 @@ const AuctionScreen = ({
           )}
         </div>
       </div>
+      <div />
     </div>
   );
 };
@@ -611,17 +653,26 @@ const Header = () => (
 
 const ScreenHeader = ({ children }) => (
   <div
-    style={{
-      height: "60px",
-      background: "white",
-      color: "black",
-      display: "flex",
-      alignItems: "center",
-      padding: "0 20px",
-      whiteSpace: "nowrap",
-    }}
+    css={css({
+      fontSize: "1rem",
+      "@media (max-width: 680px)": {
+        fontSize: "1.5vw",
+      },
+    })}
   >
-    {children}
+    <div
+      style={{
+        height: "6em",
+        background: "white",
+        color: "black",
+        display: "flex",
+        alignItems: "center",
+        padding: "0 2em",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {children}
+    </div>
   </div>
 );
 
@@ -630,9 +681,9 @@ const AuctionScreenHeader = ({ auction }) => {
   const { ensName: bidderENSName } = useProfile(auction?.bidderAddress);
   return (
     <ScreenHeader>
-      <div style={{ flex: 1, paddingRight: "1rem" }}>
+      <div style={{ flex: 1, paddingRight: "1em" }}>
         {auction?.noun != null && (
-          <div style={{ fontSize: "2em", fontWeight: "900" }}>
+          <div style={{ fontSize: "3em", fontWeight: "900" }}>
             Noun {auction.noun.id}
           </div>
         )}
@@ -691,16 +742,16 @@ const AuctionScreenHeader = ({ auction }) => {
       <div
         style={{
           background: "#EB4C2B",
-          borderRadius: "5px",
-          height: "2.8em",
-          padding: "0 1em",
+          borderRadius: "0.5em",
+          height: "3.8em",
+          padding: "0 1.3em",
           display: "flex",
           alignItems: "center",
           color: "white",
           marginLeft: "1.5em",
         }}
       >
-        <Label style={{ fontSize: "1.45em" }}>LIVE</Label>
+        <Label style={{ fontSize: "2.2em" }}>LIVE</Label>
       </div>
     </ScreenHeader>
   );
@@ -712,7 +763,7 @@ const Label = ({ style, ...props }) => (
       minWidth: 0,
       overflow: "hidden",
       textOverflow: "ellipsis",
-      fontSize: "0.8em",
+      fontSize: "1.1em",
       textTransform: "uppercase",
       fontWeight: "700",
       ...style,
@@ -729,7 +780,7 @@ const Heading2 = ({ style, ...props }) => (
       textOverflow: "ellipsis",
       // textTransform:
       //   bidderENSName || ownerENSName ? "uppercase" : undefined,
-      fontSize: "1.4em",
+      fontSize: "2em",
       fontWeight: "700",
       ...style,
     }}
