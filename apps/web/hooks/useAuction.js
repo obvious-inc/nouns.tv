@@ -1,10 +1,18 @@
 import React from "react";
-import { useContract, useProvider } from "wagmi";
+import { BigNumber, utils as ethersUtils } from "ethers";
+import {
+  useContract,
+  useProvider,
+  usePrepareContractWrite,
+  useContractWrite,
+  useWaitForTransaction,
+  chain,
+} from "wagmi";
 import { NounsAuctionHouseABI, NounsTokenABI } from "@nouns/contracts";
 import { getNounData, ImageData } from "@nouns/assets";
 import { buildSVG, getContractAddressesForChainOrThrow } from "@nouns/sdk";
 
-const contractAddresses = getContractAddressesForChainOrThrow(1);
+const contractAddresses = getContractAddressesForChainOrThrow(chain.mainnet.id);
 
 const parseAuction = (auction) => ({
   nounId: parseInt(auction.nounId),
@@ -89,6 +97,99 @@ const useActiveBlock = () => {
   return block != null && block.number === number ? block : { number };
 };
 
+const useSimpleContractWrite = ({ onSuccess, ...options }) => {
+  const { config, error: prepareError } = usePrepareContractWrite(options);
+
+  const {
+    data: transactionResponse,
+    writeAsync,
+    isLoading: isLoadingTransactionResponse,
+    error: callError,
+  } = useContractWrite(config);
+  const { isLoading: isLoadingTransactionReceipt } = useWaitForTransaction({
+    hash: transactionResponse?.hash,
+    onSuccess: (receipt) => {
+      if (onSuccess) onSuccess(receipt);
+    },
+  });
+
+  return {
+    call: writeAsync,
+    error: callError ?? prepareError,
+    prepareError,
+    callError,
+    isLoadingTransactionResponse,
+    isLoadingTransactionReceipt,
+    isLoading: isLoadingTransactionResponse || isLoadingTransactionReceipt,
+  };
+};
+
+const useBidding = (nounId) => {
+  const [amount, setAmount] = React.useState("");
+
+  const {
+    call,
+    error,
+    isLoading,
+    isLoadingTransactionResponse,
+    isLoadingTransactionReceipt,
+  } = useSimpleContractWrite({
+    addressOrName: contractAddresses.nounsAuctionHouseProxy,
+    contractInterface: NounsAuctionHouseABI,
+    functionName: "createBid",
+    args: [nounId],
+    enabled:
+      nounId != null && !isNaN(parseFloat(amount)) && parseFloat(amount) > 0,
+    overrides: {
+      value: isNaN(parseFloat(amount))
+        ? null
+        : ethersUtils.parseEther(parseFloat(amount).toString()),
+    },
+    onSuccess: (receipt) => {
+      console.log("success", receipt.status, typeof receipt.status);
+      // Clear amount if bid was successful
+      if (receipt.status === 1) setAmount("");
+    },
+  });
+
+  React.useEffect(() => {
+    setAmount("");
+  }, [nounId]);
+
+  return {
+    bid: call,
+    error,
+    isLoading,
+    isLoadingTransactionResponse,
+    isLoadingTransactionReceipt,
+    amount,
+    setAmount,
+  };
+};
+
+const useSettling = ({ enabled }) => {
+  const {
+    call,
+    error,
+    isLoading,
+    isLoadingTransactionResponse,
+    isLoadingTransactionReceipt,
+  } = useSimpleContractWrite({
+    addressOrName: contractAddresses.nounsAuctionHouseProxy,
+    contractInterface: NounsAuctionHouseABI,
+    functionName: "settleCurrentAndCreateNewAuction",
+    enabled,
+  });
+
+  return {
+    settle: call,
+    error,
+    isLoading,
+    isLoadingTransactionResponse,
+    isLoadingTransactionReceipt,
+  };
+};
+
 export const useAuction = () => {
   const provider = useProvider();
 
@@ -96,6 +197,8 @@ export const useAuction = () => {
   const [auctionsByNounId, setAuctionsByNounId] = React.useState({});
   const [seedsByNounId, setSeedsByNounId] = React.useState({});
   const [bids, setBids] = React.useState([]);
+
+  const [auctionEnded, setAuctionEnded] = React.useState(false);
 
   const auctionHouseContract = useContract({
     addressOrName: contractAddresses.nounsAuctionHouseProxy,
@@ -119,15 +222,22 @@ export const useAuction = () => {
 
     const { parts, background } = getNounData(seed);
 
-    const svgBinary = buildSVG(parts, ImageData.palette, background);
-    const imageUrl = `data:image/svg+xml;base64,${btoa(svgBinary)}`;
+    const getImageUrl = () => {
+      try {
+        const svgBinary = buildSVG(parts, ImageData.palette, background);
+        return `data:image/svg+xml;base64,${btoa(svgBinary)}`;
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    };
 
     const noun = {
       id: auction.nounId,
       ownerAddress: auction.winnerAddess,
       parts,
       background,
-      imageUrl,
+      imageUrl: getImageUrl(),
     };
 
     return {
@@ -145,6 +255,9 @@ export const useAuction = () => {
 
   const { isFomo, isVotingActive } = useFomo(auction);
   const activeBlock = useActiveBlock();
+
+  const bidding = useBidding(auction?.noun.id);
+  const settling = useSettling({ enabled: auctionEnded });
 
   React.useEffect(() => {
     const fetchBids = () =>
@@ -179,18 +292,42 @@ export const useAuction = () => {
         setAuctionsByNounId((as) => ({ ...as, [auction.nounId]: auction }));
       });
 
-    c.on(c.filters.AuctionBid(), (nounId, sender, value, extended, event) => {
-      setBids((bs) => [
-        ...bs,
-        parseBid({ ...event, args: { nounId, sender, value, extended } }),
-      ]);
+    c.on(c.filters.AuctionBid(), (nounId_, sender, value, extended, event) => {
+      const nounId = parseInt(nounId_);
+      console.log("auction bid", { nounId, sender, value, event });
+      setAuctionsByNounId((as) => ({
+        ...as,
+        [nounId]: { ...as[nounId], bidderAddress: sender, amount: value },
+      }));
+      setBids((bs) => {
+        if (
+          bs.some(
+            (b) =>
+              b.blockNumber === event.blockNumber &&
+              b.transactionIndex === event.transactionIndex
+          )
+        )
+          return bs;
+        return [
+          ...bs,
+          parseBid({
+            ...event,
+            args: { nounId: nounId_, sender, value, extended },
+          }),
+        ];
+      });
     });
     c.on(c.filters.AuctionCreated(), (nounId_, startTime, endTime) => {
       const nounId = parseInt(nounId_);
+      console.log("auction created", nounId);
       setActiveNounId(nounId);
       setAuctionsByNounId((as) => ({
         ...as,
         [nounId]: {
+          settled: false,
+          bidderAddress: "0x".padEnd(42, "0"),
+          amount: BigNumber.from(0),
+          ...as[nounId],
           nounId,
           startTime: parseInt(startTime),
           endTime: parseInt(endTime),
@@ -199,6 +336,7 @@ export const useAuction = () => {
     });
     c.on(c.filters.AuctionExtended(), (nounId_, endTime) => {
       const nounId = parseInt(nounId_);
+      console.log("auction extended", nounId);
       setAuctionsByNounId((as) => ({
         ...as,
         [nounId]: { ...as[nounId], endTime: parseInt(endTime) },
@@ -206,6 +344,7 @@ export const useAuction = () => {
     });
     c.on(c.filters.AuctionSettled(), (nounId_, winner, amount) => {
       const nounId = parseInt(nounId_);
+      console.log("auction settled", nounId);
       setAuctionsByNounId((as) => ({
         ...as,
         [nounId]: {
@@ -226,5 +365,30 @@ export const useAuction = () => {
     };
   }, [auctionHouseContract]);
 
-  return { auction, fomo: { isFomo, isVotingActive }, activeBlock };
+  React.useEffect(() => {
+    if (auction?.endTime == null) return;
+
+    if (auction.endTime < new Date().getTime() / 1000) {
+      setAuctionEnded(true);
+      return;
+    }
+
+    const handle = window.setInterval(() => {
+      const didEnd = auction.endTime < new Date().getTime() / 1000;
+      if (didEnd) window.clearInterval(handle);
+      setAuctionEnded(didEnd);
+    }, 1000);
+    return () => {
+      window.clearInterval(handle);
+    };
+  }, [auction?.endTime]);
+
+  return {
+    auction,
+    auctionEnded,
+    fomo: { isFomo, isVotingActive },
+    activeBlock,
+    bidding,
+    settling,
+  };
 };

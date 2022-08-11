@@ -23,10 +23,11 @@ if (!ALCHEMY_API_KEY) {
 // export const defaultProvider = jsonRpcProvider({
 //   rpc: (chain) => ({ http: chain.rpcUrls.default }),
 // });
-export const defaultProvider = alchemyProvider({ alchemyId: ALCHEMY_API_KEY });
+export const defaultProvider = alchemyProvider({ apiKey: ALCHEMY_API_KEY });
 
 export const { chains, provider, webSocketProvider } = configureChains(
   [chain.mainnet],
+  // [chain.rinkeby],
   // [localChain],
   [defaultProvider]
 );
