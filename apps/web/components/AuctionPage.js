@@ -1,10 +1,4 @@
-import { css } from "@emotion/react";
-// import {
-//   ImageData,
-//   getNounSeedFromBlockHash,
-//   getNounData,
-// } from "@nouns/assets";
-// import { buildSVG } from "@nouns/sdk";
+import { css, keyframes } from "@emotion/react";
 import React from "react";
 import { useAccount, useProvider, useNetwork, useSignMessage } from "wagmi";
 import {
@@ -14,12 +8,13 @@ import {
 import { useRouter } from "next/router";
 import { useProfile } from "../hooks/useProfile";
 import { useAuction } from "../hooks/useAuction";
-// import { useServiceContext } from "../hooks/useServiceContext";
 import { toFixed } from "../utils/numbers";
 import { shortenAddress } from "../utils/address";
 import { CountdownDisplay } from "./CountdownDisplay";
 import { Banner } from "./Banner";
 import { formatEther } from "ethers/lib/utils";
+
+const TEXT_ERROR = "#e85252";
 
 const chatUrl = new URL(process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL);
 
@@ -404,6 +399,7 @@ const iconByPartName = {
 
 const parseParts = (parts = []) => {
   const [body, accessory, head, glasses] = parts.map((p) => {
+    if (p == null) return null;
     const name = p.filename.split("-").slice(1).join(" ");
     return name[0].toUpperCase() + name.slice(1);
   });
@@ -412,21 +408,41 @@ const parseParts = (parts = []) => {
 
 export function AuctionPage() {
   const router = useRouter();
-  // const { config } = useServiceContext();
   const {
     auction,
+    auctionEnded,
     activeBlock,
-    // fomo: { isFomo, isVotingActive },
+    bidding: {
+      bid,
+      amount,
+      setAmount,
+      isLoading: hasPendingBid,
+      isLoadingTransactionResponse: hasPendingBidTransactionCall,
+      error: biddingError,
+    },
+    settling: {
+      settle: settleAuction,
+      isLoading: hasPendingSettleAttempt,
+      isLoadingTransactionResponse: hasPendingSettleTransactionCall,
+      error: settlingError,
+    },
   } = useAuction();
 
   const iFrameRef = React.useRef(null);
   useEmbeddedChatMessager(iFrameRef);
 
+  const auctionMode = React.useMemo(() => {
+    if (auction == null) return "loading";
+    if (auctionEnded) return "awaiting-settle";
+    return "bidding";
+  }, [auction, auctionEnded]);
+
+  const biddingEnabled = bid != null && !hasPendingBid;
+
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Header />
       <div
-        // className="test"
         style={{
           flex: 1,
           display: "flex",
@@ -454,7 +470,7 @@ export function AuctionPage() {
             },
           })}
         >
-          <AuctionScreenHeader auction={auction} />
+          <AuctionScreenHeader auction={auction} auctionEnded={auctionEnded} />
           <AuctionScreen auction={auction} activeBlock={activeBlock} />
           <Banner bids={auction?.bids ?? []} />
           <div style={{ display: "flex", flexDirection: "column" }}>
@@ -462,11 +478,122 @@ export function AuctionPage() {
               css={css({
                 flex: 1,
                 minHeight: 0,
+                padding: "1.5rem",
                 "@media (min-width: 1000px)": {
                   minHeight: "10rem",
                 },
               })}
-            ></div>
+            >
+              {auctionMode === "loading" ? (
+                <div />
+              ) : auctionMode === "awaiting-settle" ? (
+                <>
+                  <Button
+                    type="button"
+                    disabled={hasPendingSettleAttempt || settleAuction == null}
+                    isLoading={hasPendingSettleAttempt}
+                    onClick={() => {
+                      settleAuction();
+                    }}
+                    hint={
+                      hasPendingSettleTransactionCall &&
+                      "Confirm with your wallet"
+                    }
+                  >
+                    {hasPendingSettleAttempt
+                      ? "Settling auction..."
+                      : "Settle auction"}
+                  </Button>
+                  {settlingError != null && (
+                    <div style={{ marginTop: "1rem", color: TEXT_ERROR }}>
+                      {settlingError.reason ?? settlingError.message}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      bid();
+                    }}
+                    style={{ display: "flex" }}
+                  >
+                    <div
+                      css={css({
+                        height: "4rem",
+                        background: "white",
+                        borderRadius: "0.5rem",
+                        fontSize: "1.5rem",
+                        fontWeight: "600",
+                        padding: "0 1rem",
+                        width: "20rem",
+                        maxWidth: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                      })}
+                      style={{ opacity: !hasPendingBid ? 1 : "0.8" }}
+                    >
+                      <div
+                        style={{
+                          padding: "0 0.5rem",
+                          color:
+                            hasPendingBid || amount.trim() === ""
+                              ? "rgb(0 0 0 / 54%)"
+                              : "inherit",
+                        }}
+                      >
+                        {"Ξ"}
+                      </div>
+                      <input
+                        name="amount"
+                        value={amount}
+                        onChange={(e) => {
+                          setAmount(e.target.value);
+                        }}
+                        disabled={hasPendingBid}
+                        placeholder={
+                          auction.amount == null || auction.amount.isZero()
+                            ? "0.1"
+                            : `${formatEther(auction.amount)} or higher`
+                        }
+                        autoComplete="off"
+                        css={css({
+                          flex: 1,
+                          background: "none",
+                          border: 0,
+                          fontSize: "inherit",
+                          fontWeight: "inherit",
+                          fontFamily: "inherit",
+                          padding: "0",
+                          outline: "none",
+                          "::placeholder": { color: "rgb(0 0 0 / 54%)" },
+                          ":disabled": {
+                            pointerEvents: "none",
+                          },
+                        })}
+                      />
+                    </div>
+                    <Button
+                      type="submit"
+                      disabled={!biddingEnabled}
+                      isLoading={hasPendingBid}
+                      hint={hasPendingBidTransactionCall && "Check your wallet"}
+                      style={{
+                        marginLeft: "1.5rem",
+                      }}
+                    >
+                      {hasPendingBid ? "Placing bid..." : "Place bid"}
+                    </Button>
+                  </form>
+                  {biddingError != null && (
+                    <div style={{ marginTop: "1rem", color: TEXT_ERROR }}>
+                      {biddingError.reason ?? biddingError.message}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <div
               style={{
                 background: "black",
@@ -589,9 +716,11 @@ const AuctionScreen = ({
             }}
           />
           {/* <FloatingLabel position={{}} /> */}
-          {Object.entries(parts).map(([name, title]) => (
-            <FloatingNounTraitLabel key={name} name={name} title={title} />
-          ))}
+          {Object.entries(parts)
+            .filter((e) => e[1] != null)
+            .map(([name, title]) => (
+              <FloatingNounTraitLabel key={name} name={name} title={title} />
+            ))}
           {backgroundName != null && (
             <FloatingNounTraitLabel name="background" title={backgroundName} />
           )}
@@ -676,9 +805,14 @@ const ScreenHeader = ({ children }) => (
   </div>
 );
 
-const AuctionScreenHeader = ({ auction }) => {
+const AuctionScreenHeader = ({ auction, auctionEnded }) => {
   const { ensName: ownerENSName } = useProfile(auction?.noun.ownerAddress);
   const { ensName: bidderENSName } = useProfile(auction?.bidderAddress);
+  const bidderShort =
+    auction?.bidderAddress == null
+      ? null
+      : bidderENSName ?? shortenAddress(auction.bidderAddress);
+
   return (
     <ScreenHeader>
       <div style={{ flex: 1, paddingRight: "1em" }}>
@@ -704,38 +838,54 @@ const AuctionScreenHeader = ({ auction }) => {
               overflow: "hidden",
             }}
           >
-            <Label>High-Bidder</Label>
+            <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
             <Heading2>
               {auction.settled
                 ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
-                : auction.bidderAddress
-                ? bidderENSName || shortenAddress(auction.bidderAddress)
-                : "NO BIDS YET"}
+                : auctionEnded
+                ? auction.amount.isZero()
+                  ? "-"
+                  : bidderShort
+                : auction.amount.isZero()
+                ? "No bids"
+                : bidderShort}
             </Heading2>
           </div>
           <div>
-            <Label>Current bid</Label>
-            <Heading2>
-              {"Ξ"} {toFixed(formatEther(auction.amount), 2)}
-            </Heading2>
+            {auction?.amount != null && (
+              <>
+                <Label>{auctionEnded ? "Winning bid" : "Current bid"}</Label>
+                <Heading2>
+                  {auction.amount.isZero() ? (
+                    "-"
+                  ) : (
+                    <>
+                      {"Ξ"} {toFixed(formatEther(auction.amount))}
+                    </>
+                  )}
+                </Heading2>
+              </>
+            )}
           </div>
-          <div>
-            <Label>Auction ends in</Label>
-            <Heading2 style={{}}>
-              <CountdownDisplay to={auction.endTime} />
-              <div
-                aria-hidden="true"
-                style={{
-                  fontVariantNumeric: "tabular-nums",
-                  height: 0,
-                  opacity: 0,
-                  pointerEvents: "none",
-                }}
-              >
-                99h 99m 99s
-              </div>
-            </Heading2>
-          </div>
+          {!auctionEnded && (
+            <div>
+              <Label>Auction ends in</Label>
+              <Heading2 style={{}}>
+                <CountdownDisplay to={auction.endTime} />
+                <div
+                  aria-hidden="true"
+                  style={{
+                    fontVariantNumeric: "tabular-nums",
+                    height: 0,
+                    opacity: 0,
+                    pointerEvents: "none",
+                  }}
+                >
+                  99h 99m 99s
+                </div>
+              </Heading2>
+            </div>
+          )}
         </div>
       )}
 
@@ -778,8 +928,6 @@ const Heading2 = ({ style, ...props }) => (
       minWidth: 0,
       overflow: "hidden",
       textOverflow: "ellipsis",
-      // textTransform:
-      //   bidderENSName || ownerENSName ? "uppercase" : undefined,
       fontSize: "2em",
       fontWeight: "700",
       ...style,
@@ -946,5 +1094,100 @@ const ConstructionNoun = ({ style }) => (
     <path d="M43.125 28.125H41.25V30H43.125V28.125Z" fill="#F3322C" />
     <path d="M30 30H18.75V31.875H30V30Z" fill="#F3322C" />
     <path d="M43.125 30H31.875V31.875H43.125V30Z" fill="#F3322C" />
+  </svg>
+);
+
+const Button = ({
+  component: Component = "button",
+  hint,
+  isLoading = false,
+  children,
+  ...props
+}) => (
+  <Component
+    css={css({
+      display: "inline-flex",
+      alignItems: "center",
+      height: "4rem",
+      background: "white",
+      border: 0,
+      borderRadius: "0.5rem",
+      fontSize: "1.5rem",
+      fontWeight: "600",
+      fontFamily: "inherit",
+      padding: "0 1.5rem",
+      outline: "none",
+      maxWidth: "100%",
+      background: "#667AF9",
+      color: "white",
+      cursor: "pointer",
+      transition: "0.1s all easy-out",
+      textAlign: "left",
+      ":hover": {
+        filter: "brightness(1.03) saturate(1.2)",
+      },
+      ":disabled": {
+        opacity: "0.6",
+        pointerEvents: "none",
+      },
+    })}
+    {...props}
+  >
+    <div>
+      {children}
+      {hint != null && (
+        <div css={css({ fontSize: "1rem", fontWeight: "500" })}>{hint}</div>
+      )}
+    </div>
+    {isLoading && <Spinner size="1.5rem" style={{ marginLeft: "1rem" }} />}
+  </Component>
+);
+
+const rotateAnimation = keyframes({
+  "100%": {
+    transform: "rotate(360deg)",
+  },
+});
+
+const dashAnimation = keyframes({
+  "0%": {
+    strokeDasharray: "90 150",
+    strokeDashoffset: 90,
+  },
+  "50%": {
+    strokeDasharray: "90 150",
+    strokeDashoffset: -45,
+  },
+  "100%": {
+    strokeDasharray: "90 150",
+    strokeDashoffset: -120,
+  },
+});
+
+const Spinner = ({
+  size = "2rem",
+  color = "currentColor",
+  strokeWidth = 6,
+  style,
+}) => (
+  <svg
+    viewBox="0 0 50 50"
+    style={{ width: size, height: "auto", color, ...style }}
+    css={css({
+      animation: `${rotateAnimation} 2.5s linear infinite`,
+      circle: {
+        animation: `${dashAnimation} 2s ease-in-out infinite`,
+      },
+    })}
+  >
+    <circle
+      cx="25"
+      cy="25"
+      r="20"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth={strokeWidth}
+    />
   </svg>
 );
