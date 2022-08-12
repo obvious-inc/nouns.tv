@@ -1,5 +1,6 @@
 import { css, keyframes } from "@emotion/react";
 import React from "react";
+import { BigNumber } from "ethers";
 import { useAccount, useProvider, useNetwork, useSignMessage } from "wagmi";
 import {
   ConnectButton as RainbowConnectButton,
@@ -577,9 +578,22 @@ export function AuctionPage() {
                           }}
                           disabled={hasPendingBid}
                           placeholder={
-                            auction.amount == null || auction.amount.isZero()
-                              ? "0.1"
-                              : `${formatEther(auction.amount)} or higher`
+                            auction.amount == null || auction.amount.isZero() // First bid
+                              ? parseFloat(formatEther(auction.reservePrice)) >
+                                0.0001 // If the reserve price is big enough to bother
+                                ? `${formatEther(
+                                    auction.reservePrice
+                                  )} or higher`
+                                : "Place the first bid!"
+                              : `${formatEther(
+                                  auction.amount?.add(
+                                    auction.amount
+                                      ?.div(100)
+                                      .mul(
+                                        auction.minBidIncrementPercentage ?? 2
+                                      )
+                                  )
+                                )} or higher`
                           }
                           autoComplete="off"
                           css={css({

@@ -5,14 +5,15 @@ import {
   useProvider,
   usePrepareContractWrite,
   useContractWrite,
+  useContractReads,
   useWaitForTransaction,
-  chain,
 } from "wagmi";
 import { NounsAuctionHouseABI, NounsTokenABI } from "@nouns/contracts";
 import { getNounData, ImageData } from "@nouns/assets";
 import { buildSVG, getContractAddressesForChainOrThrow } from "@nouns/sdk";
+import { chains } from "../utils/network";
 
-const contractAddresses = getContractAddressesForChainOrThrow(chain.mainnet.id);
+const contractAddresses = getContractAddressesForChainOrThrow(chains[0].id);
 
 const parseAuction = (auction) => ({
   nounId: parseInt(auction.nounId),
@@ -124,8 +125,8 @@ const useSimpleContractWrite = ({ onSuccess, ...options }) => {
   };
 };
 
-const useBidding = (nounId) => {
-  const [amount, setAmount] = React.useState("");
+const useBidding = (nounId, { reservePrice }) => {
+  const [amount, setAmount] = React.useState(reservePrice ?? "");
 
   const {
     call,
@@ -153,8 +154,8 @@ const useBidding = (nounId) => {
   });
 
   React.useEffect(() => {
-    setAmount("");
-  }, [nounId]);
+    setAmount(reservePrice ?? "");
+  }, [nounId, reservePrice]);
 
   return {
     bid: call,
@@ -190,6 +191,11 @@ const useSettling = ({ enabled }) => {
   };
 };
 
+const auctionHouseContractConfig = {
+  addressOrName: contractAddresses.nounsAuctionHouseProxy,
+  contractInterface: NounsAuctionHouseABI,
+};
+
 export const useAuction = () => {
   const provider = useProvider();
 
@@ -201,8 +207,7 @@ export const useAuction = () => {
   const [auctionEnded, setAuctionEnded] = React.useState(false);
 
   const auctionHouseContract = useContract({
-    addressOrName: contractAddresses.nounsAuctionHouseProxy,
-    contractInterface: NounsAuctionHouseABI,
+    ...auctionHouseContractConfig,
     signerOrProvider: provider,
   });
 
@@ -211,6 +216,16 @@ export const useAuction = () => {
     contractInterface: NounsTokenABI,
     signerOrProvider: provider,
   });
+
+  const { data: auctionData } = useContractReads({
+    contracts: ["reservePrice", "minBidIncrementPercentage"].map(
+      (functionName) => ({
+        ...auctionHouseContractConfig,
+        functionName,
+      })
+    ),
+  });
+  const [reservePrice, minBidIncrementPercentage] = auctionData ?? [];
 
   const auction = React.useMemo(() => {
     if (activeNounId == null) return null;
@@ -242,6 +257,8 @@ export const useAuction = () => {
 
     return {
       ...auction,
+      reservePrice,
+      minBidIncrementPercentage,
       noun,
       bids: bids
         .filter((b) => b.nounId === auction.nounId)
@@ -251,12 +268,21 @@ export const useAuction = () => {
           return b2.blockNumber - b1.blockNumber;
         }),
     };
-  }, [activeNounId, auctionsByNounId, seedsByNounId, bids]);
+  }, [
+    activeNounId,
+    auctionsByNounId,
+    seedsByNounId,
+    bids,
+    reservePrice,
+    minBidIncrementPercentage,
+  ]);
 
   const { isFomo, isVotingActive } = useFomo(auction);
   const activeBlock = useActiveBlock();
 
-  const bidding = useBidding(auction?.noun.id);
+  const bidding = useBidding(auction?.noun.id, {
+    reservePrice: reservePrice?.toString(),
+  });
   const settling = useSettling({ enabled: auctionEnded });
 
   React.useEffect(() => {
