@@ -1,6 +1,5 @@
 import { css, keyframes } from "@emotion/react";
 import React from "react";
-import { BigNumber } from "ethers";
 import { useAccount, useProvider, useNetwork, useSignMessage } from "wagmi";
 import {
   ConnectButton as RainbowConnectButton,
@@ -9,7 +8,6 @@ import {
 import { useRouter } from "next/router";
 import { useProfile } from "../hooks/useProfile";
 import { useAuction } from "../hooks/useAuction";
-import { toFixed } from "../utils/numbers";
 import { shortenAddress } from "../utils/address";
 import { CountdownDisplay } from "./CountdownDisplay";
 import { Banner } from "./Banner";
@@ -584,7 +582,7 @@ export function AuctionPage() {
                                 ? `${formatEther(
                                     auction.reservePrice
                                   )} or higher`
-                                : "Place the first bid!"
+                                : "Snatch the first bid!"
                               : `${formatEther(
                                   auction.amount?.add(
                                     auction.amount
@@ -907,7 +905,7 @@ const AuctionScreenHeader = ({ auction, auctionEnded }) => {
                     "-"
                   ) : (
                     <>
-                      {"Ξ"} {toFixed(formatEther(auction.amount))}
+                      {"Ξ"} {formatEther(auction.amount)}
                     </>
                   )}
                 </Heading2>

@@ -1,13 +1,9 @@
 import React from "react";
-import Image from "next/image";
 import Marquee from "react-fast-marquee";
-import { Bid } from "../services/interfaces/noun.service";
 import { useProfile } from "../hooks/useProfile";
 import { EtherscanPageType, getEtherscanLink } from "../utils/url";
 import { Box } from "degen";
-import { toFixed } from "../utils/numbers";
 import { formatEther } from "ethers/lib/utils";
-import { Text } from "../elements/Text";
 import { shortenAddress } from "../utils/address";
 import { MarqueeRoot } from "./Banner.css";
 
@@ -43,7 +39,7 @@ const BidBlock = ({ bid }) => {
               // color: "#AE3208"
             }}
           >
-            {"Ξ"} {toFixed(formatEther(bid.amount), 2)}
+            {"Ξ"} {formatEther(bid.amount)}
           </div>
           <div data-address style={{ fontWeight: "400" }}>
             {ensName || shortenAddress(bid.bidderAddress)}
