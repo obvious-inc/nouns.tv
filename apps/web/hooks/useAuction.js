@@ -16,24 +16,6 @@ import { getNounData, ImageData } from "@nouns/assets";
 import { buildSVG, getContractAddressesForChainOrThrow } from "@nouns/sdk";
 import { chains } from "../utils/network";
 
-const parseAuction = (auction) => ({
-  nounId: parseInt(auction.nounId),
-  amount: auction.amount,
-  bidderAddress: auction.bidder,
-  startTime: parseInt(auction.startTime),
-  endTime: parseInt(auction.endTime),
-  settled: auction.settled,
-});
-
-const parseBid = (bid) => ({
-  id: `${bid.blockNumber}-${bid.transactionIndex}`,
-  blockNumber: bid.blockNumber,
-  transactionIndex: bid.transactionIndex,
-  nounId: parseInt(bid.args.nounId),
-  bidderAddress: bid.args.sender,
-  amount: bid.args.value,
-});
-
 const useContractAddresses = () => {
   const { chain } = useNetwork();
   return getContractAddressesForChainOrThrow(chain?.id ?? chains[1]?.id ?? 1);
@@ -228,6 +210,18 @@ const useAuctionBids = () => {
     signerOrProvider: provider,
   });
 
+  const parseBid = React.useCallback(
+    (bid) => ({
+      id: `${bid.blockNumber}-${bid.transactionIndex}`,
+      blockNumber: bid.blockNumber,
+      transactionIndex: bid.transactionIndex,
+      nounId: parseInt(bid.args.nounId),
+      bidderAddress: bid.args.sender,
+      amount: bid.args.value,
+    }),
+    []
+  );
+
   useContractEvent({
     addressOrName: contractAddresses.nounsAuctionHouseProxy,
     contractInterface: NounsAuctionHouseABI,
@@ -269,7 +263,7 @@ const useAuctionBids = () => {
       window.removeEventListener("focus", fetchBids);
       window.removeEventListener("online", fetchBids);
     };
-  }, [auctionHouseContract]);
+  }, [auctionHouseContract, parseBid]);
 
   return bids;
 };
@@ -285,7 +279,14 @@ export const useAuction = () => {
     addressOrName: contractAddresses.nounsAuctionHouseProxy,
     contractInterface: NounsAuctionHouseABI,
     functionName: "auction",
-    select: parseAuction,
+    select: (auction) => ({
+      nounId: parseInt(auction.nounId),
+      amount: auction.amount,
+      bidderAddress: auction.bidder,
+      startTime: parseInt(auction.startTime),
+      endTime: parseInt(auction.endTime),
+      settled: auction.settled,
+    }),
   });
 
   const { data: seed } = useContractRead({
@@ -363,7 +364,6 @@ export const useAuction = () => {
 
   const { isFomo, isVotingActive } = useFomo(auction);
   const activeBlock = useActiveBlock();
-
   const bidding = useBidding(auction?.noun.id);
   const settling = useSettling({ enabled: auctionEnded });
 
