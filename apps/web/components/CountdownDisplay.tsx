@@ -1,5 +1,5 @@
 // https://github.com/ourzora/nft-components/blob/main/src/components/CountdownDisplay.tsx
-import { useCallback, useEffect, useState, Fragment } from "react";
+import { useEffect, useState, Fragment } from "react";
 
 export type CountdownDisplayProps = {
   from?: number | string;
@@ -86,24 +86,24 @@ export const CountdownDisplay = (props: CountdownDisplayProps) => {
       )
     )
   );
-  const updateTimeLeft = useCallback(() => {
-    setTimeLeft(
-      getTimeLeft(
-        getNumber(props.to),
-        getNumber(
-          props.from === undefined ? new Date().getTime() / 1000 : props.from
-        )
-      )
-    );
-  }, [props.to, props.from]);
 
   useEffect(() => {
+    const updateTimeLeft = () => {
+      setTimeLeft(
+        getTimeLeft(
+          getNumber(props.to),
+          getNumber(
+            props.from === undefined ? new Date().getTime() / 1000 : props.from
+          )
+        )
+      );
+    };
     const checkTimeout = setInterval(updateTimeLeft, 1000);
     return () => {
       clearInterval(checkTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.to, props.from]);
 
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {

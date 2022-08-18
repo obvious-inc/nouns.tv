@@ -1,5 +1,6 @@
 import React from "react";
-import { BigNumber, utils as ethersUtils } from "ethers";
+import { useRouter } from "next/router";
+import { utils as ethersUtils } from "ethers";
 import {
   useContract,
   useProvider,
@@ -12,9 +13,11 @@ import {
   useNetwork,
 } from "wagmi";
 import { NounsAuctionHouseABI, NounsTokenABI } from "@nouns/contracts";
-import { getNounData, ImageData } from "@nouns/assets";
-import { buildSVG, getContractAddressesForChainOrThrow } from "@nouns/sdk";
+import { getNounData } from "@nouns/assets";
+import { getContractAddressesForChainOrThrow } from "@nouns/sdk";
+import useFomo from "../hooks/useFomo";
 import { chains } from "../utils/network";
+import { getImageUrlFromSeed as getNounImageUrl } from "../utils/nouns";
 
 const useContractAddresses = () => {
   const { chain } = useNetwork();
@@ -46,71 +49,6 @@ const useSimpleContractWrite = ({ onSuccess, ...options }) => {
     isLoadingTransactionReceipt,
     isLoading: isLoadingTransactionResponse || isLoadingTransactionReceipt,
   };
-};
-
-const useFomo = (auction) => {
-  const provider = useProvider();
-
-  const [isFomo, setIsFomo] = React.useState(false);
-  const [isVotingActive, setVotingActive] = React.useState(false);
-
-  React.useEffect(() => {
-    if (auction == null || auction.settled) return;
-
-    const update = () => {
-      const nowMillis = parseInt(new Date().getTime() / 1000);
-      const isFomo = auction.endTime < nowMillis;
-      setIsFomo(isFomo);
-
-      if (isFomo) {
-        setVotingActive(true);
-        window.setTimeout(() => {
-          setVotingActive(false);
-        }, 6000);
-      }
-    };
-
-    provider.on("block", update);
-    return () => {
-      provider.off("block", update);
-    };
-  }, [provider, auction]);
-
-  return { isFomo, isVotingActive };
-};
-
-const useActiveBlock = () => {
-  const provider = useProvider();
-
-  const numberRef = React.useRef();
-
-  const [number, setNumber] = React.useState(null);
-  const [block, setBlock] = React.useState(null);
-
-  React.useEffect(() => {
-    provider.getBlock("latest").then((b_) => {
-      const b = { ...b_, localTimestamp: parseInt(new Date() / 1000) };
-      setNumber(b.number);
-      setBlock(b);
-    });
-
-    const blockHandler = (n) => {
-      if (numberRef.current > n) return;
-      setNumber(n);
-      provider.getBlock(n).then((b_) => {
-        const b = { ...b_, localTimestamp: parseInt(new Date() / 1000) };
-        setBlock(b);
-      });
-    };
-
-    provider.on("block", blockHandler);
-
-    return () => {
-      provider.off("block", blockHandler);
-    };
-  }, [provider]);
-
-  return block != null && block.number === number ? block : { number };
 };
 
 const useBidding = (nounId) => {
@@ -329,22 +267,12 @@ export const useAuction = () => {
 
     const { parts, background } = getNounData(seed);
 
-    const getImageUrl = () => {
-      try {
-        const svgBinary = buildSVG(parts, ImageData.palette, background);
-        return `data:image/svg+xml;base64,${btoa(svgBinary)}`;
-      } catch (e) {
-        console.error(e);
-        return null;
-      }
-    };
-
     const noun = {
       id: rawAuction.nounId,
       ownerAddress: rawAuction.winnerAddess,
       parts,
       background,
-      imageUrl: getImageUrl(),
+      imageUrl: getNounImageUrl({ parts, background }),
     };
 
     return {
@@ -362,8 +290,13 @@ export const useAuction = () => {
     };
   }, [rawAuction, seed, bids, reservePrice, minBidIncrementPercentage]);
 
-  const { isFomo, isVotingActive } = useFomo(auction);
-  const activeBlock = useActiveBlock();
+  // const router = useRouter();
+
+  const fomo = useFomo({
+    auction,
+    // enabled: Boolean(router?.query.fomo),
+    enabled: auctionEnded && !auction?.settled,
+  });
   const bidding = useBidding(auction?.noun.id);
   const settling = useSettling({ enabled: auctionEnded });
 
@@ -388,8 +321,7 @@ export const useAuction = () => {
   return {
     auction,
     auctionEnded,
-    fomo: { isFomo, isVotingActive },
-    activeBlock,
+    fomo,
     bidding,
     settling,
   };

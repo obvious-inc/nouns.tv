@@ -13,6 +13,58 @@ import { CountdownDisplay } from "./CountdownDisplay";
 import { Banner } from "./Banner";
 import { formatEther } from "ethers/lib/utils";
 
+const random = (seed) => {
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+};
+
+const progressGradient = keyframes({
+  "0%": {
+    backgroundPosition: "0%",
+  },
+  "100%": {
+    backgroundPosition: "200%",
+  },
+});
+
+const noGifs = [
+  "https://c.tenor.com/_Yg4KymK8skAAAAS/hell-nah-i-give-you-the-wag.gif",
+  "https://c.tenor.com/hnOfwHfxp0IAAAAM/mike-peps.gif",
+  "https://c.tenor.com/aCItDdSljoAAAAAM/nah-man.gif",
+  "https://c.tenor.com/Uoh5CrkplOQAAAAd/smh-laugh.gif",
+  "https://c.tenor.com/a4oPUc0mvhsAAAAS/throw-up-dry-heave.gif",
+  "https://c.tenor.com/GVHE94wLwG4AAAAS/whet-what.gif",
+  "https://c.tenor.com/IywGEo-8gNAAAAAS/gross-nasty.gif",
+  "https://c.tenor.com/CqJJhD3yocsAAAAS/uh-oh.gif",
+  "https://c.tenor.com/pTQ1cO-LsaYAAAAC/uh-wtf.gif",
+  "https://c.tenor.com/WZB_2H2htckAAAAM/ew-gross.gif",
+  "https://c.tenor.com/AIQAS4l0uAIAAAAM/ew-yuck.gif",
+  "https://c.tenor.com/JBlp2G_dqqcAAAAC/new-girl.gif",
+];
+const yesGifs = [
+  "https://c.tenor.com/fmZuKGPpf3cAAAAS/yes-yes-yes-yes.gif",
+  "https://c.tenor.com/zLdksqBjgdMAAAAS/yas-oh-yeah.gif",
+  "https://c.tenor.com/5FI2iWeIs70AAAAd/yes-yes-yes.gif",
+  "https://c.tenor.com/dbA2b82g77cAAAAS/proud-ross.gif",
+  "https://c.tenor.com/yr2TZIdaOukAAAAd/pedro-approves-pedrorc.gif",
+  "https://c.tenor.com/BNg5I6x4wUsAAAAC/im-so-excited-freaking-cant-wait.gif",
+  "https://c.tenor.com/2w1XsfvQD5kAAAAC/hhgf.gif",
+  "https://c.tenor.com/Nh7N6tq8SnYAAAAd/friends-rachel-green.gif",
+  "https://c.tenor.com/cuGev1KFtZkAAAAC/yes-yas.gif",
+  "https://c.tenor.com/FS2PD8WU9RgAAAAC/yes-yay.gif",
+  "https://c.tenor.com/inZhd-3tflYAAAAd/new-girl-winston-bishop.gif",
+];
+
+let preloadedGifs;
+const preloadGifs = () => {
+  if (preloadedGifs != null) return;
+  preloadedGifs = [...noGifs, ...yesGifs].map((url) => {
+    const img = new Image();
+    img.src = url;
+    return img;
+  });
+};
+
 const TEXT_ERROR = "#e85252";
 
 const chatUrl = new URL(process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL);
@@ -410,7 +462,6 @@ export function AuctionPage() {
   const {
     auction,
     auctionEnded,
-    activeBlock,
     bidding: {
       bid,
       amount,
@@ -425,6 +476,7 @@ export function AuctionPage() {
       isLoadingTransactionResponse: hasPendingSettleTransactionCall,
       error: settlingError,
     },
+    fomo,
   } = useAuction();
 
   const iFrameRef = React.useRef(null);
@@ -470,7 +522,11 @@ export function AuctionPage() {
           })}
         >
           <AuctionScreenHeader auction={auction} auctionEnded={auctionEnded} />
-          <AuctionScreen auction={auction} activeBlock={activeBlock} />
+          {fomo.isActive ? (
+            <FomoScreen {...fomo} />
+          ) : (
+            <AuctionScreen auction={auction} />
+          )}
           <Banner bids={auction?.bids ?? []} />
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div
@@ -700,21 +756,7 @@ export function AuctionPage() {
   );
 }
 
-const AuctionScreen = ({
-  auction,
-  // activeBlock
-}) => {
-  // const nounId = auction?.noun.id;
-
-  // const nextNoun = React.useMemo(() => {
-  //   if (nounId == null || activeBlock?.hash == null) return null;
-  //   const seed = getNounSeedFromBlockHash(nounId + 1, activeBlock.hash);
-  //   const { parts, background } = getNounData(seed);
-  //   const svgBinary = buildSVG(parts, ImageData.palette, background);
-  //   const imageUrl = `data:image/svg+xml;base64,${btoa(svgBinary)}`;
-  //   return { id: nounId + 1, parts: parseParts(parts), background, imageUrl };
-  // }, [nounId, activeBlock]);
-
+const AuctionScreen = ({ auction }) => {
   const noun = auction?.noun;
   const parts = parseParts(auction?.noun.parts);
 
@@ -727,7 +769,7 @@ const AuctionScreen = ({
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+        gridTemplateColumns: "auto minmax(0,1fr)",
         alignItems: "flex-end",
         transition: "0.2s background ease-out",
         background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
@@ -776,6 +818,316 @@ const AuctionScreen = ({
   );
 };
 
+const FomoScreen = ({
+  noun,
+  block,
+  vote,
+  isVotingActive,
+  like,
+  dislike,
+  score,
+  settlementAttempted,
+  voteCounts,
+  isConnected,
+  reconnect,
+}) => {
+  const parts = parseParts(noun?.parts);
+
+  const backgroundName = {
+    e1d7d5: "Warm",
+    d5d7e1: "Cold",
+  }[noun?.background.toLowerCase()];
+
+  React.useEffect(() => {
+    preloadGifs();
+  }, []);
+
+  const noGifUrl =
+    block && noGifs[Math.floor(random(Number(block.number)) * noGifs.length)];
+  const yesGifUrl =
+    block && yesGifs[Math.floor(random(Number(block.number)) * yesGifs.length)];
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "auto minmax(0,1fr)",
+        alignItems: "stretch",
+        transition: "0.2s background ease-out",
+        background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
+        flex: "1 1 0",
+        minHeight: 0,
+      }}
+    >
+      <div
+        style={{
+          paddingLeft: "2rem",
+          height: "100%",
+          minHeight: 0,
+          display: "flex",
+          alignItems: "flex-end",
+        }}
+      >
+        <div
+          style={{ position: "relative", height: "100%" }}
+          className="noun-container"
+        >
+          {/* eslint-disable-next-line */}
+          <img
+            src={noun?.imageUrl ?? "../assets/loading-skull-noun.gif"}
+            alt={`Noun ${noun?.id}`}
+            style={{
+              display: "block",
+              width: "auto",
+              height: "100%",
+            }}
+          />
+          {Object.entries(parts)
+            .filter((e) => e[1] != null)
+            .map(([name, title]) => (
+              <FloatingNounTraitLabel key={name} name={name} title={title} />
+            ))}
+          {backgroundName != null && (
+            <FloatingNounTraitLabel name="background" title={backgroundName} />
+          )}
+        </div>
+        {/* <CountdownDisplay to={activeBlock.localTimestamp + 6} /> */}
+      </div>
+      <div
+        css={css({
+          display: "flex",
+          alignItems: "center",
+          minHeight: 0,
+          overflow: "hidden",
+        })}
+      >
+        {!isConnected ? (
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {/* <GrayButton onClick={reconnect}>Reconnect</GrayButton> */}
+          </div>
+        ) : (
+          block != null && (
+            <div
+              css={css({
+                textAlign: "center",
+                padding: "2rem",
+                width: "100%",
+                button: {
+                  position: "relative",
+                  display: "block",
+                  border: "0.1rem solid black",
+                  padding: "0.5rem",
+                  borderRadius: "0.5rem",
+                  background: "hsl(0 0% 85%)",
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  transition: "0.1s transform ease-out",
+                  ":hover": {
+                    background: "hsl(0 0% 80%)",
+                  },
+                  ":hover img": {
+                    filter: "saturate(1.25)",
+                  },
+                  "&[data-selected=true]": {
+                    boxShadow: "0 0 0 0.3rem #667af9",
+                  },
+                  "&[data-selected=true] img": {
+                    filter: "saturate(1.2)",
+                  },
+                  ":disabled": {
+                    cursor: "not-allowed",
+                    pointerEvents: "none",
+                  },
+                  ":not([data-selected=true]):disabled": {
+                    borderColor: "hsl(0 0% 60%)",
+                  },
+                  ":not([data-selected=true]):disabled img": {
+                    filter: "saturate(0) contrast(60%)",
+                  },
+                  ".label": {
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    top: "50%",
+                    padding: "1rem 1.5rem",
+                    fontWeight: "800",
+                    color: "white",
+                    transform: "translateY(-50%) rotate(-5deg) scale(0.5)",
+                    WebkitTextStroke: "1px black",
+                    opacity: 0,
+                    transition: "0.07s all ease-in",
+                  },
+                  ":hover .label, &[data-selected=true] .label": {
+                    opacity: 1,
+                    transform: "translateY(-50%) rotate(-5deg) scale(1)",
+                  },
+                },
+                img: {
+                  display: "block",
+                  width: "12rem",
+                  height: "12rem",
+                  objectFit: "cover",
+                  transition: "0.1s transform ease-out",
+                  borderRadius: "0.2rem",
+                },
+              })}
+            >
+              <div
+                css={css({
+                  fontSize: "2.8rem",
+                  fontWeight: "700",
+                  margin: "0 0 0.7rem",
+                })}
+              >
+                {settlementAttempted
+                  ? "Attempting to settle..."
+                  : isVotingActive
+                  ? "Try to mint this noun?"
+                  : "Ok, let’s try another one"}
+              </div>
+              <div
+                css={css({
+                  fontSize: "1.6rem",
+                  fontWeight: "600",
+                  color: "rgb(0 0 0 / 60%)",
+                  margin: "0 0 2.2rem",
+                })}
+              >
+                {settlementAttempted ? (
+                  "OMG OMG OMG OMG OMG"
+                ) : isVotingActive ? (
+                  <>
+                    Voting ends in{" "}
+                    <CountdownDisplay to={block.localTimestamp / 1000 + 7} />
+                  </>
+                ) : (
+                  <>
+                    Waiting for a new block...{" "}
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        transform: "scale(1.2)",
+                        margin: "0 0.2rem",
+                      }}
+                    >
+                      🥱
+                    </span>
+                  </>
+                )}
+              </div>
+              <div
+                style={{
+                  position: "relative",
+                  margin: "0 auto 3rem",
+                  width: "100%",
+                  maxWidth: "42rem",
+                }}
+              >
+                <div
+                  css={css({
+                    height: "2.4rem",
+                    width: "100%",
+                    borderRadius: "0.5rem",
+                    background:
+                      "linear-gradient(90deg, rgba(0,179,255,1) 0%, rgba(255,0,209,1) 25%, rgba(255,160,0,1) 50%, rgba(243,255,0,1) 75%, rgba(0,179,255,1) 100%)",
+                    animation: `${progressGradient} 6s linear infinite`,
+                    backgroundSize: "200%",
+                    position: "relative",
+                    overflow: "hidden",
+                  })}
+                >
+                  <div
+                    css={css({
+                      position: "absolute",
+                      right: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: `${
+                        100 -
+                        (settlementAttempted
+                          ? 100
+                          : Math.max(5, Math.min(100, score * 100)))
+                      }%`,
+                      transition:
+                        "0.2s width ease-out, 0.2s background ease-out",
+                      background: isVotingActive ? "white" : "hsl(0 0% 70%)",
+                    })}
+                  />
+                </div>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    right: "100%",
+                    padding: "0 0.8rem",
+                    fontSize: "1.3rem",
+                    fontWeight: "500",
+                  }}
+                >
+                  {String(voteCounts.dislike)}
+                </div>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    left: "100%",
+                    padding: "0 0.8rem",
+                    fontSize: "1.3rem",
+                    fontWeight: "500",
+                  }}
+                >
+                  {String(voteCounts.like)}
+                </div>
+              </div>
+              <div
+                css={css({
+                  display: "grid",
+                  maxWidth: "42rem",
+                  margin: "0 auto",
+                  gridTemplateColumns: "repeat(2, minmax(0,auto))",
+                  justifyContent: "space-evenly",
+                  userSelect: "none",
+                })}
+              >
+                <button
+                  onClick={dislike}
+                  disabled={!isVotingActive || vote != null}
+                  data-selected={vote === "dislike"}
+                >
+                  <img alt="NO" key={noGifUrl} src={noGifUrl} />
+                  <div className="label" style={{ fontSize: "5rem" }}>
+                    NO
+                  </div>
+                </button>
+                <button
+                  onClick={like}
+                  disabled={!isVotingActive || vote != null}
+                  data-selected={vote === "like"}
+                >
+                  <img key={yesGifUrl} alt="YES" src={yesGifUrl} />
+                  <div className="label" style={{ fontSize: "4.2rem" }}>
+                    YES
+                  </div>
+                </button>
+              </div>
+            </div>
+          )
+        )}
+      </div>
+    </div>
+  );
+};
+
 const Header = () => (
   <div
     style={{
@@ -809,16 +1161,7 @@ const Header = () => (
     <div style={{ color: "white", fontSize: "1.25em", fontWeight: "700" }}>
       NOUNS.TV
     </div>
-    <div style={{ flex: 1, padding: "0 1rem" }}>
-      {/* <img */}
-      {/*   src={nextBlockNounImageUrl || "../assets/loading-skull-noun.gif"} */}
-      {/*   alt={`Noun ${nounId + 1}`} */}
-      {/*   style={{ display: "inline-flex", width: "2rem", height: "2rem" }} */}
-      {/* />{" "} */}
-      {/* {activeBlock?.localTimestamp != null && ( */}
-      {/*   <CountdownDisplay to={activeBlock.localTimestamp + 6} /> */}
-      {/* )} */}
-    </div>
+    <div style={{ flex: 1, padding: "0 1rem" }}></div>
     <div>
       <RainbowConnectButton />
     </div>
@@ -863,7 +1206,12 @@ const AuctionScreenHeader = ({ auction, auctionEnded }) => {
       <div style={{ flex: 1, paddingRight: "1em" }}>
         {auction?.noun != null && (
           <div style={{ fontSize: "3em", fontWeight: "900" }}>
-            Noun {auction.noun.id}
+            Noun {auction.noun.id}{" "}
+            {auctionEnded && (
+              <span css={css({ fontSize: "0.6em", fontWeight: "500" })}>
+                (Auction ended)
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -996,6 +1344,7 @@ const FloatingNounTraitLabel = ({ name, title }) => (
       borderRadius: "0.3rem",
       cursor: "default",
       transform: "translateY(-50%) translateX(-1rem)",
+      zIndex: 2,
       ...positionByPartName[name],
     }}
   >
@@ -1235,4 +1584,27 @@ const Spinner = ({
       strokeWidth={strokeWidth}
     />
   </svg>
+);
+
+const GrayButton = ({ component: Component = "button", ...props }) => (
+  <Component
+    css={css({
+      display: "block",
+      border: "0.1rem solid black",
+      borderRadius: "0.5rem",
+      background: "hsl(0 0% 85%)",
+      cursor: "pointer",
+      padding: "0 1rem",
+      minHeight: "4rem",
+      fontSize: "1.5rem",
+      ":hover": {
+        background: "hsl(0 0% 80%)",
+      },
+      ":disabled": {
+        cursor: "not-allowed",
+        pointerEvents: "none",
+      },
+    })}
+    {...props}
+  />
 );

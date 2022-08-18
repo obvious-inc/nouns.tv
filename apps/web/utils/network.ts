@@ -27,7 +27,7 @@ export const defaultProvider = alchemyProvider({ apiKey: ALCHEMY_API_KEY });
 
 export const { chains, provider, webSocketProvider } = configureChains(
   [chain.mainnet],
-  // [chain.mainnet, chain.rinkeby],
+  // [chain.rinkeby, chain.mainnet],
   // [localChain],
   [defaultProvider]
 );

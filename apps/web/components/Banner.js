@@ -1,4 +1,5 @@
 import React from "react";
+import { css } from "@emotion/react";
 import Marquee from "react-fast-marquee";
 import { useProfile } from "../hooks/useProfile";
 import { EtherscanPageType, getEtherscanLink } from "../utils/url";
@@ -53,9 +54,26 @@ const BidBlock = ({ bid }) => {
 export function Banner({ bids }) {
   return (
     <Marquee className={MarqueeRoot} pauseOnHover gradient={false} speed={60}>
-      <div style={{ padding: "0.6em 0", minHeight: "5.7rem" }}>
-        <Box display="flex" flexDirection="row" alignItems="center">
-          {bids
+      <div
+        style={{
+          padding: "0.6em 0",
+          minHeight: "5.7rem",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        {bids.length === 0 ? (
+          <div
+            css={css({
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+            })}
+          >
+            No bids
+          </div>
+        ) : (
+          bids
             .sort((a, b) => b.blockTimestamp - a.blockTimestamp)
             .map((bid, i, bids) => (
               <React.Fragment key={i}>
@@ -74,8 +92,8 @@ export function Banner({ bids }) {
                   <div style={{ width: "25vw" }} />
                 )}
               </React.Fragment>
-            ))}
-        </Box>
+            ))
+        )}
       </div>
     </Marquee>
   );
