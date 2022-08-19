@@ -68,25 +68,24 @@ const useNewHeadsSocket = (listener) => {
 
 let voteSocket = null;
 
-let votingActiveTimeoutHandle;
+let votingTimerTimeoutHandle;
 
 const useVoting = ({ auction }) => {
   const provider = useProvider();
 
   const [latestBlock, setLatestBlock] = React.useState(null);
-  const [votesByBlockNumber, setVotesByBlockNumber] = React.useState({});
+  const [votesByBlockHash, setVotesByBlockHash] = React.useState({});
   const [isVotingActive, setVotingActive] = React.useState(false);
   const [score, setScore] = React.useState(0);
   const [settlementAttempted, setSettlementAttempted] = React.useState(false);
   const [isConnectedToVotingSocket, setConnectedToVotingSocket] =
     React.useState(false);
-  const [voteCounts, setVoteCount] = React.useState({ like: 0, dislike: 0 });
+  const [voteCountsByBlockHash, setVoteCountsByBlockHash] = React.useState({});
 
   const reset = () => {
     setScore(0);
     setVotingActive(true);
     setSettlementAttempted(false);
-    setVoteCount({ like: 0, dislike: 0 });
   };
 
   const { isConnected: isConnectedToBlockSocket } = useNewHeadsSocket(
@@ -94,15 +93,20 @@ const useVoting = ({ auction }) => {
       // Ignore chain reorgs
       if (Number(block.number) < Number(latestBlock.number)) return;
 
-      if (votingActiveTimeoutHandle != null) {
-        clearTimeout(votingActiveTimeoutHandle);
-        votingActiveTimeoutHandle = null;
-      }
-
       reset();
       setLatestBlock({ ...block, localTimestamp: new Date().getTime() });
+      setVoteCountsByBlockHash((cs) => ({
+        ...cs,
+        [block.hash]: { like: 0, dislike: 0 },
+      }));
+      //
+      // Reset the timer in case the previous one hasn’t finised
+      if (votingTimerTimeoutHandle != null) {
+        clearTimeout(votingTimerTimeoutHandle);
+        votingTimerTimeoutHandle = null;
+      }
 
-      votingActiveTimeoutHandle = window.setTimeout(() => {
+      votingTimerTimeoutHandle = window.setTimeout(() => {
         setVotingActive(false);
       }, 6000);
     }
@@ -166,9 +170,9 @@ const useVoting = ({ auction }) => {
     if ([auction?.nounId, latestBlock?.hash, type].some((a) => a == null))
       throw new Error();
 
-    setVotesByBlockNumber((vs) => ({
+    setVotesByBlockHash((vs) => ({
       ...vs,
-      [Number(latestBlock.number)]: type,
+      [latestBlock.hash]: type,
     }));
 
     const voteStringByType = {
@@ -206,10 +210,7 @@ const useVoting = ({ auction }) => {
       window.reload();
     },
     isVotingActive,
-    vote:
-      latestBlock == null
-        ? null
-        : votesByBlockNumber[Number(latestBlock.number)],
+    vote: latestBlock == null ? null : votesByBlockHash[latestBlock.hash],
     like,
     dislike,
     shrug,
@@ -217,7 +218,13 @@ const useVoting = ({ auction }) => {
     score,
     settlementAttempted,
     block: latestBlock,
-    voteCounts,
+    voteCounts:
+      latestBlock == null
+        ? null
+        : voteCountsByBlockHash[latestBlock.hash] ?? {
+            likes: 0,
+            dislikes: 0,
+          },
   };
 };
 

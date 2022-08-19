@@ -532,7 +532,7 @@ export function AuctionPage() {
             <FomoScreen
               {...fomo}
               nounImageElement={
-                <NounImage noun={auction?.noun} forceStats={forceStats} />
+                <NounImage noun={fomo.noun} forceStats={forceStats} />
               }
               controlsElement={
                 <div
@@ -1141,7 +1141,7 @@ const FomoScreen = ({
                     fontWeight: "500",
                   }}
                 >
-                  {String(voteCounts.dislike)}
+                  {String(voteCounts.dislike ?? 0)}
                 </div>
                 <div
                   style={{
@@ -1154,7 +1154,7 @@ const FomoScreen = ({
                     fontWeight: "500",
                   }}
                 >
-                  {String(voteCounts.like)}
+                  {String(voteCounts.like ?? 0)}
                 </div>
               </div>
               <div
