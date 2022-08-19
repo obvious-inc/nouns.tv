@@ -479,6 +479,11 @@ export function AuctionPage() {
     fomo,
   } = useAuction();
 
+  const [forceFomo, setForceFomo] = React.useState(false);
+  const toggleForceFomo = () => setForceFomo((s) => !s);
+  const [forceStats, setForceStats] = React.useState(false);
+  const toggleForceStats = () => setForceStats((s) => !s);
+
   const iFrameRef = React.useRef(null);
   useEmbeddedChatMessager(iFrameRef);
 
@@ -512,20 +517,79 @@ export function AuctionPage() {
             display: "flex",
             flexDirection: "column",
             background: "rgb(38 38 38)",
-            minHeight: 0,
           }}
           css={css({
             flex: 2,
+            minHeight: 0,
             "@media (max-width: 1000px)": {
               flex: 1,
+              minHeight: "40hv",
             },
           })}
         >
           <AuctionScreenHeader auction={auction} auctionEnded={auctionEnded} />
-          {fomo.isActive ? (
-            <FomoScreen {...fomo} />
+          {forceFomo || fomo.isActive ? (
+            <FomoScreen
+              {...fomo}
+              nounImageElement={
+                <NounImage noun={auction?.noun} forceStats={forceStats} />
+              }
+              controlsElement={
+                <div
+                  style={{
+                    display: "grid",
+                    gridAutoColumns: "auto",
+                    gridAutoFlow: "column",
+                    gridGap: "1.5rem",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <Switch
+                    id="stats-switch"
+                    label="Stats"
+                    checked={forceStats}
+                    onChange={toggleForceStats}
+                  />
+                  {/* <Switch */}
+                  {/*   id="fomo-switch" */}
+                  {/*   label="FOMO" */}
+                  {/*   checked={forceFomo} */}
+                  {/*   onChange={toggleForceFomo} */}
+                  {/* /> */}
+                </div>
+              }
+            />
           ) : (
-            <AuctionScreen auction={auction} />
+            <AuctionScreen
+              auction={auction}
+              nounImageElement={
+                <NounImage noun={auction?.noun} forceStats={forceStats} />
+              }
+              controlsElement={
+                <div
+                  style={{
+                    display: "grid",
+                    gridAutoColumns: "auto",
+                    gridAutoFlow: "column",
+                    gridGap: "1.5rem",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <Switch
+                    id="stats-switch"
+                    label="Stats"
+                    checked={forceStats}
+                    onChange={toggleForceStats}
+                  />
+                  {/* <Switch */}
+                  {/*   id="fomo-switch" */}
+                  {/*   label="FOMO" */}
+                  {/*   checked={forceFomo} */}
+                  {/*   onChange={toggleForceFomo} */}
+                  {/* /> */}
+                </div>
+              }
+            />
           )}
           <Banner bids={auction?.bids ?? []} />
           <div style={{ display: "flex", flexDirection: "column" }}>
@@ -756,9 +820,50 @@ export function AuctionPage() {
   );
 }
 
-const AuctionScreen = ({ auction }) => {
+const AuctionScreen = ({ auction, nounImageElement, controlsElement }) => {
   const noun = auction?.noun;
-  const parts = parseParts(auction?.noun.parts);
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+        alignItems: "stretch",
+        transition: "0.2s background ease-out",
+        background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
+        flex: "1 1 0",
+        minHeight: 0,
+        position: "relative",
+      }}
+    >
+      <div
+        style={{
+          paddingLeft: "2rem",
+          minHeight: 0,
+          display: "flex",
+          alignItems: "stretch",
+          justifyContent: "center",
+        }}
+      >
+        {nounImageElement}
+      </div>
+      <div />
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          bottom: 0,
+          padding: "1rem 1.5rem",
+        }}
+      >
+        {controlsElement}
+      </div>
+    </div>
+  );
+};
+
+const NounImage = ({ noun, forceStats }) => {
+  const parts = parseParts(noun?.parts);
 
   const backgroundName = {
     e1d7d5: "Warm",
@@ -767,58 +872,44 @@ const AuctionScreen = ({ auction }) => {
 
   return (
     <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "auto minmax(0,1fr)",
-        alignItems: "flex-end",
-        transition: "0.2s background ease-out",
-        background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
-        flex: "1 1 0",
-        minHeight: 0,
-      }}
+      style={{ position: "relative" }}
+      className="noun-container"
+      css={css({
+        "[data-noun-trait]": {
+          opacity: forceStats ? 1 : 0,
+          transition: "0.1s opacity ease-out",
+        },
+        ":hover [data-noun-trait]": {
+          opacity: 1,
+        },
+      })}
     >
-      <div
+      {/* eslint-disable-next-line */}
+      <img
+        src={noun?.imageUrl ?? "../assets/loading-skull-noun.gif"}
+        alt={`Noun ${noun?.id}`}
         style={{
-          paddingLeft: "2rem",
+          display: "block",
+          width: "100%",
           height: "100%",
-          minHeight: 0,
-          display: "flex",
-          alignItems: "flex-end",
+          objectFit: "contain",
+          objectPosition: "bottom",
         }}
-      >
-        <div
-          style={{ position: "relative", height: "100%" }}
-          className="noun-container"
-        >
-          {/* eslint-disable-next-line */}
-          <img
-            src={noun?.imageUrl ?? "../assets/loading-skull-noun.gif"}
-            alt={`Noun ${noun?.id}`}
-            style={{
-              display: "block",
-              width: "auto",
-              height: "100%",
-              // objectFit: "contain",
-              // objectPosition: "left bottom",
-            }}
-          />
-          {/* <FloatingLabel position={{}} /> */}
-          {Object.entries(parts)
-            .filter((e) => e[1] != null)
-            .map(([name, title]) => (
-              <FloatingNounTraitLabel key={name} name={name} title={title} />
-            ))}
-          {backgroundName != null && (
-            <FloatingNounTraitLabel name="background" title={backgroundName} />
-          )}
-        </div>
-      </div>
-      <div />
+      />
+      {Object.entries(parts)
+        .filter((e) => e[1] != null)
+        .map(([name, title]) => (
+          <FloatingNounTraitLabel key={name} name={name} title={title} />
+        ))}
+      {backgroundName != null && (
+        <FloatingNounTraitLabel name="background" title={backgroundName} />
+      )}
     </div>
   );
 };
 
 const FomoScreen = ({
+  // isActive,
   noun,
   block,
   vote,
@@ -829,76 +920,52 @@ const FomoScreen = ({
   settlementAttempted,
   voteCounts,
   isConnected,
-  reconnect,
+  nounImageElement,
+  controlsElement,
+  // reconnect,
 }) => {
-  const parts = parseParts(noun?.parts);
-
-  const backgroundName = {
-    e1d7d5: "Warm",
-    d5d7e1: "Cold",
-  }[noun?.background.toLowerCase()];
-
   React.useEffect(() => {
     preloadGifs();
   }, []);
 
-  const noGifUrl =
-    block && noGifs[Math.floor(random(Number(block.number)) * noGifs.length)];
-  const yesGifUrl =
-    block && yesGifs[Math.floor(random(Number(block.number)) * yesGifs.length)];
+  const [noGifUrl, yesGifUrl] = React.useMemo(() => {
+    if (block == null) return [];
+    return [
+      noGifs[Math.floor(random(Number(block.number)) * noGifs.length)],
+      yesGifs[Math.floor(random(Number(block.number)) * yesGifs.length)],
+    ];
+  }, [block]);
 
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "auto minmax(0,1fr)",
+        gridTemplateColumns: "repeat(2, minmax(0,1fr))",
         alignItems: "stretch",
         transition: "0.2s background ease-out",
         background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
         flex: "1 1 0",
         minHeight: 0,
+        position: "relative",
       }}
     >
       <div
         style={{
           paddingLeft: "2rem",
-          height: "100%",
-          minHeight: 0,
           display: "flex",
-          alignItems: "flex-end",
+          alignItems: "stretch",
+          justifyContent: "center",
+          minHeight: 0,
         }}
       >
-        <div
-          style={{ position: "relative", height: "100%" }}
-          className="noun-container"
-        >
-          {/* eslint-disable-next-line */}
-          <img
-            src={noun?.imageUrl ?? "../assets/loading-skull-noun.gif"}
-            alt={`Noun ${noun?.id}`}
-            style={{
-              display: "block",
-              width: "auto",
-              height: "100%",
-            }}
-          />
-          {Object.entries(parts)
-            .filter((e) => e[1] != null)
-            .map(([name, title]) => (
-              <FloatingNounTraitLabel key={name} name={name} title={title} />
-            ))}
-          {backgroundName != null && (
-            <FloatingNounTraitLabel name="background" title={backgroundName} />
-          )}
-        </div>
-        {/* <CountdownDisplay to={activeBlock.localTimestamp + 6} /> */}
+        {nounImageElement}
       </div>
       <div
         css={css({
           display: "flex",
           alignItems: "center",
           minHeight: 0,
-          overflow: "hidden",
+          position: "relative",
         })}
       >
         {!isConnected ? (
@@ -918,7 +985,8 @@ const FomoScreen = ({
             <div
               css={css({
                 textAlign: "center",
-                padding: "2rem",
+                padding: "2rem 4rem",
+                paddingLeft: "1rem",
                 width: "100%",
                 button: {
                   position: "relative",
@@ -997,7 +1065,7 @@ const FomoScreen = ({
                 css={css({
                   fontSize: "1.6rem",
                   fontWeight: "600",
-                  color: "rgb(0 0 0 / 60%)",
+                  color: "hsl(0 0% 40%)",
                   margin: "0 0 2.2rem",
                 })}
               >
@@ -1123,6 +1191,17 @@ const FomoScreen = ({
             </div>
           )
         )}
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          padding: "1rem 1.5rem",
+        }}
+      >
+        {controlsElement}
       </div>
     </div>
   );
@@ -1586,25 +1665,70 @@ const Spinner = ({
   </svg>
 );
 
-const GrayButton = ({ component: Component = "button", ...props }) => (
-  <Component
+// const GrayButton = ({ component: Component = "button", ...props }) => (
+//   <Component
+//     css={css({
+//       display: "block",
+//       border: "0.1rem solid black",
+//       borderRadius: "0.5rem",
+//       background: "hsl(0 0% 85%)",
+//       cursor: "pointer",
+//       padding: "0 1rem",
+//       minHeight: "4rem",
+//       fontSize: "1.5rem",
+//       ":hover": {
+//         background: "hsl(0 0% 80%)",
+//       },
+//       ":disabled": {
+//         cursor: "not-allowed",
+//         pointerEvents: "none",
+//       },
+//     })}
+//     {...props}
+//   />
+// );
+
+const Switch = ({ id, label, ...props }) => (
+  <label
+    htmlFor={id}
     css={css({
-      display: "block",
-      border: "0.1rem solid black",
-      borderRadius: "0.5rem",
-      background: "hsl(0 0% 85%)",
+      pointerEvents: "all",
+      fontSize: "1.3rem",
+      fontWeight: "600",
+      color: "hsl(0 0% 46%)",
       cursor: "pointer",
-      padding: "0 1rem",
-      minHeight: "4rem",
-      fontSize: "1.5rem",
-      ":hover": {
-        background: "hsl(0 0% 80%)",
-      },
-      ":disabled": {
-        cursor: "not-allowed",
-        pointerEvents: "none",
-      },
+      userSelect: "none",
+      transition: "8ms color ease-out",
+      ":hover": { color: "hsl(0 0% 25%)" },
     })}
-    {...props}
-  />
+  >
+    <input
+      id={id}
+      type="checkbox"
+      {...props}
+      css={css({
+        WebkitAppearance: "none",
+        padding: 0,
+        paddingRight: "0.3rem",
+        cursor: "pointer",
+        color: "inherit",
+        outline: "none",
+        transition: "0.1s color ease-out",
+        ":after": {
+          content: '""',
+          display: "inline-flex",
+          background: "currentColor",
+          width: "1rem",
+          height: "1rem",
+          border: "0.2rem solid white",
+          borderRightWidth: "1.2rem",
+        },
+        ":checked:after": {
+          borderRightWidth: "0.2rem",
+          borderLeftWidth: "1.2rem",
+        },
+      })}
+    />
+    {label}
+  </label>
 );

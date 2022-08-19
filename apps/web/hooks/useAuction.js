@@ -290,12 +290,11 @@ export const useAuction = () => {
     };
   }, [rawAuction, seed, bids, reservePrice, minBidIncrementPercentage]);
 
-  // const router = useRouter();
+  const router = useRouter();
 
   const fomo = useFomo({
     auction,
-    // enabled: Boolean(router?.query.fomo),
-    enabled: auctionEnded && !auction?.settled,
+    enabled: Boolean(router?.query.fomo) || (auctionEnded && !auction?.settled),
   });
   const bidding = useBidding(auction?.noun.id);
   const settling = useSettling({ enabled: auctionEnded });
