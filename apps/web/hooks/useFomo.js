@@ -68,6 +68,8 @@ const useNewHeadsSocket = (listener) => {
 
 let voteSocket = null;
 
+let votingActiveTimeoutHandle;
+
 const useVoting = ({ auction }) => {
   const provider = useProvider();
 
@@ -92,10 +94,15 @@ const useVoting = ({ auction }) => {
       // Ignore chain reorgs
       if (Number(block.number) < Number(latestBlock.number)) return;
 
+      if (votingActiveTimeoutHandle != null) {
+        clearTimeout(votingActiveTimeoutHandle);
+        votingActiveTimeoutHandle = null;
+      }
+
       reset();
       setLatestBlock({ ...block, localTimestamp: new Date().getTime() });
 
-      window.setTimeout(() => {
+      votingActiveTimeoutHandle = window.setTimeout(() => {
         setVotingActive(false);
       }, 6000);
     }
