@@ -3,6 +3,7 @@ import { useProvider, useNetwork } from "wagmi";
 import { getNounData, getNounSeedFromBlockHash } from "@nouns/assets";
 import { ALCHEMY_API_KEY } from "../utils/network";
 import { getImageUrlFromSeed as getNounImageUrl } from "../utils/nouns";
+import { useLayoutEffect } from "../utils/react";
 
 const useNewHeadsSocket = (listener) => {
   const network = useNetwork();
@@ -12,7 +13,7 @@ const useNewHeadsSocket = (listener) => {
 
   const [isConnected, setConnected] = React.useState(false);
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     listenerRef.current = listener;
   });
 

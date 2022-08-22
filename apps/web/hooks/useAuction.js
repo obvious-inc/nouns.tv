@@ -19,6 +19,14 @@ import useFomo from "../hooks/useFomo";
 import { chains } from "../utils/network";
 import { getImageUrlFromSeed as getNounImageUrl } from "../utils/nouns";
 
+const useDidMount = () => {
+  const [didMount, setDidMount] = React.useState(false);
+  React.useEffect(() => {
+    setDidMount(true);
+  }, []);
+  return didMount;
+};
+
 const useContractAddresses = () => {
   const { chain } = useNetwork();
   return getContractAddressesForChainOrThrow(chain?.id ?? chains[1]?.id ?? 1);
@@ -207,6 +215,7 @@ const useAuctionBids = () => {
 };
 
 export const useAuction = () => {
+  const didMount = useDidMount();
   const bids = useAuctionBids();
 
   const [auctionEnded, setAuctionEnded] = React.useState(false);
@@ -318,7 +327,7 @@ export const useAuction = () => {
   }, [auction?.endTime]);
 
   return {
-    auction,
+    auction: didMount ? auction : null,
     auctionEnded,
     fomo,
     bidding,
