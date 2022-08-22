@@ -10,6 +10,7 @@ import { useProfile } from "../hooks/useProfile";
 import { useAuction } from "../hooks/useAuction";
 import { shortenAddress } from "../utils/address";
 import { CountdownDisplay } from "./CountdownDisplay";
+import Dialog from "./Dialog";
 import { Banner } from "./Banner";
 import { formatEther } from "ethers/lib/utils";
 
@@ -459,41 +460,15 @@ const parseParts = (parts = []) => {
 
 export function AuctionPage() {
   const router = useRouter();
-  const {
-    auction,
-    auctionEnded,
-    bidding: {
-      bid,
-      amount,
-      setAmount,
-      isLoading: hasPendingBid,
-      isLoadingTransactionResponse: hasPendingBidTransactionCall,
-      error: biddingError,
-    },
-    settling: {
-      settle: settleAuction,
-      isLoading: hasPendingSettleAttempt,
-      isLoadingTransactionResponse: hasPendingSettleTransactionCall,
-      error: settlingError,
-    },
-    fomo,
-  } = useAuction();
+  const { auction, auctionEnded, bidding, settling, fomo } = useAuction();
 
-  const [forceFomo, setForceFomo] = React.useState(false);
-  const toggleForceFomo = () => setForceFomo((s) => !s);
+  // const [forceFomo, setForceFomo] = React.useState(false);
+  // const toggleForceFomo = () => setForceFomo((s) => !s);
   const [forceStats, setForceStats] = React.useState(false);
   const toggleForceStats = () => setForceStats((s) => !s);
 
   const iFrameRef = React.useRef(null);
   useEmbeddedChatMessager(iFrameRef);
-
-  const auctionMode = React.useMemo(() => {
-    if (auction == null) return "loading";
-    if (auctionEnded) return "awaiting-settle";
-    return "bidding";
-  }, [auction, auctionEnded]);
-
-  const biddingEnabled = bid != null && !hasPendingBid;
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -527,8 +502,13 @@ export function AuctionPage() {
             },
           })}
         >
-          <AuctionScreenHeader auction={auction} auctionEnded={auctionEnded} />
-          {forceFomo || fomo.isActive ? (
+          <AuctionScreenHeader
+            auction={auction}
+            bidding={bidding}
+            settling={settling}
+            auctionEnded={auctionEnded}
+          />
+          {fomo.isActive ? (
             <FomoScreen
               {...fomo}
               nounImageElement={
@@ -597,167 +577,12 @@ export function AuctionPage() {
               css={css({
                 flex: 1,
                 minHeight: 0,
-                padding: "1.5rem",
                 "@media (min-width: 1000px)": {
                   minHeight: "10rem",
-                  padding: "2rem",
                 },
               })}
             >
-              {auctionMode === "loading" ? (
-                <div />
-              ) : auctionMode === "awaiting-settle" ? (
-                <>
-                  <Button
-                    type="button"
-                    disabled={hasPendingSettleAttempt || settleAuction == null}
-                    isLoading={hasPendingSettleAttempt}
-                    onClick={() => {
-                      settleAuction();
-                    }}
-                    hint={
-                      hasPendingSettleTransactionCall &&
-                      "Confirm with your wallet"
-                    }
-                  >
-                    {hasPendingSettleAttempt
-                      ? "Settling auction..."
-                      : "Settle auction"}
-                  </Button>
-                  {settlingError != null && (
-                    <div
-                      css={css({
-                        marginTop: "1.5rem",
-                        color: TEXT_ERROR,
-                        ":first-letter": { textTransform: "uppercase" },
-                      })}
-                    >
-                      {settlingError.reason ?? settlingError.message}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div>
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      bid();
-                    }}
-                  >
-                    <label
-                      htmlFor="bid-amount"
-                      style={{
-                        display: "block",
-                        color: "white",
-                        fontSize: "1.4rem",
-                        textTransform: "uppercase",
-                        fontWeight: "700",
-                        margin: "0 0 0.8rem",
-                      }}
-                    >
-                      Tv Shop{" "}
-                      <span style={{ color: "rgb(255 255 255 / 54%" }}>
-                        (Bid on Noun)
-                      </span>
-                    </label>
-                    <div style={{ display: "flex" }}>
-                      <div
-                        css={css({
-                          height: "4rem",
-                          background: "white",
-                          borderRadius: "0.5rem",
-                          fontSize: "1.5rem",
-                          fontWeight: "600",
-                          padding: "0 1rem",
-                          width: "20rem",
-                          maxWidth: "100%",
-                          display: "flex",
-                          alignItems: "center",
-                        })}
-                        style={{ opacity: !hasPendingBid ? 1 : "0.8" }}
-                      >
-                        <div
-                          style={{
-                            padding: "0 0.5rem",
-                            color:
-                              hasPendingBid || amount.trim() === ""
-                                ? "rgb(0 0 0 / 54%)"
-                                : "inherit",
-                          }}
-                        >
-                          {"Ξ"}
-                        </div>
-                        <input
-                          id="bid-amount"
-                          name="amount"
-                          value={amount}
-                          onChange={(e) => {
-                            setAmount(e.target.value);
-                          }}
-                          disabled={hasPendingBid}
-                          placeholder={
-                            auction.amount == null || auction.amount.isZero() // First bid
-                              ? parseFloat(formatEther(auction.reservePrice)) >
-                                0.0001 // If the reserve price is big enough to bother
-                                ? `${formatEther(
-                                    auction.reservePrice
-                                  )} or higher`
-                                : "Snatch the first bid!"
-                              : `${formatEther(
-                                  auction.amount?.add(
-                                    auction.amount
-                                      ?.div(100)
-                                      .mul(
-                                        auction.minBidIncrementPercentage ?? 2
-                                      )
-                                  )
-                                )} or higher`
-                          }
-                          autoComplete="off"
-                          css={css({
-                            flex: 1,
-                            background: "none",
-                            border: 0,
-                            fontSize: "inherit",
-                            fontWeight: "inherit",
-                            fontFamily: "inherit",
-                            padding: "0",
-                            outline: "none",
-                            "::placeholder": { color: "rgb(0 0 0 / 54%)" },
-                            ":disabled": {
-                              pointerEvents: "none",
-                            },
-                          })}
-                        />
-                      </div>
-                      <Button
-                        type="submit"
-                        disabled={!biddingEnabled}
-                        isLoading={hasPendingBid}
-                        hint={
-                          hasPendingBidTransactionCall && "Check your wallet"
-                        }
-                        style={{
-                          marginLeft: "1.5rem",
-                        }}
-                      >
-                        {hasPendingBid ? "Placing bid..." : "Place bid"}
-                      </Button>
-                    </div>
-                  </form>
-                  {biddingError != null && (
-                    <div
-                      css={css({
-                        marginTop: "1.5rem",
-                        color: TEXT_ERROR,
-                        ":first-letter": { textTransform: "uppercase" },
-                      })}
-                    >
-                      {biddingError.reason ?? biddingError.message}
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* TODO */}
             </div>
             <div
               style={{
@@ -1258,12 +1083,12 @@ const ScreenHeader = ({ children }) => (
   >
     <div
       style={{
-        height: "6em",
+        minHeight: "6em",
         background: "white",
         color: "black",
         display: "flex",
         alignItems: "center",
-        padding: "0 2em",
+        padding: "1em 2em",
         whiteSpace: "nowrap",
       }}
     >
@@ -1272,13 +1097,40 @@ const ScreenHeader = ({ children }) => (
   </div>
 );
 
-const AuctionScreenHeader = ({ auction, auctionEnded }) => {
+const AuctionScreenHeader = ({ auction, auctionEnded, bidding, settling }) => {
   const { ensName: ownerENSName } = useProfile(auction?.noun.ownerAddress);
   const { ensName: bidderENSName } = useProfile(auction?.bidderAddress);
   const bidderShort =
     auction?.bidderAddress == null
       ? null
       : bidderENSName ?? shortenAddress(auction.bidderAddress);
+
+  const [displayBidDialog, setDisplayBidDialog] = React.useState(false);
+  const toggleDisplayBidDialog = () => setDisplayBidDialog((s) => !s);
+
+  const auctionMode = React.useMemo(() => {
+    if (auction == null) return "loading";
+    if (auctionEnded) return "awaiting-settle";
+    return "bidding";
+  }, [auction, auctionEnded]);
+
+  const {
+    bid,
+    amount,
+    setAmount,
+    isLoading: hasPendingBid,
+    isLoadingTransactionResponse: hasPendingBidTransactionCall,
+    error: biddingError,
+  } = bidding;
+
+  const {
+    settle: settleAuction,
+    isLoading: hasPendingSettleAttempt,
+    isLoadingTransactionResponse: hasPendingSettleTransactionCall,
+    error: settlingError,
+  } = settling;
+
+  const biddingEnabled = bid != null && !hasPendingBid;
 
   return (
     <ScreenHeader>
@@ -1361,20 +1213,178 @@ const AuctionScreenHeader = ({ auction, auctionEnded }) => {
         </div>
       )}
 
-      <div
-        style={{
-          background: "#EB4C2B",
-          borderRadius: "0.5em",
-          height: "3.8em",
-          padding: "0 1.3em",
-          display: "flex",
-          alignItems: "center",
-          color: "white",
-          marginLeft: "1.5em",
-        }}
+      {auctionMode === "loading" ? null : auctionMode === "awaiting-settle" ? (
+        <>
+          <GrayButton
+            type="button"
+            disabled={hasPendingSettleAttempt || settleAuction == null}
+            isLoading={hasPendingSettleAttempt}
+            onClick={() => {
+              settleAuction();
+            }}
+            hint={hasPendingSettleTransactionCall && "Confirm with your wallet"}
+            error={settlingError?.reason ?? settlingError?.message}
+            style={{ marginLeft: "1.5rem" }}
+          >
+            {hasPendingSettleAttempt ? "Settling auction..." : "Settle auction"}
+          </GrayButton>
+          {/* {settlingError != null && ( */}
+          {/*   <div */}
+          {/*     css={css({ */}
+          {/*       marginTop: "1.5rem", */}
+          {/*       color: TEXT_ERROR, */}
+          {/*       ":first-letter": { textTransform: "uppercase" }, */}
+          {/*     })} */}
+          {/*   > */}
+          {/*     {settlingError.reason ?? settlingError.message} */}
+          {/*   </div> */}
+          {/* )} */}
+        </>
+      ) : (
+        <GrayButton
+          onClick={() => {
+            toggleDisplayBidDialog();
+          }}
+          style={{ marginLeft: "1rem" }}
+        >
+          Place a bid
+        </GrayButton>
+      )}
+
+      <Dialog
+        isOpen={displayBidDialog}
+        onRequestClose={toggleDisplayBidDialog}
+        style={{ padding: "2.5rem 2rem 3.5rem", width: "35rem" }}
       >
-        <Label style={{ fontSize: "2.2em" }}>LIVE</Label>
-      </div>
+        {({ titleProps }) => (
+          <>
+            <header style={{ textAlign: "center" }}>
+              <h3
+                {...titleProps}
+                style={{ margin: 0, fontSize: "3rem", fontWeight: "900" }}
+              >
+                TV SHOP
+              </h3>
+              <div
+                style={{
+                  fontSize: "1.4rem",
+                  fontWeight: "700",
+                  margin: "0 0 2rem",
+                }}
+              >
+                Place a bid on noun {auction?.nounId}
+              </div>
+            </header>
+            <main>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  bid();
+                }}
+                style={{
+                  width: "25rem",
+                  maxWidth: "100%",
+                  margin: "0 auto",
+                }}
+              >
+                <div
+                  css={css({
+                    height: "5rem",
+                    width: "100%",
+                    background: "white",
+                    border: "0.1rem solid black",
+                    borderRadius: "1rem",
+                    fontSize: "1.5rem",
+                    fontWeight: "600",
+                    padding: "0 1rem",
+                    display: "flex",
+                    alignItems: "center",
+                    margin: "0 0 1rem",
+                  })}
+                  style={{
+                    borderColor: hasPendingBid ? "hsl(0 0% 70%)" : undefined,
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "0 0.5rem",
+                      color:
+                        hasPendingBid || amount.trim() === ""
+                          ? "rgb(0 0 0 / 54%)"
+                          : "inherit",
+                    }}
+                  >
+                    {"Ξ"}
+                  </div>
+                  <input
+                    id="bid-amount"
+                    name="amount"
+                    value={amount}
+                    onChange={(e) => {
+                      setAmount(e.target.value);
+                    }}
+                    disabled={hasPendingBid}
+                    placeholder={
+                      auction.amount == null || auction.amount.isZero() // First bid
+                        ? parseFloat(formatEther(auction.reservePrice)) > 0.0001 // If the reserve price is big enough to bother
+                          ? `${formatEther(auction.reservePrice)} or higher`
+                          : "Snatch the first bid!"
+                        : `${formatEther(
+                            auction.amount?.add(
+                              auction.amount
+                                ?.div(100)
+                                .mul(auction.minBidIncrementPercentage ?? 2)
+                            )
+                          )} or higher`
+                    }
+                    autoComplete="off"
+                    css={css({
+                      flex: 1,
+                      background: "none",
+                      border: 0,
+                      fontSize: "inherit",
+                      fontWeight: "inherit",
+                      fontFamily: "inherit",
+                      padding: "0",
+                      outline: "none",
+                      "::placeholder": { color: "rgb(0 0 0 / 54%)" },
+                      ":disabled": {
+                        pointerEvents: "none",
+                      },
+                    })}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={!biddingEnabled}
+                  isLoading={hasPendingBid}
+                  hint={hasPendingBidTransactionCall && "Check your wallet"}
+                  style={{
+                    borderRadius: "1rem",
+                    width: "100%",
+                    minHeight: "5rem",
+                  }}
+                >
+                  {hasPendingBid ? "Placing bid..." : "Place bid"}
+                </Button>
+                {biddingError != null && (
+                  <div
+                    css={css({
+                      marginTop: "1rem",
+                      color: TEXT_ERROR,
+                      fontSize: "1.4rem",
+                      fontWeight: "500",
+                      ":first-letter": { textTransform: "uppercase" },
+                    })}
+                  >
+                    {biddingError.reason ?? biddingError.message}
+                  </div>
+                )}
+              </form>
+            </main>
+          </>
+        )}
+      </Dialog>
     </ScreenHeader>
   );
 };
@@ -1581,6 +1591,7 @@ const Button = ({
     css={css({
       display: "inline-flex",
       alignItems: "center",
+      justifyContent: "center",
       height: "4rem",
       background: "white",
       border: 0,
@@ -1600,7 +1611,8 @@ const Button = ({
         filter: "brightness(1.03) saturate(1.2)",
       },
       ":disabled": {
-        opacity: "0.6",
+        opacity: "0.8",
+        color: "hsl(0 0% 100% / 80%)",
         pointerEvents: "none",
       },
     })}
@@ -1665,28 +1677,58 @@ const Spinner = ({
   </svg>
 );
 
-// const GrayButton = ({ component: Component = "button", ...props }) => (
-//   <Component
-//     css={css({
-//       display: "block",
-//       border: "0.1rem solid black",
-//       borderRadius: "0.5rem",
-//       background: "hsl(0 0% 85%)",
-//       cursor: "pointer",
-//       padding: "0 1rem",
-//       minHeight: "4rem",
-//       fontSize: "1.5rem",
-//       ":hover": {
-//         background: "hsl(0 0% 80%)",
-//       },
-//       ":disabled": {
-//         cursor: "not-allowed",
-//         pointerEvents: "none",
-//       },
-//     })}
-//     {...props}
-//   />
-// );
+const GrayButton = ({
+  component: Component = "button",
+  isLoading,
+  error,
+  hint,
+  children,
+  ...props
+}) => (
+  <Component
+    css={css({
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      border: "0.1rem solid black",
+      borderRadius: "0.5rem",
+      background: "hsl(0 0% 85%)",
+      cursor: "pointer",
+      padding: "0 1rem",
+      minHeight: "4rem",
+      fontSize: "1.5rem",
+      fontFamily: "inherit",
+      fontWeight: "500",
+      textAlign: "left",
+      ":hover": {
+        background: "hsl(0 0% 80%)",
+      },
+      ":disabled": {
+        cursor: "not-allowed",
+        pointerEvents: "none",
+        borderColor: "hsl(0 0% 65%)",
+        color: "hsl(0 0% 46%)",
+      },
+    })}
+    {...props}
+  >
+    <div>
+      {children}
+      {(hint != null || error != null) && (
+        <div
+          css={css({
+            fontSize: "1rem",
+            fontWeight: "500",
+            color: error != null ? "red" : undefined,
+          })}
+        >
+          {error ?? hint}
+        </div>
+      )}
+    </div>
+    {isLoading && <Spinner size="1.5rem" style={{ marginLeft: "1rem" }} />}
+  </Component>
+);
 
 const Switch = ({ id, label, ...props }) => (
   <label
