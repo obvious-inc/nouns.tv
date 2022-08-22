@@ -500,31 +500,215 @@ export function AuctionPage() {
 
   const biddingEnabled = bid != null && !hasPendingBid;
 
-  const auctionActionButtonElement = (
-    <>
-      {auctionMode === "loading" ? null : auctionMode === "awaiting-settle" ? (
-        <GrayButton
-          type="button"
-          disabled={hasPendingSettleAttempt || settleAuction == null}
-          isLoading={hasPendingSettleAttempt}
-          onClick={() => {
-            settleAuction();
-          }}
-          hint={hasPendingSettleTransactionCall && "Confirm with your wallet"}
-          error={settlingError?.reason ?? settlingError?.message}
-        >
-          {hasPendingSettleAttempt ? "Settling auction..." : "Settle auction"}
-        </GrayButton>
-      ) : (
-        <GrayButton
-          onClick={() => {
-            toggleDisplayBidDialog();
-          }}
-        >
-          Place a bid
-        </GrayButton>
-      )}
+  const auctionActionButtonElement =
+    auctionMode === "loading" ? null : auctionMode === "awaiting-settle" ? (
+      <GrayButton
+        type="button"
+        disabled={hasPendingSettleAttempt || settleAuction == null}
+        isLoading={hasPendingSettleAttempt}
+        onClick={() => {
+          settleAuction();
+        }}
+        hint={hasPendingSettleTransactionCall && "Confirm with your wallet"}
+        error={settlingError?.reason ?? settlingError?.message}
+      >
+        {hasPendingSettleAttempt ? "Settling auction..." : "Settle auction"}
+      </GrayButton>
+    ) : (
+      <GrayButton
+        onClick={() => {
+          toggleDisplayBidDialog();
+        }}
+      >
+        Place a bid
+      </GrayButton>
+    );
 
+  return (
+    <>
+      <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+        <Header />
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "stretch",
+            background: "rgb(25 25 25)",
+          }}
+          css={css({
+            [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
+              flexDirection: "column",
+            },
+          })}
+        >
+          <div
+            style={{
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              background: "rgb(38 38 38)",
+            }}
+            css={css({
+              flex: 2,
+              minHeight: 0,
+              [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                flex: 1,
+                minHeight: "40hv",
+              },
+            })}
+          >
+            <AuctionScreenHeader
+              auction={auction}
+              bidding={bidding}
+              settling={settling}
+              auctionEnded={auctionEnded}
+              auctionActionButtonElement={auctionActionButtonElement}
+            />
+            {fomo.isActive ? (
+              <FomoScreen
+                {...fomo}
+                nounImageElement={
+                  <NounImage noun={fomo.noun} forceStats={forceStats} />
+                }
+                controlsElement={
+                  <div
+                    style={{
+                      display: "grid",
+                      gridAutoColumns: "auto",
+                      gridAutoFlow: "column",
+                      gridGap: "1.5rem",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <Switch
+                      id="stats-switch"
+                      label="Stats"
+                      checked={forceStats}
+                      onChange={toggleForceStats}
+                    />
+                    {/* <Switch */}
+                    {/*   id="fomo-switch" */}
+                    {/*   label="FOMO" */}
+                    {/*   checked={forceFomo} */}
+                    {/*   onChange={toggleForceFomo} */}
+                    {/* /> */}
+                  </div>
+                }
+                auctionActionButtonElement={auctionActionButtonElement}
+              />
+            ) : (
+              <AuctionScreen
+                auction={auction}
+                nounImageElement={
+                  <NounImage noun={auction?.noun} forceStats={forceStats} />
+                }
+                auctionActionButtonElement={auctionActionButtonElement}
+                controlsElement={
+                  <div
+                    style={{
+                      display: "grid",
+                      gridAutoColumns: "auto",
+                      gridAutoFlow: "column",
+                      gridGap: "1.5rem",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <Switch
+                      id="stats-switch"
+                      label="Stats"
+                      checked={forceStats}
+                      onChange={toggleForceStats}
+                    />
+                    {/* <Switch */}
+                    {/*   id="fomo-switch" */}
+                    {/*   label="FOMO" */}
+                    {/*   checked={forceFomo} */}
+                    {/*   onChange={toggleForceFomo} */}
+                    {/* /> */}
+                  </div>
+                }
+              />
+            )}
+            <div
+              css={css({
+                display: fomo.isActive ? "none" : "block",
+                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                  display: "block",
+                },
+              })}
+            >
+              <Banner bids={auction?.bids ?? []} />
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <div
+                  css={css({
+                    flex: 1,
+                    minHeight: 0,
+                    [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                      minHeight: "10rem",
+                    },
+                  })}
+                >
+                  {/* TODO */}
+                </div>
+                <div
+                  style={{
+                    background: "black",
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "stretch",
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "0.7rem 1rem",
+                      fontWeight: "600",
+                      fontSize: "1.2rem",
+                      textTransform: "uppercase",
+                      color: "#fff006",
+                    }}
+                  >
+                    TV controls under construction
+                  </div>
+                  <div
+                    style={{
+                      position: "relative",
+                      zIndex: 1,
+                      alignSelf: "flex-end",
+                      height: 0,
+                      overflow: "visible",
+                      padding: "0 2.3rem 0 0.5rem",
+                      display: "flex",
+                      alignItems: "flex-end",
+                    }}
+                  >
+                    <ConstructionNoun style={{ width: "5rem" }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
+            {chatUrl != null && (
+              <iframe
+                ref={iFrameRef}
+                src={[
+                  chatUrl.href,
+                  router.query.compact ? "compact=1" : undefined,
+                ]
+                  .filter(Boolean)
+                  .join("?")}
+                allow="clipboard-read; clipboard-write"
+                style={{
+                  display: "block",
+                  width: "100%",
+                  height: "100%",
+                  border: 0,
+                }}
+              />
+            )}
+          </div>
+        </div>
+      </div>
       <Dialog
         isOpen={displayBidDialog}
         onRequestClose={toggleDisplayBidDialog}
@@ -553,7 +737,9 @@ export function AuctionPage() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  bid();
+                  bid().then(() => {
+                    setDisplayBidDialog(false);
+                  });
                 }}
                 style={{
                   width: "25rem",
@@ -660,192 +846,6 @@ export function AuctionPage() {
         )}
       </Dialog>
     </>
-  );
-
-  return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <Header />
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          alignItems: "stretch",
-          background: "rgb(25 25 25)",
-        }}
-        css={css({
-          [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            flexDirection: "column",
-          },
-        })}
-      >
-        <div
-          style={{
-            minWidth: 0,
-            display: "flex",
-            flexDirection: "column",
-            background: "rgb(38 38 38)",
-          }}
-          css={css({
-            flex: 2,
-            minHeight: 0,
-            [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
-              flex: 1,
-              minHeight: "40hv",
-            },
-          })}
-        >
-          <AuctionScreenHeader
-            auction={auction}
-            bidding={bidding}
-            settling={settling}
-            auctionEnded={auctionEnded}
-            auctionActionButtonElement={auctionActionButtonElement}
-          />
-          {fomo.isActive ? (
-            <FomoScreen
-              {...fomo}
-              nounImageElement={
-                <NounImage noun={fomo.noun} forceStats={forceStats} />
-              }
-              controlsElement={
-                <div
-                  style={{
-                    display: "grid",
-                    gridAutoColumns: "auto",
-                    gridAutoFlow: "column",
-                    gridGap: "1.5rem",
-                    pointerEvents: "none",
-                  }}
-                >
-                  <Switch
-                    id="stats-switch"
-                    label="Stats"
-                    checked={forceStats}
-                    onChange={toggleForceStats}
-                  />
-                  {/* <Switch */}
-                  {/*   id="fomo-switch" */}
-                  {/*   label="FOMO" */}
-                  {/*   checked={forceFomo} */}
-                  {/*   onChange={toggleForceFomo} */}
-                  {/* /> */}
-                </div>
-              }
-              auctionActionButtonElement={auctionActionButtonElement}
-            />
-          ) : (
-            <AuctionScreen
-              auction={auction}
-              nounImageElement={
-                <NounImage noun={auction?.noun} forceStats={forceStats} />
-              }
-              auctionActionButtonElement={auctionActionButtonElement}
-              controlsElement={
-                <div
-                  style={{
-                    display: "grid",
-                    gridAutoColumns: "auto",
-                    gridAutoFlow: "column",
-                    gridGap: "1.5rem",
-                    pointerEvents: "none",
-                  }}
-                >
-                  <Switch
-                    id="stats-switch"
-                    label="Stats"
-                    checked={forceStats}
-                    onChange={toggleForceStats}
-                  />
-                  {/* <Switch */}
-                  {/*   id="fomo-switch" */}
-                  {/*   label="FOMO" */}
-                  {/*   checked={forceFomo} */}
-                  {/*   onChange={toggleForceFomo} */}
-                  {/* /> */}
-                </div>
-              }
-            />
-          )}
-          <div
-            css={css({
-              display: fomo.isActive ? "none" : "block",
-              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                display: "block",
-              },
-            })}
-          >
-            <Banner bids={auction?.bids ?? []} />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div
-                css={css({
-                  flex: 1,
-                  minHeight: 0,
-                  [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                    minHeight: "10rem",
-                  },
-                })}
-              >
-                {/* TODO */}
-              </div>
-              <div
-                style={{
-                  background: "black",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "stretch",
-                }}
-              >
-                <div
-                  style={{
-                    padding: "0.7rem 1rem",
-                    fontWeight: "600",
-                    fontSize: "1.2rem",
-                    textTransform: "uppercase",
-                    color: "#fff006",
-                  }}
-                >
-                  TV controls under construction
-                </div>
-                <div
-                  style={{
-                    position: "relative",
-                    zIndex: 1,
-                    alignSelf: "flex-end",
-                    height: 0,
-                    overflow: "visible",
-                    padding: "0 2.3rem 0 0.5rem",
-                    display: "flex",
-                    alignItems: "flex-end",
-                  }}
-                >
-                  <ConstructionNoun style={{ width: "5rem" }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
-          {chatUrl != null && (
-            <iframe
-              ref={iFrameRef}
-              src={[
-                chatUrl.href,
-                router.query.compact ? "compact=1" : undefined,
-              ]
-                .filter(Boolean)
-                .join("?")}
-              allow="clipboard-read; clipboard-write"
-              style={{
-                display: "block",
-                width: "100%",
-                height: "100%",
-                border: 0,
-              }}
-            />
-          )}
-        </div>
-      </div>
-    </div>
   );
 }
 

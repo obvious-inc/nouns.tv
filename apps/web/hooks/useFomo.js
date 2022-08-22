@@ -71,10 +71,11 @@ let voteSocket = null;
 
 let votingTimerTimeoutHandle;
 
-const useVoting = ({ auction }) => {
+const useVoting = ({ auction, enabled }) => {
   const provider = useProvider();
 
   const [latestBlock, setLatestBlock] = React.useState(null);
+  const [recentBlockHashes, setRecentBlockHashes] = React.useState([]);
   const [votesByBlockHash, setVotesByBlockHash] = React.useState({});
   const [isVotingActive, setVotingActive] = React.useState(false);
   const [score, setScore] = React.useState(0);
@@ -94,8 +95,15 @@ const useVoting = ({ auction }) => {
       // Ignore chain reorgs
       if (Number(block.number) < Number(latestBlock.number)) return;
 
-      reset();
       setLatestBlock({ ...block, localTimestamp: new Date().getTime() });
+
+      if (!enabled) return;
+
+      reset();
+      setRecentBlockHashes((hashes) =>
+        // No need to keep more than 3
+        [...hashes, block.hash].slice(-3)
+      );
       setVoteCountsByBlockHash((cs) => ({
         ...cs,
         [block.hash]: { like: 0, dislike: 0 },
@@ -196,14 +204,16 @@ const useVoting = ({ auction }) => {
   const dislike = () => vote({ type: "dislike" });
   const shrug = () => vote({ type: "shrug" });
 
-  const markInactive = () => {
+  const isInactive =
+    recentBlockHashes.length === 3 &&
+    recentBlockHashes.every((h) => votesByBlockHash[h] == null);
+
+  React.useEffect(() => {
+    if (!isInactive) return;
     voteSocket.send(
-      JSON.stringify({
-        action: "changestatus",
-        status: "inactive",
-      })
+      JSON.stringify({ action: "changestatus", status: "inactive" })
     );
-  };
+  }, [isInactive]);
 
   return {
     isConnected: isConnectedToBlockSocket && isConnectedToVotingSocket,
@@ -215,7 +225,6 @@ const useVoting = ({ auction }) => {
     like,
     dislike,
     shrug,
-    markInactive,
     score,
     settlementAttempted,
     block: latestBlock,
@@ -230,7 +239,7 @@ const useVoting = ({ auction }) => {
 };
 
 const useFomo = ({ auction, enabled }) => {
-  const { block, ...voting } = useVoting({ auction });
+  const { block, ...voting } = useVoting({ auction, enabled });
 
   const noun = React.useMemo(() => {
     if (!enabled || auction?.nounId == null || block?.hash == null) return null;
