@@ -1,3 +1,4 @@
+import formatDate from "date-fns/format";
 import { css, keyframes } from "@emotion/react";
 import React from "react";
 import { useAccount, useProvider, useNetwork, useSignMessage } from "wagmi";
@@ -1373,6 +1374,9 @@ const AuctionScreenHeader = ({
   auctionEnded,
   auctionActionButtonElement,
 }) => {
+  const [isTimer, setIsTimer] = React.useState(true);
+  const toggleTimer = () => setIsTimer((s) => !s);
+
   const { ensName: ownerENSName } = useProfile(auction?.noun.ownerAddress);
   const { ensName: bidderENSName } = useProfile(auction?.bidderAddress);
   const bidderShort =
@@ -1454,10 +1458,28 @@ const AuctionScreenHeader = ({
             )}
           </div>
           {!auctionEnded && (
-            <div>
-              <Label>Auction ends in</Label>
+            <button
+              onClick={toggleTimer}
+              style={{
+                background: "none",
+                padding: 0,
+                border: 0,
+                textAlign: "left",
+                color: "inherit",
+                cursor: "pointer",
+              }}
+            >
+              <Label>{isTimer ? "Auction ends in" : "Auction ends at"}</Label>
               <Heading2>
-                <CountdownDisplay to={auction.endTime} />
+                {isTimer ? (
+                  <CountdownDisplay to={auction.endTime} />
+                ) : (
+                  new Intl.DateTimeFormat(undefined, {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  }).format(new Date(auction.endTime * 1000))
+                )}
                 <div
                   aria-hidden="true"
                   style={{
@@ -1470,7 +1492,7 @@ const AuctionScreenHeader = ({
                   99h 99m 99s
                 </div>
               </Heading2>
-            </div>
+            </button>
           )}
         </div>
       )}
