@@ -542,18 +542,15 @@ export function AuctionPage() {
           })}
         >
           <div
-            style={{
+            css={css({
               minWidth: 0,
               display: "flex",
               flexDirection: "column",
               background: "rgb(38 38 38)",
-            }}
-            css={css({
-              flex: 2,
-              minHeight: 0,
-              [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                flex: 1,
-                minHeight: "40hv",
+              maxHeight: "60vh",
+              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                maxHeight: "none",
+                flex: "1 1 0",
               },
             })}
           >
@@ -687,7 +684,17 @@ export function AuctionPage() {
               </div>
             </div>
           </div>
-          <div style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
+          <div
+            css={css({
+              flex: "1 1 0",
+              maxWidth: "100%",
+              minHeight: 0,
+              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                width: "44rem",
+                flex: "none",
+              },
+            })}
+          >
             {chatUrl != null && (
               <iframe
                 ref={iFrameRef}
@@ -864,10 +871,10 @@ const AuctionScreen = ({
         flexDirection: "column",
         transition: "0.2s background ease-out",
         background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
-        flex: "1 1 0",
         minHeight: 0,
         position: "relative",
         [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+          flex: "1 1 0",
           display: "grid",
           gridTemplateColumns: "repeat(2, minmax(0,1fr))",
           alignItems: "stretch",
@@ -998,10 +1005,10 @@ const FomoScreen = ({
         flexDirection: "column-reverse",
         transition: "0.2s background ease-out",
         background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
-        flex: "1 1 0",
         minHeight: 0,
         position: "relative",
         [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+          flex: "1 1 0",
           display: "grid",
           gridTemplateColumns: "repeat(2, minmax(0,1fr))",
           alignItems: "stretch",
@@ -1010,12 +1017,13 @@ const FomoScreen = ({
     >
       <div
         css={css({
-          flex: "1 1 0",
+          flex: "1 1 auto",
+          height: "14rem",
           display: "flex",
           alignItems: "stretch",
           justifyContent: "center",
-          minHeight: 0,
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            height: "auto",
             flex: "none",
             paddingLeft: "2rem",
           },
@@ -1137,6 +1145,8 @@ const FomoScreen = ({
               </div>
               <div
                 css={css({
+                  fontSize: "1.4rem",
+                  fontWeight: "500",
                   margin: "0 0 1rem",
                   [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
                     color: "hsl(0 0% 40%)",
