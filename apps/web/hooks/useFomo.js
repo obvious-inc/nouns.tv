@@ -136,10 +136,17 @@ const useVoting = ({ auction, enabled }) => {
         const data = JSON.parse(String(message.data));
         console.log("vote socket message", data);
         if (data.vote) {
-          if (data.vote === "voteLike")
-            setVoteCount((cs) => ({ ...cs, like: cs.like + 1 }));
-          if (data.vote === "voteDislike")
-            setVoteCount((cs) => ({ ...cs, dislike: cs.dislike + 1 }));
+          setVoteCountsByBlockHash((cs) => {
+            const counts = cs[data.blockhash] ?? { like: 0, dislike: 0 };
+            const voteType = { voteLike: "like", voteDislike: "dislike" }[
+              data.vote
+            ];
+            if (voteType == null) return cs;
+            return {
+              ...cs,
+              [data.blockhash]: { ...counts, [voteType]: counts[voteType] + 1 },
+            };
+          });
         }
         if ("score" in data) {
           setScore(data.score);
