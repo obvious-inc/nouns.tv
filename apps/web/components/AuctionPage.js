@@ -1019,7 +1019,7 @@ const FomoScreen = ({
       <div
         css={css({
           flex: "1 1 auto",
-          height: "14rem",
+          height: "12rem",
           display: "flex",
           alignItems: "stretch",
           justifyContent: "center",
@@ -1115,8 +1115,8 @@ const FomoScreen = ({
                 },
                 img: {
                   display: "block",
-                  width: "10rem",
-                  height: "8rem",
+                  width: "7rem",
+                  height: "7rem",
                   objectFit: "cover",
                   transition: "0.1s transform ease-out",
                   borderRadius: "0.2rem",
