@@ -1791,6 +1791,7 @@ const GrayButton = ({
       fontFamily: "inherit",
       fontWeight: "500",
       textAlign: "left",
+      color: "black",
       ":hover": {
         background: "hsl(0 0% 80%)",
       },
