@@ -462,9 +462,50 @@ const parseParts = (parts = []) => {
   return { body, accessory, head, glasses };
 };
 
-export function AuctionPage() {
+const getSeedStats = (nouns, nounId) => {
+  if (nouns.some((n) => n == null)) return null;
+
+  const noun = nouns.find((n) => Number(n.id) === Number(nounId));
+
+  if (noun == null) return null;
+
+  const partNames = ["head", "body", "glasses", "accessory"];
+
+  const partCounts = nouns.reduce((acc, n) => {
+    for (let partName of partNames) {
+      const partId = n.seed[partName];
+      const partCount = acc[partName]?.[partId] ?? 0;
+      acc[partName] = {
+        ...acc[partName],
+        [partId]: partCount + 1,
+      };
+    }
+
+    return acc;
+  }, {});
+
+  return Object.fromEntries(
+    partNames.map((partName) => {
+      const id = noun.seed[partName];
+      const count = partCounts[partName]?.[id] ?? 0;
+      const total = nouns.length;
+      return [partName, { id, count, total }];
+    })
+  );
+};
+
+export function AuctionPage({ nouns }) {
   const router = useRouter();
   const { auction, auctionEnded, bidding, settling, fomo } = useAuction();
+
+  const stats = getSeedStats(
+    fomo.isActive
+      ? [...nouns, fomo.noun]
+      : nouns.some((n) => Number(n.id) === auction?.nounId)
+      ? nouns
+      : [...nouns, auction?.noun],
+    fomo.isActive ? fomo.noun?.id : auction?.nounId
+  );
 
   // const [forceFomo, setForceFomo] = React.useState(false);
   // const toggleForceFomo = () => setForceFomo((s) => !s);
@@ -564,7 +605,11 @@ export function AuctionPage() {
               <FomoScreen
                 {...fomo}
                 nounImageElement={
-                  <NounImage noun={fomo.noun} forceStats={forceStats} />
+                  <NounImage
+                    noun={fomo.noun}
+                    stats={stats}
+                    forceStats={forceStats}
+                  />
                 }
                 controlsElement={
                   <div
@@ -596,7 +641,11 @@ export function AuctionPage() {
               <AuctionScreen
                 auction={auction}
                 nounImageElement={
-                  <NounImage noun={auction?.noun} forceStats={forceStats} />
+                  <NounImage
+                    noun={auction?.noun}
+                    stats={stats}
+                    forceStats={forceStats}
+                  />
                 }
                 auctionActionButtonElement={auctionActionButtonElement}
                 controlsElement={
@@ -925,7 +974,7 @@ const AuctionScreen = ({
   );
 };
 
-const NounImage = ({ noun, forceStats }) => {
+const NounImage = ({ noun, stats, forceStats }) => {
   const parts = parseParts(noun?.parts);
 
   const backgroundName = {
@@ -962,7 +1011,12 @@ const NounImage = ({ noun, forceStats }) => {
       {Object.entries(parts)
         .filter((e) => e[1] != null)
         .map(([name, title]) => (
-          <FloatingNounTraitLabel key={name} name={name} title={title} />
+          <FloatingNounTraitLabel
+            key={name}
+            name={name}
+            title={title}
+            stats={stats[name]}
+          />
         ))}
       {backgroundName != null && (
         <FloatingNounTraitLabel name="background" title={backgroundName} />
@@ -1542,29 +1596,77 @@ const Heading2 = ({ style, ...props }) => (
   />
 );
 
-const FloatingNounTraitLabel = ({ name, title }) => (
-  <div
-    data-noun-trait
-    style={{
-      display: "flex",
-      alignItems: "center",
-      position: "absolute",
-      background: "white",
-      width: "max-content",
-      padding: "0.6rem 0.8rem 0.6rem 0.6rem",
-      fontSize: "1.5rem",
-      fontWeight: "500",
-      borderRadius: "0.3rem",
-      cursor: "default",
-      transform: "translateY(-50%) translateX(-1rem)",
-      zIndex: 2,
-      ...positionByPartName[name],
-    }}
-  >
-    {iconByPartName[name]}
-    {title}
-  </div>
-);
+const FloatingNounTraitLabel = ({ name, title, stats }) => {
+  return (
+    <div
+      data-noun-trait
+      style={{
+        position: "absolute",
+        background: "white",
+        width: "max-content",
+        padding: "0.6rem 0.8rem 0.6rem 0.6rem",
+        fontSize: "1.5rem",
+        fontWeight: "500",
+        borderRadius: "0.3rem",
+        cursor: "default",
+        transform: "translateY(-50%) translateX(-1rem)",
+        zIndex: 2,
+        ...positionByPartName[name],
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        {iconByPartName[name]}
+        {title}
+      </div>
+      {stats != null && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            fontSize: "1.3rem",
+            fontWeight: "500",
+            color: "hsl(0 0% 36%)",
+            margin: "0.3rem 0 0",
+          }}
+        >
+          {stats.count === 1 ? (
+            <>
+              First appearance
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 11 11"
+                fill="none"
+                style={{
+                  display: "block",
+                  width: "1.2rem",
+                  height: "auto",
+                  marginLeft: "0.3rem",
+                }}
+              >
+                <path
+                  d="M4.07942 4.84659C4.40544 4.79947 4.68734 4.59481 4.83312 4.29941L5.50043 2.94719L6.16774 4.29941C6.31337 4.5945 6.59485 4.79906 6.92048 4.84645L8.41111 5.06338L7.33263 6.11402C7.09674 6.34382 6.98911 6.67503 7.04486 6.9996L7.30002 8.48509L5.96545 7.78408C5.6743 7.63114 5.32656 7.63114 5.0354 7.78408L3.70084 8.48509L3.956 6.9996C4.0117 6.67527 3.90428 6.3443 3.66873 6.11451L2.58975 5.06191L4.07942 4.84659Z"
+                  fill="#FFC110"
+                  stroke="#FFC110"
+                  strokeWidth="2"
+                />
+              </svg>
+            </>
+          ) : (
+            <>
+              Rarity: {stats.count}/{stats.total}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ConstructionNoun = ({ style }) => (
   <svg

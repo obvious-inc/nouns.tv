@@ -3,8 +3,8 @@ import { NOUN_TOKEN_ADDRESS } from "../utils/address";
 import { configLookup, NounishConfig } from "./ServiceContext";
 import { GraphQLClient } from "graphql-request";
 import { SubgraphService } from "./subgraph.service";
-import { Auction } from "./interfaces/noun.service";
-import { PAGE_SIZE } from "../utils/pagination";
+import { Noun } from "./interfaces/noun.service";
+// import { PAGE_SIZE } from "../utils/pagination";
 
 export type StaticParams = {
   address: string;
@@ -13,14 +13,14 @@ export type StaticParams = {
 export type StaticProps = {
   config: NounishConfig;
   address: string;
-  auction: Auction;
+  nouns: Noun[];
 };
 
 export const getStaticAuctionProps: GetStaticProps<
   StaticProps,
   StaticParams
-> = async ({ params = {} }) => {
-  const address = params.address || NOUN_TOKEN_ADDRESS;
+> = async () => {
+  const address = NOUN_TOKEN_ADDRESS;
   const config = configLookup(address);
   if (!config) {
     // TODO - derive config from user entry for new contracts
@@ -29,10 +29,10 @@ export const getStaticAuctionProps: GetStaticProps<
 
   const client = new GraphQLClient(config.baseURI);
   const service = new SubgraphService(address, client);
-  const auctions: Auction[] = await service.getAuctions("DESC", PAGE_SIZE, 0);
+  const nouns: Noun[] = await service.getNouns();
 
   return {
-    props: { address, config, auction: auctions[0] },
+    props: { address, config, nouns },
     revalidate: 30,
   };
 };

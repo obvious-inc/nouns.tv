@@ -283,6 +283,12 @@ export const useAuction = () => {
       parts,
       background,
       imageUrl: getNounImageUrl({ parts, background }),
+      seed: Object.fromEntries(
+        ["accessory", "body", "head", "glasses", "background"].map((p) => [
+          p,
+          String(seed[p]),
+        ])
+      ),
     };
 
     return {

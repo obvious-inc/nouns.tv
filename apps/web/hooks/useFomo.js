@@ -255,7 +255,7 @@ const useFomo = ({ auction, enabled }) => {
     const seed = getNounSeedFromBlockHash(id, block.hash);
     const { parts, background } = getNounData(seed);
     const imageUrl = getNounImageUrl({ parts, background });
-    return { id, parts, background, imageUrl };
+    return { id, parts, background, imageUrl, seed };
   }, [enabled, auction?.nounId, block]);
 
   return {

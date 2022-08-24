@@ -112,6 +112,15 @@ const GET_AUCTIONS_BY_ID = gql`
   ${AUCTION_FRAGMENT}
 `;
 
+const GET_NOUNS_BY_ID = gql`
+  query GetNouns {
+    nouns(first: 1000) {
+      ...NounFragment
+    }
+  }
+  ${NOUN_FRAGMENT}
+`;
+
 const GET_BIDS = gql`
   query GetBids($address: String, $blockNumber: Int, $offset: Int!) {
     bids(
@@ -166,8 +175,8 @@ export class SubgraphService implements NounService {
 
   public async getAuctions(
     order: "DESC" | "ASC",
-    limit: number,
-    offset: number
+    limit?: number,
+    offset?: number
   ): Promise<Auction[]> {
     const resp = await this.client.request(GET_AUCTIONS_BY_ID, {
       order: order.toLowerCase(),
@@ -175,6 +184,11 @@ export class SubgraphService implements NounService {
       offset,
     });
     return resp.auctions;
+  }
+
+  public async getNouns(): Promise<Noun[]> {
+    const resp = await this.client.request(GET_NOUNS_BY_ID);
+    return resp.nouns;
   }
 
   public async getBids(
