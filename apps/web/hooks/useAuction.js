@@ -223,6 +223,7 @@ export const useAuction = () => {
   const contractAddresses = useContractAddresses();
 
   const { data: rawAuction, refetch: refetchAuction } = useContractRead({
+    cacheTime: 0, // Prevent flash of old auction on page load
     addressOrName: contractAddresses.nounsAuctionHouseProxy,
     contractInterface: NounsAuctionHouseABI,
     functionName: "auction",
