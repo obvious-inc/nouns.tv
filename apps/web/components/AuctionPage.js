@@ -531,7 +531,7 @@ export function AuctionPage() {
         <Header />
         <div
           style={{
-            flex: 1,
+            flex: "1 1 0",
             display: "flex",
             alignItems: "stretch",
             background: "rgb(25 25 25)",
@@ -548,9 +548,7 @@ export function AuctionPage() {
               display: "flex",
               flexDirection: "column",
               background: "rgb(38 38 38)",
-              maxHeight: "60vh",
               [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                maxHeight: "none",
                 flex: "1 1 0",
               },
             })}
@@ -872,13 +870,16 @@ const AuctionScreen = ({
         flexDirection: "column",
         transition: "0.2s background ease-out",
         background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
-        minHeight: 0,
+        minHeight: "12rem",
         position: "relative",
+        // Top nav and header + bids banner is 3 x 6rem hight, + 3rem for the "under construction" banner
+        maxHeight: "max(12rem, calc(50vh - 6rem * 3 - 3rem))",
         [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
           flex: "1 1 0",
           display: "grid",
           gridTemplateColumns: "repeat(2, minmax(0,1fr))",
           alignItems: "stretch",
+          maxHeight: "none",
         },
       })}
     >
@@ -1317,10 +1318,10 @@ const Header = () => (
     style={{
       background: "black",
       display: "flex",
-      height: "60px",
+      minHeight: "6rem",
       alignItems: "center",
-      padding: "0 20px",
-      paddingRight: "15px", // To match the chat
+      padding: "0 2rem",
+      paddingRight: "1.5rem", // To match the chat
       color: "white",
     }}
   >
