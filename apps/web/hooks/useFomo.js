@@ -246,21 +246,38 @@ const useVoting = ({ auction, enabled }) => {
 };
 
 const useFomo = ({ auction, enabled }) => {
-  const { block, ...voting } = useVoting({ auction, enabled });
+  const { block, ...voting } = useVoting({
+    auction,
+    enabled,
+  });
 
-  const noun = React.useMemo(() => {
+  const nounOrNouns = React.useMemo(() => {
     if (!enabled || auction?.nounId == null || block?.hash == null) return null;
 
-    const id = auction.nounId + 1;
-    const seed = getNounSeedFromBlockHash(id, block.hash);
-    const { parts, background } = getNounData(seed);
-    const imageUrl = getNounImageUrl({ parts, background });
-    return { id, parts, background, imageUrl, seed };
+    const buildNoun = (id, hash) => {
+      const seed = getNounSeedFromBlockHash(id, hash);
+      const { parts, background } = getNounData(seed);
+      const imageUrl = getNounImageUrl({ parts, background });
+      return { id, parts, background, imageUrl, seed };
+    };
+
+    if (auction.nounId <= 1820 && auction.nounId % 10 === 0)
+      return [
+        buildNoun(auction.nounId + 1, block.hash),
+        buildNoun(auction.nounId + 2, block.hash),
+      ];
+
+    return buildNoun(auction.nounId + 1, block.hash);
   }, [enabled, auction?.nounId, block]);
+
+  const [noundersNoun, noun] = Array.isArray(nounOrNouns)
+    ? nounOrNouns
+    : [null, nounOrNouns];
 
   return {
     isActive: enabled,
     noun,
+    noundersNoun,
     block,
     ...voting,
   };

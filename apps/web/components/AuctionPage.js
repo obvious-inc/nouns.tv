@@ -974,7 +974,7 @@ const AuctionScreen = ({
   );
 };
 
-const NounImage = ({ noun, stats, forceStats }) => {
+const NounImage = ({ noun, stats, forceStats, noStats }) => {
   const parts = parseParts(noun?.parts);
 
   const backgroundName = {
@@ -1008,18 +1008,22 @@ const NounImage = ({ noun, stats, forceStats }) => {
           objectPosition: "bottom",
         }}
       />
-      {Object.entries(parts)
-        .filter((e) => e[1] != null)
-        .map(([name, title]) => (
-          <FloatingNounTraitLabel
-            key={name}
-            name={name}
-            title={title}
-            stats={stats[name]}
-          />
-        ))}
-      {backgroundName != null && (
-        <FloatingNounTraitLabel name="background" title={backgroundName} />
+      {!noStats && (
+        <>
+          {Object.entries(parts)
+            .filter((e) => e[1] != null)
+            .map(([name, title]) => (
+              <FloatingNounTraitLabel
+                key={name}
+                name={name}
+                title={title}
+                stats={stats?.[name]}
+              />
+            ))}
+          {backgroundName != null && (
+            <FloatingNounTraitLabel name="background" title={backgroundName} />
+          )}
+        </>
       )}
     </div>
   );
@@ -1028,6 +1032,7 @@ const NounImage = ({ noun, stats, forceStats }) => {
 const FomoScreen = ({
   // isActive,
   noun,
+  noundersNoun,
   block,
   vote,
   isVotingActive,
@@ -1078,6 +1083,7 @@ const FomoScreen = ({
           display: "flex",
           alignItems: "stretch",
           justifyContent: "center",
+          position: "relative",
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
             height: "auto",
             flex: "none",
@@ -1086,6 +1092,24 @@ const FomoScreen = ({
         })}
       >
         {nounImageElement}
+        {noundersNoun != null && (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "12%",
+              minWidth: "6rem",
+              height: "auto",
+              transform: "translateX(10%) translateY(10%)",
+              border: "0.1rem solid black",
+              borderRadius: "0.5rem",
+              overflow: "hidden",
+            }}
+          >
+            <NounImage noun={noundersNoun} noStats />
+          </div>
+        )}
       </div>
       <div
         css={css({
