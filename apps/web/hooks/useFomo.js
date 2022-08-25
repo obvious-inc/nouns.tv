@@ -261,13 +261,12 @@ const useFomo = ({ auction, enabled }) => {
       return { id, parts, background, imageUrl, seed };
     };
 
-    if (auction.nounId <= 1820 && auction.nounId % 10 === 0)
-      return [
-        buildNoun(auction.nounId + 1, block.hash),
-        buildNoun(auction.nounId + 2, block.hash),
-      ];
+    const id = auction.nounId + 1;
 
-    return buildNoun(auction.nounId + 1, block.hash);
+    if (id <= 1820 && id % 10 === 0)
+      return [buildNoun(id, block.hash), buildNoun(id + 1, block.hash)];
+
+    return buildNoun(id, block.hash);
   }, [enabled, auction?.nounId, block]);
 
   const [noundersNoun, noun] = Array.isArray(nounOrNouns)
