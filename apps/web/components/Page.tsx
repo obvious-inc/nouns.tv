@@ -10,7 +10,7 @@ type PageProps = {
   children: React.ReactNode;
 };
 
-const SITE_IMAGE = `${SITE_URL}/ogImage.jpg`;
+const SITE_IMAGE = `${SITE_URL}/metatag.png`;
 
 export function Page({
   title = SITE_TITLE,
@@ -27,6 +27,8 @@ export function Page({
         <meta name="description" content={description} />
         <meta property="og:type" content="website" />
         <meta property="og:title" content={title} key="title" />
+        <meta property="og:image" content={image} />
+
         <meta
           name="og:description"
           property="og:description"
@@ -38,12 +40,10 @@ export function Page({
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
         <meta name="twitter:site" content={SITE_URL} />
+        <meta name="twitter:image" content={image} />
 
         <link rel="icon" type="image/png" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/favicon.ico" />
-
-        {/* <meta property="og:image" content={image} />
-        <meta name="twitter:image" content={image} /> */}
       </Head>
       {children}
     </>
