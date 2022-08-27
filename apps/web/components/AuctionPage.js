@@ -747,12 +747,7 @@ export function AuctionPage({ nouns }) {
             {chatUrl != null && (
               <iframe
                 ref={iFrameRef}
-                src={[
-                  chatUrl.href,
-                  router.query.compact ? "compact=1" : undefined,
-                ]
-                  .filter(Boolean)
-                  .join("?")}
+                src={`${chatUrl.href}?compact=1`}
                 allow="clipboard-read; clipboard-write"
                 style={{
                   display: "block",
