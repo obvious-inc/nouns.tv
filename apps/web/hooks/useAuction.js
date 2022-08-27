@@ -164,6 +164,7 @@ const useAuctionBids = () => {
       nounId: parseInt(bid.args.nounId),
       bidderAddress: bid.args.sender,
       amount: bid.args.value,
+      transactionHash: bid.transactionHash,
     }),
     []
   );

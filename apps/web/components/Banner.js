@@ -10,45 +10,55 @@ import { shortenAddress } from "../utils/address";
 const BidBlock = ({ bid }) => {
   const { ensName, avatarURI } = useProfile(bid.bidderAddress, bid.blockNumber);
 
+  const bidderEtherscanLink = getEtherscanLink(
+    EtherscanPageType.ADDRESS,
+    bid.bidderAddress
+  );
+
   return (
-    <a
-      href={getEtherscanLink(EtherscanPageType.ADDRESS, bid.bidderAddress)}
-      target="_blank"
-      rel="noreferrer"
-      style={{ display: "block" }}
-    >
-      <Box display="flex" flexDirection="row" alignItems="center">
-        {avatarURI && (
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              overflow: "hidden",
-              marginRight: "0.5em",
-              background: "rgb(0 0 0 / 10%)",
-            }}
-          >
-            <img src={avatarURI} alt="Avatar" width={36} height={36} />
-          </div>
-        )}
-        <div style={{ fontSize: "1.1em" }}>
-          <div
-            style={{
-              fontWeight: "700",
-              // color: "#AE3208"
-            }}
-          >
-            {"Ξ"} {formatEther(bid.amount)}
-          </div>
-          <div data-address style={{ fontWeight: "400" }}>
-            {ensName || shortenAddress(bid.bidderAddress)}
-          </div>
-        </div>
-      </Box>
-    </a>
+    <Box display="flex" flexDirection="row" alignItems="center">
+      {avatarURI && (
+        <Link
+          href={bidderEtherscanLink}
+          style={{
+            width: "36px",
+            height: "36px",
+            borderRadius: "50%",
+            overflow: "hidden",
+            marginRight: "0.5em",
+            background: "rgb(0 0 0 / 10%)",
+          }}
+        >
+          <img src={avatarURI} alt="Avatar" width={36} height={36} />
+        </Link>
+      )}
+      <div style={{ fontSize: "1.1em" }}>
+        <Link
+          href={getEtherscanLink(EtherscanPageType.TX, bid.transactionHash)}
+          css={css({ display: "block", fontWeight: "700" })}
+        >
+          {"Ξ"} {formatEther(bid.amount)}
+        </Link>
+        <Link
+          href={bidderEtherscanLink}
+          css={css({ display: "block", fontWeight: "400" })}
+        >
+          {ensName || shortenAddress(bid.bidderAddress)}
+        </Link>
+      </div>
+    </Box>
   );
 };
+
+const Link = ({ href, ...props }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noreferrer"
+    css={css({ ":hover": { textDecoration: "underline" } })}
+    {...props}
+  />
+);
 
 export function Banner({ bids }) {
   return (

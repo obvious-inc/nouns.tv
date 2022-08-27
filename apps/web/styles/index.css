@@ -39,10 +39,6 @@ button {
   height: 100%;
 }
 
-a:hover [data-address] {
-  text-decoration: underline;
-}
-
 /* .test { */
 /*   container-type: size; */
 /* } */
