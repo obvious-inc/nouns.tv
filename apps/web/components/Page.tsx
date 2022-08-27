@@ -1,7 +1,6 @@
 import Head from "next/head";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../utils/seo";
 import React from "react";
-import { Box } from "degen";
 
 type PageProps = {
   title?: string;
@@ -10,12 +9,11 @@ type PageProps = {
   children: React.ReactNode;
 };
 
-const SITE_IMAGE = `${SITE_URL}/metatag.png`;
+const image = `${SITE_URL}/metatag.png`;
 
 export function Page({
   title = SITE_TITLE,
   description = SITE_DESCRIPTION,
-  image = SITE_IMAGE,
   children,
 }: PageProps) {
   return (
@@ -26,15 +24,12 @@ export function Page({
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
         <meta name="description" content={description} />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content={title} key="title" />
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
         <meta property="og:image" content={image} />
-
-        <meta
-          name="og:description"
-          property="og:description"
-          content={description}
-        />
-        <meta property="og:site_name" content={title} />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="2400" />
+        <meta property="og:image:height" content="1256" />
         <meta property="og:url" content={SITE_URL} />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" content={title} />
