@@ -7,6 +7,7 @@ import {
   useConnectModal,
 } from "@rainbow-me/rainbowkit";
 import { useRouter } from "next/router";
+import { SITE_TITLE } from "../utils/seo";
 import { useProfile } from "../hooks/useProfile";
 import { useAuction } from "../hooks/useAuction";
 import { shortenAddress } from "../utils/address";
@@ -1421,8 +1422,15 @@ const Header = () => (
       <rect x="35" y="15" width="10" height="10" fill="black" />
     </svg>
 
-    <div style={{ color: "white", fontSize: "1.25em", fontWeight: "700" }}>
-      NOUNS.TV
+    <div
+      style={{
+        color: "white",
+        fontSize: "1.25em",
+        fontWeight: "700",
+        textTransform: "uppercase",
+      }}
+    >
+      {SITE_TITLE}
     </div>
     <div style={{ flex: 1, padding: "0 1rem" }}></div>
     <div>
