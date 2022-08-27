@@ -1,4 +1,3 @@
-import formatDate from "date-fns/format";
 import { css, keyframes } from "@emotion/react";
 import React from "react";
 import { useAccount, useProvider, useNetwork, useSignMessage } from "wagmi";
@@ -6,12 +5,12 @@ import {
   ConnectButton as RainbowConnectButton,
   useConnectModal,
 } from "@rainbow-me/rainbowkit";
-import { useRouter } from "next/router";
 import { SITE_TITLE } from "../utils/seo";
 import { useProfile } from "../hooks/useProfile";
 import { useAuction } from "../hooks/useAuction";
 import { shortenAddress } from "../utils/address";
 import { useLayoutEffect } from "../utils/react";
+import { getSeedStats as getNounSeedStats } from "../utils/nouns";
 import { CountdownDisplay } from "./CountdownDisplay";
 import Dialog from "./Dialog";
 import { Banner } from "./Banner";
@@ -463,50 +462,24 @@ const parseParts = (parts = []) => {
   return { body, accessory, head, glasses };
 };
 
-const getSeedStats = (nouns, nounId) => {
-  if (nouns.some((n) => n == null)) return null;
-
-  const noun = nouns.find((n) => Number(n.id) === Number(nounId));
-
-  if (noun == null) return null;
-
-  const partNames = ["head", "body", "glasses", "accessory"];
-
-  const partCounts = nouns.reduce((acc, n) => {
-    for (let partName of partNames) {
-      const partId = n.seed[partName];
-      const partCount = acc[partName]?.[partId] ?? 0;
-      acc[partName] = {
-        ...acc[partName],
-        [partId]: partCount + 1,
-      };
-    }
-
-    return acc;
-  }, {});
-
-  return Object.fromEntries(
-    partNames.map((partName) => {
-      const id = noun.seed[partName];
-      const count = partCounts[partName]?.[id] ?? 0;
-      const total = nouns.length;
-      return [partName, { id, count, total }];
-    })
-  );
-};
-
 export function AuctionPage({ nouns }) {
-  const router = useRouter();
   const { auction, auctionEnded, bidding, settling, fomo } = useAuction();
 
-  const stats = getSeedStats(
-    fomo.isActive
-      ? [...nouns, fomo.noun]
-      : nouns.some((n) => Number(n.id) === auction?.nounId)
-      ? nouns
-      : [...nouns, auction?.noun],
-    fomo.isActive ? fomo.noun?.id : auction?.nounId
-  );
+  const stats = React.useMemo(() => {
+    if (fomo.isActive)
+      return fomo.noun == null
+        ? null
+        : getNounSeedStats([...nouns, fomo.noun], fomo.noun.id);
+
+    if (auction == null) return null;
+
+    return getNounSeedStats(
+      nouns.some((n) => Number(n.id) === auction.nounId)
+        ? nouns
+        : [...nouns, auction.noun],
+      auction.nounId
+    );
+  }, [fomo.isActive, fomo.noun, auction, nouns]);
 
   // const [forceFomo, setForceFomo] = React.useState(false);
   // const toggleForceFomo = () => setForceFomo((s) => !s);
