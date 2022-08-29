@@ -68,7 +68,7 @@ export function Banner({ bids }) {
         background: "#ffc110",
       }}
     >
-      <Marquee pauseOnHover gradient={false} speed={60}>
+      <Marquee direction="right" pauseOnHover gradient={false} speed={60}>
         <div
           style={{
             padding: "0.6em 0",
