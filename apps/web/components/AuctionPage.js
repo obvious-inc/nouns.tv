@@ -521,6 +521,38 @@ export function AuctionPage({ nouns }) {
       </GrayButton>
     );
 
+  const staticNounStatsElement = React.useMemo(() => {
+    const noun = fomo.isActive ? fomo.noun : auction?.noun;
+    const parts = parseParts(noun?.parts);
+    return (
+      <div
+        style={{
+          display: "grid",
+          gridAutoFlow: "row",
+          gridGap: "0.4rem",
+          alignSelf: "flex-end",
+          padding: "1rem",
+        }}
+      >
+        {["head", "glasses", "body", "accessory"]
+          .map((n) => [n, parts[n]])
+          .filter((e) => e[1] != null)
+          .map(([name, title]) => (
+            <NounTraitLabel
+              key={name}
+              name={name}
+              title={title}
+              stats={stats?.[name]}
+              highlight={stats?.[name].count === 1}
+            />
+          ))}
+        {/* {backgroundName != null && ( */}
+        {/*   <NounTraitLabel name="background" title={backgroundName} /> */}
+        {/* )} */}
+      </div>
+    );
+  }, [auction, fomo, stats]);
+
   return (
     <>
       <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -566,6 +598,7 @@ export function AuctionPage({ nouns }) {
                     forceStats={forceStats}
                   />
                 }
+                staticNounStatsElement={staticNounStatsElement}
                 controlsElement={
                   <div
                     css={css({
@@ -605,6 +638,7 @@ export function AuctionPage({ nouns }) {
                     forceStats={forceStats}
                   />
                 }
+                staticNounStatsElement={staticNounStatsElement}
                 auctionActionButtonElement={auctionActionButtonElement}
                 controlsElement={
                   <div
@@ -865,6 +899,7 @@ const AuctionScreen = ({
   nounImageElement,
   controlsElement,
   auctionActionButtonElement,
+  staticNounStatsElement,
 }) => {
   const noun = auction?.noun;
   const isMobileLayout = useMediaQuery(
@@ -880,6 +915,7 @@ const AuctionScreen = ({
         background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
         minHeight: "12rem",
         position: "relative",
+        overflow: "hidden",
         // Top nav and header + bids banner is 3 x 6rem hight, + 3rem for the "under construction" banner
         maxHeight: "max(12rem, calc(50vh - 6rem * 3 - 3rem))",
         [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
@@ -894,11 +930,13 @@ const AuctionScreen = ({
       <div
         css={css({
           minHeight: 0,
-          display: "flex",
-          alignItems: "stretch",
-          justifyContent: "flex-start",
+          display: "grid",
+          gridTemplateColumns: "16rem minmax(0,1fr)",
           padding: "0 1.5rem",
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            display: "flex",
+            alignItems: "stretch",
+            justifyContent: "flex-start",
             padding: 0,
             paddingLeft: "2rem",
             justifyContent: "center",
@@ -906,6 +944,7 @@ const AuctionScreen = ({
         })}
       >
         {nounImageElement}
+        {isMobileLayout && staticNounStatsElement}
       </div>
       <div />
       <div
@@ -944,10 +983,6 @@ const NounImage = ({ noun, stats, forceStats, noStats }) => {
     d5d7e1: "Cold",
   }[noun?.background.toLowerCase()];
 
-  const isMobileLayout = useMediaQuery(
-    `(max-width: ${STACKED_MODE_BREAKPOINT})`
-  );
-
   return (
     <div
       style={{ position: "relative" }}
@@ -979,55 +1014,24 @@ const NounImage = ({ noun, stats, forceStats, noStats }) => {
           objectPosition: "bottom",
         }}
       />
-      {!noStats &&
-        (isMobileLayout == null ? null : isMobileLayout ? (
-          <div
-            style={{
-              position: "absolute",
-              left: "calc(100% + 1.5rem)",
-              bottom: "1rem",
-              display: "grid",
-              gridAutoFlow: "row",
-              gridGap: "0.4rem",
-            }}
-          >
-            {["head", "glasses", "body", "accessory"]
-              .map((n) => [n, parts[n]])
-              .filter((e) => e[1] != null)
-              .map(([name, title]) => (
-                <NounTraitLabel
-                  key={name}
-                  name={name}
-                  title={title}
-                  stats={stats?.[name]}
-                  highlight={stats?.[name].count === 1}
-                />
-              ))}
-            {/* {backgroundName != null && ( */}
-            {/*   <NounTraitLabel name="background" title={backgroundName} /> */}
-            {/* )} */}
-          </div>
-        ) : (
-          <>
-            {Object.entries(parts)
-              .filter((e) => e[1] != null)
-              .map(([name, title]) => (
-                <FloatingNounTraitLabel
-                  key={name}
-                  name={name}
-                  title={title}
-                  stats={stats?.[name]}
-                  highlight={stats?.[name].count === 1}
-                />
-              ))}
-            {backgroundName != null && (
+      {!noStats && (
+        <>
+          {Object.entries(parts)
+            .filter((e) => e[1] != null)
+            .map(([name, title]) => (
               <FloatingNounTraitLabel
-                name="background"
-                title={backgroundName}
+                key={name}
+                name={name}
+                title={title}
+                stats={stats?.[name]}
+                highlight={stats?.[name].count === 1}
               />
-            )}
-          </>
-        ))}
+            ))}
+          {backgroundName != null && (
+            <FloatingNounTraitLabel name="background" title={backgroundName} />
+          )}
+        </>
+      )}
     </div>
   );
 };
@@ -1047,9 +1051,14 @@ const FomoScreen = ({
   isConnected,
   nounImageElement,
   controlsElement,
+  staticNounStatsElement,
   // auctionActionButtonElement,
   // reconnect,
 }) => {
+  const isMobileLayout = useMediaQuery(
+    `(max-width: ${STACKED_MODE_BREAKPOINT})`
+  );
+
   React.useEffect(() => {
     preloadGifs();
   }, []);
@@ -1082,10 +1091,8 @@ const FomoScreen = ({
       <div
         css={css({
           flex: "1 1 auto",
-          height: "12rem",
-          display: "flex",
-          alignItems: "stretch",
-          justifyContent: "flex-start",
+          display: "grid",
+          gridTemplateColumns: "12rem minmax(0, 1fr)",
           padding: "0 4.5rem",
           position: "relative",
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
@@ -1093,11 +1100,15 @@ const FomoScreen = ({
             height: "auto",
             flex: "none",
             paddingLeft: "2rem",
+            display: "flex",
+            alignItems: "stretch",
+            justifyContent: "flex-start",
             justifyContent: "center",
           },
         })}
       >
         {nounImageElement}
+        {isMobileLayout && staticNounStatsElement}
         {noundersNoun != null && (
           <div
             style={{
@@ -1133,6 +1144,7 @@ const FomoScreen = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              minHeight: "11.66rem",
             }}
           >
             {/* <GrayButton onClick={reconnect}>Reconnect</GrayButton> */}
