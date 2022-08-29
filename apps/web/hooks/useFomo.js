@@ -106,9 +106,9 @@ const useVoting = ({ auction, enabled }) => {
       );
       setVoteCountsByBlockHash((cs) => ({
         ...cs,
-        [block.hash]: { like: 0, dislike: 0 },
+        [block.hash]: cs[block.hash] ?? { like: 0, dislike: 0 },
       }));
-      //
+
       // Reset the timer in case the previous one hasn’t finised
       if (votingTimerTimeoutHandle != null) {
         clearTimeout(votingTimerTimeoutHandle);
