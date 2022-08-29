@@ -21,6 +21,12 @@ body {
   height: 100%;
 }
 
+@media screen and (max-width: 460px) {
+  html {
+    font-size: 2.2vw;
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;
