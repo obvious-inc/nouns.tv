@@ -23,12 +23,24 @@ const random = (seed) => {
   return x - Math.floor(x);
 };
 
-const progressGradient = keyframes({
+const rainbowGradient =
+  "linear-gradient(90deg, rgba(0,179,255,1) 0%, rgba(255,0,209,1) 25%, rgba(255,160,0,1) 50%, rgba(243,255,0,1) 75%, rgba(0,179,255,1) 100%)";
+const highlightGradient =
+  "linear-gradient(90deg, rgb(114 214 255) 0%, rgb(255 148 236) 25%, rgb(255 200 107) 50%, rgb(222 255 123) 75%, rgba(114, 214, 255,1) 100%)";
+const progressGradientAnimation = keyframes({
   "0%": {
     backgroundPosition: "0%",
   },
   "100%": {
     backgroundPosition: "200%",
+  },
+});
+const highlightGradientAnimation = keyframes({
+  "0%": {
+    backgroundPosition: "0%",
+  },
+  "100%": {
+    backgroundPosition: "600%",
   },
 });
 
@@ -987,6 +999,7 @@ const NounImage = ({ noun, stats, forceStats, noStats }) => {
                 name={name}
                 title={title}
                 stats={stats?.[name]}
+                highlight={stats?.[name].count === 1}
               />
             ))}
           {backgroundName != null && (
@@ -1243,9 +1256,8 @@ const FomoScreen = ({
                     height: "2.4rem",
                     width: "100%",
                     borderRadius: "0.5rem",
-                    background:
-                      "linear-gradient(90deg, rgba(0,179,255,1) 0%, rgba(255,0,209,1) 25%, rgba(255,160,0,1) 50%, rgba(243,255,0,1) 75%, rgba(0,179,255,1) 100%)",
-                    animation: `${progressGradient} 6s linear infinite`,
+                    background: rainbowGradient,
+                    animation: `${progressGradientAnimation} 6s linear infinite`,
                     backgroundSize: "200%",
                     position: "relative",
                     overflow: "hidden",
@@ -1602,13 +1614,12 @@ const Heading2 = ({ style, ...props }) => (
   />
 );
 
-const FloatingNounTraitLabel = ({ name, title, stats }) => {
+const FloatingNounTraitLabel = ({ highlight = false, name, title, stats }) => {
   return (
     <div
       data-noun-trait
-      style={{
+      css={css({
         position: "absolute",
-        background: "white",
         width: "max-content",
         padding: "0.6rem 0.8rem 0.6rem 0.6rem",
         fontSize: "1.5rem",
@@ -1617,15 +1628,15 @@ const FloatingNounTraitLabel = ({ name, title, stats }) => {
         cursor: "default",
         transform: "translateY(-50%) translateX(-1rem)",
         zIndex: 2,
+        background: highlight ? highlightGradient : "white",
+        backgroundSize: "600%",
+        animation: `${highlightGradientAnimation} 25s linear infinite`,
+        border: highlight ? "1px solid rgb(0 0 0 / 35%)" : undefined,
+        boxShadow: "2px 2px 0 0 rgb(0 0 0 / 10%)",
         ...positionByPartName[name],
-      }}
+      })}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
+      <div style={{ display: "flex", alignItems: "center" }}>
         {iconByPartName[name]}
         {title}
       </div>
@@ -1636,7 +1647,7 @@ const FloatingNounTraitLabel = ({ name, title, stats }) => {
             alignItems: "center",
             fontSize: "1.3rem",
             fontWeight: "500",
-            color: "hsl(0 0% 36%)",
+            color: highlight ? "currentcolor" : "hsl(0 0% 36%)",
             margin: "0.3rem 0 0",
           }}
         >
@@ -1657,8 +1668,10 @@ const FloatingNounTraitLabel = ({ name, title, stats }) => {
               >
                 <path
                   d="M4.07942 4.84659C4.40544 4.79947 4.68734 4.59481 4.83312 4.29941L5.50043 2.94719L6.16774 4.29941C6.31337 4.5945 6.59485 4.79906 6.92048 4.84645L8.41111 5.06338L7.33263 6.11402C7.09674 6.34382 6.98911 6.67503 7.04486 6.9996L7.30002 8.48509L5.96545 7.78408C5.6743 7.63114 5.32656 7.63114 5.0354 7.78408L3.70084 8.48509L3.956 6.9996C4.0117 6.67527 3.90428 6.3443 3.66873 6.11451L2.58975 5.06191L4.07942 4.84659Z"
-                  fill="#FFC110"
-                  stroke="#FFC110"
+                  fill="currentColor"
+                  stroke="currentColor"
+                  // fill="#FFC110"
+                  // stroke="#FFC110"
                   strokeWidth="2"
                 />
               </svg>
