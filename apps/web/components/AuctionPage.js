@@ -8,6 +8,7 @@ import {
 import { SITE_TITLE } from "../utils/seo";
 import { useProfile } from "../hooks/useProfile";
 import { useAuction } from "../hooks/useAuction";
+import useMediaQuery from "../hooks/useMediaQuery";
 import { shortenAddress } from "../utils/address";
 import { useLayoutEffect } from "../utils/react";
 import { getSeedStats as getNounSeedStats } from "../utils/nouns";
@@ -220,13 +221,7 @@ const positionByPartName = {
 
 const iconByPartName = {
   head: (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      style={{ display: "block", marginRight: "0.5rem" }}
-    >
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
       <rect width="3" height="3" fill="black" />
       <rect y="3" width="3" height="3" fill="black" />
       <rect y="6" width="3" height="3" fill="black" />
@@ -258,13 +253,7 @@ const iconByPartName = {
     </svg>
   ),
   glasses: (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      style={{ display: "block", marginRight: "0.5rem" }}
-    >
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
       <rect width="3" height="3" fill="black" />
       <rect y="3" width="3" height="3" fill="black" />
       <rect y="6" width="3" height="3" fill="black" />
@@ -310,13 +299,7 @@ const iconByPartName = {
     </svg>
   ),
   body: (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      style={{ display: "block", marginRight: "0.5rem" }}
-    >
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
       <rect width="3" height="3" fill="black" />
       <rect y="3" width="3" height="3" fill="black" />
       <rect y="6" width="3" height="3" fill="black" />
@@ -364,13 +347,7 @@ const iconByPartName = {
     </svg>
   ),
   accessory: (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      style={{ display: "block", marginRight: "0.5rem" }}
-    >
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
       <rect width="3" height="3" fill="black" />
       <rect y="3" width="3" height="3" fill="black" />
       <rect y="6" width="3" height="3" fill="black" />
@@ -412,16 +389,8 @@ const iconByPartName = {
     </svg>
   ),
   background: (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      style={{ display: "block", marginRight: "0.5rem" }}
-    >
-      <rect width="3" height="3" fill="black" />
-      <rect y="3" width="3" height="3" fill="black" />
-      <rect y="6" width="3" height="3" fill="black" />
+    <svg width="18" height="18" viewBox="0 0 18 18">
+      {" "}
       <rect y="9" width="3" height="3" fill="black" />
       <rect y="12" width="3" height="3" fill="black" />
       <rect y="15" width="3" height="3" fill="black" />
@@ -599,13 +568,16 @@ export function AuctionPage({ nouns }) {
                 }
                 controlsElement={
                   <div
-                    style={{
+                    css={css({
                       display: "grid",
                       gridAutoColumns: "auto",
                       gridAutoFlow: "column",
                       gridGap: "1.5rem",
                       pointerEvents: "none",
-                    }}
+                      [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                        display: "none",
+                      },
+                    })}
                   >
                     <Switch
                       id="stats-switch"
@@ -636,13 +608,16 @@ export function AuctionPage({ nouns }) {
                 auctionActionButtonElement={auctionActionButtonElement}
                 controlsElement={
                   <div
-                    style={{
+                    css={css({
                       display: "grid",
                       gridAutoColumns: "auto",
                       gridAutoFlow: "column",
                       gridGap: "1.5rem",
                       pointerEvents: "none",
-                    }}
+                      [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                        display: "none",
+                      },
+                    })}
                   >
                     <Switch
                       id="stats-switch"
@@ -892,6 +867,9 @@ const AuctionScreen = ({
   auctionActionButtonElement,
 }) => {
   const noun = auction?.noun;
+  const isMobileLayout = useMediaQuery(
+    `(max-width: ${STACKED_MODE_BREAKPOINT})`
+  );
 
   return (
     <div
@@ -918,9 +896,12 @@ const AuctionScreen = ({
           minHeight: 0,
           display: "flex",
           alignItems: "stretch",
-          justifyContent: "center",
+          justifyContent: "flex-start",
+          padding: "0 1.5rem",
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            padding: 0,
             paddingLeft: "2rem",
+            justifyContent: "center",
           },
         })}
       >
@@ -943,7 +924,7 @@ const AuctionScreen = ({
           [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
             display: "block",
             position: "absolute",
-            bottom: 0,
+            top: 0,
             right: 0,
             padding: "1rem 1.5rem",
           },
@@ -963,6 +944,10 @@ const NounImage = ({ noun, stats, forceStats, noStats }) => {
     d5d7e1: "Cold",
   }[noun?.background.toLowerCase()];
 
+  const isMobileLayout = useMediaQuery(
+    `(max-width: ${STACKED_MODE_BREAKPOINT})`
+  );
+
   return (
     <div
       style={{ position: "relative" }}
@@ -970,10 +955,15 @@ const NounImage = ({ noun, stats, forceStats, noStats }) => {
       css={css({
         "[data-noun-trait]": {
           opacity: forceStats ? 1 : 0,
-          transition: "0.1s opacity ease-out",
         },
-        ":hover [data-noun-trait]": {
-          opacity: 1,
+        "@media (hover: hover)": {
+          "[data-noun-trait]": {
+            opacity: forceStats ? 1 : 0,
+            transition: "0.1s opacity ease-out",
+          },
+          ":hover [data-noun-trait]": {
+            opacity: 1,
+          },
         },
       })}
     >
@@ -989,24 +979,55 @@ const NounImage = ({ noun, stats, forceStats, noStats }) => {
           objectPosition: "bottom",
         }}
       />
-      {!noStats && (
-        <>
-          {Object.entries(parts)
-            .filter((e) => e[1] != null)
-            .map(([name, title]) => (
+      {!noStats &&
+        (isMobileLayout == null ? null : isMobileLayout ? (
+          <div
+            style={{
+              position: "absolute",
+              left: "calc(100% + 1.5rem)",
+              bottom: "1rem",
+              display: "grid",
+              gridAutoFlow: "row",
+              gridGap: "0.4rem",
+            }}
+          >
+            {["head", "glasses", "body", "accessory"]
+              .map((n) => [n, parts[n]])
+              .filter((e) => e[1] != null)
+              .map(([name, title]) => (
+                <NounTraitLabel
+                  key={name}
+                  name={name}
+                  title={title}
+                  stats={stats?.[name]}
+                  highlight={stats?.[name].count === 1}
+                />
+              ))}
+            {/* {backgroundName != null && ( */}
+            {/*   <NounTraitLabel name="background" title={backgroundName} /> */}
+            {/* )} */}
+          </div>
+        ) : (
+          <>
+            {Object.entries(parts)
+              .filter((e) => e[1] != null)
+              .map(([name, title]) => (
+                <FloatingNounTraitLabel
+                  key={name}
+                  name={name}
+                  title={title}
+                  stats={stats?.[name]}
+                  highlight={stats?.[name].count === 1}
+                />
+              ))}
+            {backgroundName != null && (
               <FloatingNounTraitLabel
-                key={name}
-                name={name}
-                title={title}
-                stats={stats?.[name]}
-                highlight={stats?.[name].count === 1}
+                name="background"
+                title={backgroundName}
               />
-            ))}
-          {backgroundName != null && (
-            <FloatingNounTraitLabel name="background" title={backgroundName} />
-          )}
-        </>
-      )}
+            )}
+          </>
+        ))}
     </div>
   );
 };
@@ -1026,7 +1047,7 @@ const FomoScreen = ({
   isConnected,
   nounImageElement,
   controlsElement,
-  auctionActionButtonElement,
+  // auctionActionButtonElement,
   // reconnect,
 }) => {
   React.useEffect(() => {
@@ -1064,12 +1085,15 @@ const FomoScreen = ({
           height: "12rem",
           display: "flex",
           alignItems: "stretch",
-          justifyContent: "center",
+          justifyContent: "flex-start",
+          padding: "0 4.5rem",
           position: "relative",
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            padding: 0,
             height: "auto",
             flex: "none",
             paddingLeft: "2rem",
+            justifyContent: "center",
           },
         })}
       >
@@ -1118,7 +1142,7 @@ const FomoScreen = ({
             <div
               css={css({
                 textAlign: "center",
-                padding: "2rem 3rem 1rem",
+                padding: "1.5rem 3rem 1rem",
                 [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
                   padding: "2rem 4rem",
                   paddingLeft: "1rem",
@@ -1134,11 +1158,13 @@ const FomoScreen = ({
                   overflow: "hidden",
                   cursor: "pointer",
                   transition: "0.1s transform ease-out",
-                  ":hover": {
-                    background: "hsl(0 0% 80%)",
-                  },
-                  ":hover img": {
-                    filter: "saturate(1.25)",
+                  "@media (hover: hover)": {
+                    ":hover": {
+                      background: "hsl(0 0% 80%)",
+                    },
+                    ":hover img": {
+                      filter: "saturate(1.25)",
+                    },
                   },
                   "&[data-selected=true]": {
                     boxShadow: "0 0 0 0.3rem #667af9",
@@ -1158,26 +1184,34 @@ const FomoScreen = ({
                   },
                   ".label": {
                     position: "absolute",
-                    left: 0,
-                    right: 0,
+                    left: "50%",
                     top: "50%",
                     padding: "1rem 1.5rem",
                     fontWeight: "800",
                     color: "white",
-                    transform: "translateY(-50%) rotate(-5deg) scale(0.5)",
+                    transform:
+                      "translateY(-50%) translateX(-50%) rotate(-5deg) scale(0.5)",
                     WebkitTextStroke: "1px black",
-                    opacity: 0,
                     transition: "0.07s all ease-in",
+                    opacity: 0,
                   },
-                  ":hover .label, &[data-selected=true] .label": {
+                  "&[data-selected=true] .label": {
                     opacity: 1,
-                    transform: "translateY(-50%) rotate(-5deg) scale(1)",
+                    transform:
+                      "translateY(-50%) translateX(-50%) rotate(-5deg) scale(1)",
+                  },
+                  "@media (hover: hover)": {
+                    ":hover .label, &[data-selected=true] .label": {
+                      opacity: 1,
+                      transform:
+                        "translateY(-50%) translateX(-50%) rotate(-5deg) scale(1)",
+                    },
                   },
                 },
                 img: {
                   display: "block",
-                  width: "7rem",
-                  height: "7rem",
+                  width: "6rem",
+                  height: "6rem",
                   objectFit: "cover",
                   transition: "0.1s transform ease-out",
                   borderRadius: "0.2rem",
@@ -1207,10 +1241,12 @@ const FomoScreen = ({
               </div>
               <div
                 css={css({
+                  display: "none",
                   fontSize: "1.4rem",
                   fontWeight: "500",
                   margin: "0 0 1rem",
                   [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                    display: "block",
                     color: "hsl(0 0% 40%)",
                     margin: "0 0 2.2rem",
                     fontSize: "1.6rem",
@@ -1354,20 +1390,20 @@ const FomoScreen = ({
       >
         {controlsElement}
       </div>
-      <div
-        css={css({
-          display: "none",
-          [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            display: "block",
-            position: "absolute",
-            bottom: 0,
-            right: 0,
-            padding: "1rem 1.5rem",
-          },
-        })}
-      >
-        {auctionActionButtonElement}
-      </div>
+      {/* <div */}
+      {/*   css={css({ */}
+      {/*     display: "none", */}
+      {/*     [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: { */}
+      {/*       display: "block", */}
+      {/*       position: "absolute", */}
+      {/*       bottom: 0, */}
+      {/*       right: 0, */}
+      {/*       padding: "1rem 1.5rem", */}
+      {/*     }, */}
+      {/*   })} */}
+      {/* > */}
+      {/*   {auctionActionButtonElement} */}
+      {/* </div> */}
     </div>
   );
 };
@@ -1614,6 +1650,57 @@ const Heading2 = ({ style, ...props }) => (
   />
 );
 
+const NounTraitLabel = ({ highlight = false, name, title, stats }) => {
+  return (
+    <div
+      css={css({
+        display: "grid",
+        alignItems: "center",
+        gridTemplateColumns: "auto minmax(0,1fr)",
+        gridGap: "0.4rem",
+        width: "max-content",
+        padding: "0.2rem 0.4rem",
+        fontSize: "1.2rem",
+        fontWeight: "500",
+        borderRadius: "0.3rem",
+        cursor: "default",
+        background: highlight ? highlightGradient : "white",
+        backgroundSize: "600%",
+        animation: `${highlightGradientAnimation} 25s linear infinite`,
+        border: highlight ? "1px solid rgb(0 0 0 / 35%)" : undefined,
+        boxShadow: "2px 2px 0 0 rgb(0 0 0 / 10%)",
+      })}
+    >
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <div
+          css={css({
+            marginRight: "0.4rem",
+            svg: { display: "block", width: "1.2rem", height: "auto" },
+          })}
+        >
+          {iconByPartName[name]}
+        </div>
+        <span>
+          {title} <span style={{ color: "rgb(0 0 0 / 54%)" }}>{name}</span>
+        </span>
+      </div>
+      {stats != null && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            fontSize: "1rem",
+            fontWeight: "500",
+            color: highlight ? "currentcolor" : "hsl(0 0% 36%)",
+          }}
+        >
+          ({stats.count}/{stats.total})
+        </div>
+      )}
+    </div>
+  );
+};
+
 const FloatingNounTraitLabel = ({ highlight = false, name, title, stats }) => {
   return (
     <div
@@ -1637,7 +1724,9 @@ const FloatingNounTraitLabel = ({ highlight = false, name, title, stats }) => {
       })}
     >
       <div style={{ display: "flex", alignItems: "center" }}>
-        {iconByPartName[name]}
+        <div css={css({ marginRight: "0.5rem", svg: { display: "block" } })}>
+          {iconByPartName[name]}
+        </div>
         {title}
       </div>
       {stats != null && (
@@ -1852,13 +1941,15 @@ const Button = ({
       cursor: "pointer",
       transition: "0.1s all easy-out",
       textAlign: "left",
-      ":hover": {
-        filter: "brightness(1.03) saturate(1.2)",
-      },
       ":disabled": {
         opacity: "0.8",
         color: "hsl(0 0% 100% / 80%)",
         pointerEvents: "none",
+      },
+      "@media (hover: hover)": {
+        ":hover": {
+          filter: "brightness(1.03) saturate(1.2)",
+        },
       },
     })}
     {...props}
@@ -1946,14 +2037,16 @@ const GrayButton = ({
       fontWeight: "500",
       textAlign: "left",
       color: "black",
-      ":hover": {
-        background: "hsl(0 0% 80%)",
-      },
       ":disabled": {
         cursor: "not-allowed",
         pointerEvents: "none",
         borderColor: "hsl(0 0% 65%)",
         color: "hsl(0 0% 46%)",
+      },
+      "@media (hover: hover)": {
+        ":hover": {
+          background: "hsl(0 0% 80%)",
+        },
       },
     })}
     {...props}
@@ -1987,7 +2080,9 @@ const Switch = ({ id, label, ...props }) => (
       cursor: "pointer",
       userSelect: "none",
       transition: "8ms color ease-out",
-      ":hover": { color: "hsl(0 0% 25%)" },
+      "@media (hover: hover)": {
+        ":hover": { color: "hsl(0 0% 25%)" },
+      },
     })}
   >
     <input
