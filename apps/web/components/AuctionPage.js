@@ -1372,35 +1372,41 @@ const Header = () => (
       color: "white",
     }}
   >
-    <svg
-      width="50"
-      height="30"
-      viewBox="0 0 50 30"
-      fill="none"
-      style={{ marginRight: "0.7em" }}
-    >
-      <rect width="50" height="30" fill="#FF1AD2" />
-      <rect x="5" y="5" width="10" height="10" fill="black" />
-      <rect x="5" y="15" width="10" height="10" fill="white" />
-      <rect x="15" y="5" width="10" height="10" fill="white" />
-      <rect x="15" y="15" width="10" height="10" fill="black" />
-      <rect x="25" y="5" width="10" height="10" fill="black" />
-      <rect x="25" y="15" width="10" height="10" fill="white" />
-      <rect x="35" y="5" width="10" height="10" fill="white" />
-      <rect x="35" y="15" width="10" height="10" fill="black" />
-    </svg>
+    <div style={{ width: "5rem", marginRight: "1rem" }}>
+      <svg
+        width="50"
+        height="30"
+        viewBox="0 0 50 30"
+        fill="none"
+        style={{ width: "100%", height: "auto" }}
+      >
+        <rect width="50" height="30" fill="#FF1AD2" />
+        <rect x="5" y="5" width="10" height="10" fill="black" />
+        <rect x="5" y="15" width="10" height="10" fill="white" />
+        <rect x="15" y="5" width="10" height="10" fill="white" />
+        <rect x="15" y="15" width="10" height="10" fill="black" />
+        <rect x="25" y="5" width="10" height="10" fill="black" />
+        <rect x="25" y="15" width="10" height="10" fill="white" />
+        <rect x="35" y="5" width="10" height="10" fill="white" />
+        <rect x="35" y="15" width="10" height="10" fill="black" />
+      </svg>
+    </div>
 
     <div
       style={{
         color: "white",
-        fontSize: "1.25em",
+        fontSize: "1.8rem",
         fontWeight: "700",
         textTransform: "uppercase",
+        flex: 1,
+        minWidth: 0,
+        paddingRight: "1rem",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
       }}
     >
       {SITE_TITLE}
     </div>
-    <div style={{ flex: 1, padding: "0 1rem" }}></div>
     <div>
       <RainbowConnectButton />
     </div>
