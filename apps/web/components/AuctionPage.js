@@ -1136,7 +1136,7 @@ const FomoScreen = ({
           position: "relative",
         })}
       >
-        {!isConnected ? (
+        {!isConnected || block == null ? (
           <div
             style={{
               width: "100%",
@@ -1149,159 +1149,59 @@ const FomoScreen = ({
           >
             {/* <GrayButton onClick={reconnect}>Reconnect</GrayButton> */}
           </div>
-        ) : (
-          block != null && (
+        ) : isMobileLayout ? (
+          <div css={css({ width: "100%", padding: "1.5rem" })}>
             <div
               css={css({
-                textAlign: "center",
-                padding: "1.5rem 3rem 1rem",
-                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                  padding: "2rem 4rem",
-                  paddingLeft: "1rem",
-                },
-                width: "100%",
-                button: {
-                  position: "relative",
-                  display: "block",
-                  border: "0.1rem solid black",
-                  padding: "0.5rem",
-                  borderRadius: "0.5rem",
-                  background: "hsl(0 0% 85%)",
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  transition: "0.1s transform ease-out",
-                  "@media (hover: hover)": {
-                    ":hover": {
-                      background: "hsl(0 0% 80%)",
-                    },
-                    ":hover img": {
-                      filter: "saturate(1.25)",
-                    },
-                  },
-                  "&[data-selected=true]": {
-                    boxShadow: "0 0 0 0.3rem #667af9",
-                  },
-                  "&[data-selected=true] img": {
-                    filter: "saturate(1.2)",
-                  },
-                  ":disabled": {
-                    cursor: "not-allowed",
-                    pointerEvents: "none",
-                  },
-                  ":not([data-selected=true]):disabled": {
-                    borderColor: "hsl(0 0% 60%)",
-                  },
-                  ":not([data-selected=true]):disabled img": {
-                    filter: "saturate(0) contrast(60%)",
-                  },
-                  ".label": {
-                    position: "absolute",
-                    left: "50%",
-                    top: "50%",
-                    padding: "1rem 1.5rem",
-                    fontWeight: "800",
-                    color: "white",
-                    transform:
-                      "translateY(-50%) translateX(-50%) rotate(-5deg) scale(0.5)",
-                    WebkitTextStroke: "1px black",
-                    transition: "0.07s all ease-in",
-                    opacity: 0,
-                  },
-                  "&[data-selected=true] .label": {
-                    opacity: 1,
-                    transform:
-                      "translateY(-50%) translateX(-50%) rotate(-5deg) scale(1)",
-                  },
-                  "@media (hover: hover)": {
-                    ":hover .label, &[data-selected=true] .label": {
-                      opacity: 1,
-                      transform:
-                        "translateY(-50%) translateX(-50%) rotate(-5deg) scale(1)",
-                    },
-                  },
-                },
-                img: {
-                  display: "block",
-                  width: "6rem",
-                  height: "6rem",
-                  objectFit: "cover",
-                  transition: "0.1s transform ease-out",
-                  borderRadius: "0.2rem",
-                  [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                    width: "12rem",
-                    height: "12rem",
-                  },
-                },
+                display: "grid",
+                gridTemplateColumns: "auto minmax(0,1fr) auto",
+                gridGap: "1rem",
+                alignItems: "flex-end",
+                userSelect: "none",
               })}
             >
-              <div
-                css={css({
-                  display: "none",
-                  fontSize: "2.8rem",
-                  fontWeight: "700",
-                  margin: "0 0 0.7rem",
-                  [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                    display: "block",
-                  },
-                })}
-              >
-                {settlementAttempted
-                  ? "Attempting to settle..."
-                  : isVotingActive
-                  ? "Try to mint this noun?"
-                  : "Ok, let’s try another one"}
-              </div>
-              <div
-                css={css({
-                  display: "none",
-                  fontSize: "1.4rem",
-                  fontWeight: "500",
-                  margin: "0 0 1rem",
-                  [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                    display: "block",
-                    color: "hsl(0 0% 40%)",
-                    margin: "0 0 2.2rem",
-                    fontSize: "1.6rem",
-                    fontWeight: "600",
-                  },
-                })}
-              >
-                {settlementAttempted ? (
-                  "OMG OMG OMG OMG OMG"
-                ) : isVotingActive ? (
-                  <>
-                    Voting ends in{" "}
-                    <CountdownDisplay to={block.localTimestamp / 1000 + 7} />
-                  </>
-                ) : (
-                  <>
-                    Waiting for a new block...{" "}
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        transform: "scale(1.2)",
-                        margin: "0 0.2rem",
-                      }}
-                    >
-                      🥱
-                    </span>
-                  </>
-                )}
-              </div>
-              <div
-                css={css({
-                  position: "relative",
-                  width: "100%",
-                  maxWidth: "42rem",
-                  margin: "0 auto 1.5rem",
-                  [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                    margin: "0 auto 3rem",
-                  },
-                })}
-              >
+              <VoteGifButton
+                isVotingActive={isVotingActive}
+                currentVote={vote}
+                vote="dislike"
+                label="NO"
+                gifUrl={noGifUrl}
+                onClick={dislike}
+              />
+              <div>
                 <div
                   css={css({
-                    height: "2.4rem",
+                    fontSize: "1.4rem",
+                    fontWeight: "500",
+                    margin: "0 0 0.5rem",
+                    textAlign: "center",
+                  })}
+                >
+                  {settlementAttempted ? (
+                    "OMG OMG OMG OMG OMG"
+                  ) : isVotingActive ? (
+                    <>
+                      Voting ends in{" "}
+                      <CountdownDisplay to={block.localTimestamp / 1000 + 7} />
+                    </>
+                  ) : (
+                    <>
+                      Waiting for a new block...{" "}
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          transform: "scale(1.2)",
+                          margin: "0 0.2rem",
+                        }}
+                      >
+                        🥱
+                      </span>
+                    </>
+                  )}
+                </div>
+                <div
+                  css={css({
+                    height: "5rem",
                     width: "100%",
                     borderRadius: "0.5rem",
                     background: rainbowGradient,
@@ -1309,6 +1209,7 @@ const FomoScreen = ({
                     backgroundSize: "200%",
                     position: "relative",
                     overflow: "hidden",
+                    border: "1px solid rgb(0 0 0 / 40%)",
                   })}
                 >
                   <div
@@ -1329,66 +1230,178 @@ const FomoScreen = ({
                     })}
                   />
                 </div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    right: "100%",
-                    padding: "0 0.8rem",
-                    fontSize: "1.3rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  {String(voteCounts.dislike ?? 0)}
-                </div>
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    left: "100%",
-                    padding: "0 0.8rem",
-                    fontSize: "1.3rem",
-                    fontWeight: "500",
-                  }}
-                >
-                  {String(voteCounts.like ?? 0)}
-                </div>
               </div>
+              <VoteGifButton
+                isVotingActive={isVotingActive}
+                currentVote={vote}
+                vote="like"
+                label="YES"
+                gifUrl={yesGifUrl}
+                onClick={like}
+              />
+            </div>
+          </div>
+        ) : (
+          <div
+            css={css({
+              width: "100%",
+              textAlign: "center",
+              padding: "1.5rem 3rem 1rem",
+              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                padding: "2rem 4rem",
+                paddingLeft: "1rem",
+              },
+            })}
+          >
+            <div
+              css={css({
+                display: "none",
+                fontSize: "2.8rem",
+                fontWeight: "700",
+                margin: "0 0 0.7rem",
+                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                  display: "block",
+                },
+              })}
+            >
+              {settlementAttempted
+                ? "Attempting to settle..."
+                : isVotingActive
+                ? "Try to mint this noun?"
+                : "Ok, let’s try another one"}
+            </div>
+            <div
+              css={css({
+                display: "none",
+                fontSize: "1.4rem",
+                fontWeight: "500",
+                margin: "0 0 1rem",
+                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                  display: "block",
+                  color: "hsl(0 0% 40%)",
+                  margin: "0 0 2.2rem",
+                  fontSize: "1.6rem",
+                  fontWeight: "600",
+                },
+              })}
+            >
+              {settlementAttempted ? (
+                "OMG OMG OMG OMG OMG"
+              ) : isVotingActive ? (
+                <>
+                  Voting ends in{" "}
+                  <CountdownDisplay to={block.localTimestamp / 1000 + 7} />
+                </>
+              ) : (
+                <>
+                  Waiting for a new block...{" "}
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      transform: "scale(1.2)",
+                      margin: "0 0.2rem",
+                    }}
+                  >
+                    🥱
+                  </span>
+                </>
+              )}
+            </div>
+            <div
+              css={css({
+                position: "relative",
+                width: "100%",
+                maxWidth: "42rem",
+                margin: "0 auto 1.5rem",
+                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                  margin: "0 auto 3rem",
+                },
+              })}
+            >
               <div
                 css={css({
-                  display: "grid",
-                  maxWidth: "42rem",
-                  margin: "0 auto",
-                  gridTemplateColumns: "repeat(2, minmax(0,auto))",
-                  justifyContent: "space-evenly",
-                  userSelect: "none",
+                  height: "2.4rem",
+                  width: "100%",
+                  borderRadius: "0.5rem",
+                  background: rainbowGradient,
+                  animation: `${progressGradientAnimation} 6s linear infinite`,
+                  backgroundSize: "200%",
+                  position: "relative",
+                  overflow: "hidden",
                 })}
               >
-                <button
-                  onClick={dislike}
-                  disabled={!isVotingActive || vote != null}
-                  data-selected={vote === "dislike"}
-                >
-                  <img alt="NO" key={noGifUrl} src={noGifUrl} />
-                  <div className="label" style={{ fontSize: "5rem" }}>
-                    NO
-                  </div>
-                </button>
-                <button
-                  onClick={like}
-                  disabled={!isVotingActive || vote != null}
-                  data-selected={vote === "like"}
-                >
-                  <img key={yesGifUrl} alt="YES" src={yesGifUrl} />
-                  <div className="label" style={{ fontSize: "4.2rem" }}>
-                    YES
-                  </div>
-                </button>
+                <div
+                  css={css({
+                    position: "absolute",
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: `${
+                      100 -
+                      (settlementAttempted
+                        ? 100
+                        : Math.max(5, Math.min(100, score * 100)))
+                    }%`,
+                    transition: "0.2s width ease-out, 0.2s background ease-out",
+                    background: isVotingActive ? "white" : "hsl(0 0% 70%)",
+                  })}
+                />
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  right: "100%",
+                  padding: "0 0.8rem",
+                  fontSize: "1.3rem",
+                  fontWeight: "500",
+                }}
+              >
+                {String(voteCounts.dislike ?? 0)}
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  left: "100%",
+                  padding: "0 0.8rem",
+                  fontSize: "1.3rem",
+                  fontWeight: "500",
+                }}
+              >
+                {String(voteCounts.like ?? 0)}
               </div>
             </div>
-          )
+            <div
+              css={css({
+                display: "grid",
+                maxWidth: "42rem",
+                margin: "0 auto",
+                gridTemplateColumns: "repeat(2, minmax(0,auto))",
+                justifyContent: "space-evenly",
+                userSelect: "none",
+              })}
+            >
+              <VoteGifButton
+                isVotingActive={isVotingActive}
+                currentVote={vote}
+                vote="dislike"
+                label="NO"
+                gifUrl={noGifUrl}
+                onClick={dislike}
+              />
+              <VoteGifButton
+                isVotingActive={isVotingActive}
+                currentVote={vote}
+                vote="like"
+                label="YES"
+                gifUrl={yesGifUrl}
+                onClick={like}
+              />
+            </div>
+          </div>
         )}
       </div>
 
@@ -1417,6 +1430,99 @@ const FomoScreen = ({
       {/*   {auctionActionButtonElement} */}
       {/* </div> */}
     </div>
+  );
+};
+
+const VoteGifButton = ({
+  label,
+  onClick,
+  gifUrl,
+  vote,
+  currentVote,
+  isVotingActive,
+}) => {
+  return (
+    <button
+      css={css({
+        position: "relative",
+        display: "block",
+        border: "0.1rem solid black",
+        padding: "0.5rem",
+        borderRadius: "0.5rem",
+        background: "hsl(0 0% 85%)",
+        overflow: "hidden",
+        cursor: "pointer",
+        transition: "0.1s transform ease-out",
+        "@media (hover: hover)": {
+          ":hover": {
+            background: "hsl(0 0% 80%)",
+          },
+          ":hover img": {
+            filter: "saturate(1.25)",
+          },
+        },
+        "&[data-selected=true]": {
+          boxShadow: "0 0 0 0.3rem #667af9",
+        },
+        "&[data-selected=true] img": {
+          filter: "saturate(1.2)",
+        },
+        ":disabled": {
+          cursor: "not-allowed",
+          pointerEvents: "none",
+        },
+        ":not([data-selected=true]):disabled": {
+          borderColor: "hsl(0 0% 60%)",
+        },
+        ":not([data-selected=true]):disabled img": {
+          filter: "saturate(0) contrast(60%)",
+        },
+        ".label": {
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          padding: "1rem 1.5rem",
+          fontWeight: "800",
+          color: "white",
+          transform:
+            "translateY(-50%) translateX(-50%) rotate(-5deg) scale(0.5)",
+          WebkitTextStroke: "1px black",
+          transition: "0.07s all ease-in",
+          opacity: 0,
+        },
+        "&[data-selected=true] .label": {
+          opacity: 1,
+          transform: "translateY(-50%) translateX(-50%) rotate(-5deg) scale(1)",
+        },
+        "@media (hover: hover)": {
+          ":hover .label, &[data-selected=true] .label": {
+            opacity: 1,
+            transform:
+              "translateY(-50%) translateX(-50%) rotate(-5deg) scale(1)",
+          },
+        },
+        img: {
+          display: "block",
+          width: "6rem",
+          height: "6rem",
+          objectFit: "cover",
+          transition: "0.1s transform ease-out",
+          borderRadius: "0.2rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            width: "12rem",
+            height: "12rem",
+          },
+        },
+      })}
+      onClick={onClick}
+      disabled={!isVotingActive || currentVote != null}
+      data-selected={currentVote === vote}
+    >
+      <img alt={label} key={gifUrl} src={gifUrl} />
+      <div className="label" style={{ fontSize: "5rem" }}>
+        {label}
+      </div>
+    </button>
   );
 };
 
