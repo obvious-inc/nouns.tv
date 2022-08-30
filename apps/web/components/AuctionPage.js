@@ -1667,11 +1667,11 @@ const NounTraitLabel = ({ highlight = false, name, title, stats }) => {
     <div
       css={css({
         display: "grid",
-        alignItems: "center",
+        alignItems: "flex-start",
         gridTemplateColumns: "auto minmax(0,1fr)",
         gridGap: "0.4rem",
         width: "max-content",
-        padding: "0.2rem 0.4rem",
+        padding: "0 0.4rem",
         fontSize: "1.2rem",
         fontWeight: "500",
         borderRadius: "0.3rem",
@@ -1687,28 +1687,34 @@ const NounTraitLabel = ({ highlight = false, name, title, stats }) => {
         <div
           css={css({
             marginRight: "0.4rem",
-            svg: { display: "block", width: "1.2rem", height: "auto" },
+            svg: {
+              display: "block",
+              padding: "0.4rem 0",
+              width: "1.2rem",
+              height: "auto",
+            },
           })}
         >
           {iconByPartName[name]}
         </div>
-        <span>
+        <div style={{ padding: "0.2rem 0" }}>
           {title} <span style={{ color: "rgb(0 0 0 / 54%)" }}>{name}</span>
-        </span>
-      </div>
-      {stats != null && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            fontSize: "1rem",
-            fontWeight: "500",
-            color: highlight ? "currentcolor" : "hsl(0 0% 36%)",
-          }}
-        >
-          ({stats.count}/{stats.total})
+          {stats != null && (
+            <>
+              {" "}
+              <span
+                style={{
+                  fontSize: "1rem",
+                  fontWeight: "500",
+                  color: highlight ? "currentcolor" : "hsl(0 0% 36%)",
+                }}
+              >
+                ({stats.count}/{stats.total})
+              </span>
+            </>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
