@@ -464,8 +464,10 @@ export function AuctionPage({ nouns }) {
 
   // const [forceFomo, setForceFomo] = React.useState(false);
   // const toggleForceFomo = () => setForceFomo((s) => !s);
-  const [forceStats, setForceStats] = React.useState(false);
-  const toggleForceStats = () => setForceStats((s) => !s);
+  const [forceStats_, setForceStats] = React.useState(undefined);
+  const forceStats =
+    typeof forceStats_ === "boolean" ? forceStats_ : fomo.isActive;
+  const toggleForceStats = () => setForceStats(() => !forceStats);
 
   const iFrameRef = React.useRef(null);
   useEmbeddedChatMessager(iFrameRef);
@@ -1071,6 +1073,14 @@ const FomoScreen = ({
     ];
   }, [block]);
 
+  const state = settlementAttempted
+    ? "attempting-settlement"
+    : isVotingActive
+    ? vote == null
+      ? "voting"
+      : "voted"
+    : "awaiting-block";
+
   return (
     <div
       css={css({
@@ -1177,27 +1187,33 @@ const FomoScreen = ({
                     textAlign: "center",
                   })}
                 >
-                  {settlementAttempted ? (
-                    "OMG OMG OMG OMG OMG"
-                  ) : isVotingActive ? (
-                    <>
-                      Voting ends in{" "}
-                      <CountdownDisplay to={block.localTimestamp / 1000 + 7} />
-                    </>
-                  ) : (
-                    <>
-                      Waiting for a new block...{" "}
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          transform: "scale(1.2)",
-                          margin: "0 0.2rem",
-                        }}
-                      >
-                        🥱
-                      </span>
-                    </>
-                  )}
+                  {(() => {
+                    switch (state) {
+                      case "attempting-settlement":
+                        return "OMG OMG OMG OMG OMG";
+                      case "voting":
+                        return (
+                          <>
+                            Voting ends in{" "}
+                            <CountdownDisplay
+                              to={block.localTimestamp / 1000 + 7}
+                            />
+                          </>
+                        );
+                      case "voted":
+                        return (
+                          <>
+                            OMG thx for voting!! <Emoji>😍</Emoji>
+                          </>
+                        );
+                      case "awaiting-block":
+                        return (
+                          <>
+                            Waiting for a new block... <Emoji>🥱</Emoji>
+                          </>
+                        );
+                    }
+                  })()}
                 </div>
                 <div
                   css={css({
@@ -1246,22 +1262,14 @@ const FomoScreen = ({
             css={css({
               width: "100%",
               textAlign: "center",
-              padding: "1.5rem 3rem 1rem",
-              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                padding: "2rem 4rem",
-                paddingLeft: "1rem",
-              },
+              padding: "2rem 4rem 2rem 1rem",
             })}
           >
             <div
               css={css({
-                display: "none",
                 fontSize: "2.8rem",
                 fontWeight: "700",
                 margin: "0 0 0.7rem",
-                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                  display: "block",
-                },
               })}
             >
               {settlementAttempted
@@ -1272,50 +1280,55 @@ const FomoScreen = ({
             </div>
             <div
               css={css({
-                display: "none",
-                fontSize: "1.4rem",
-                fontWeight: "500",
-                margin: "0 0 1rem",
-                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                  display: "block",
-                  color: "hsl(0 0% 40%)",
-                  margin: "0 0 2.2rem",
-                  fontSize: "1.6rem",
-                  fontWeight: "600",
-                },
+                color: "hsl(0 0% 40%)",
+                margin: "0 0 2.2rem",
+                fontSize: "1.6rem",
+                fontWeight: "600",
               })}
             >
-              {settlementAttempted ? (
-                "OMG OMG OMG OMG OMG"
-              ) : isVotingActive ? (
-                <>
-                  Voting ends in{" "}
-                  <CountdownDisplay to={block.localTimestamp / 1000 + 7} />
-                </>
-              ) : (
-                <>
-                  Waiting for a new block...{" "}
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      transform: "scale(1.2)",
-                      margin: "0 0.2rem",
-                    }}
-                  >
-                    🥱
-                  </span>
-                </>
-              )}
+              {(() => {
+                switch (state) {
+                  case "attempting-settlement":
+                    return "OMG OMG OMG OMG OMG";
+                  case "voting":
+                    return (
+                      <>
+                        Voting ends in{" "}
+                        <CountdownDisplay
+                          to={block.localTimestamp / 1000 + 7}
+                        />
+                      </>
+                    );
+                  case "voted":
+                    return (
+                      <>
+                        OMG thx for voting!! <Emoji>😍</Emoji>
+                      </>
+                    );
+                  case "awaiting-block":
+                    return (
+                      <>
+                        Waiting for a new block...{" "}
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            transform: "scale(1.2)",
+                            margin: "0 0.2rem",
+                          }}
+                        >
+                          🥱
+                        </span>
+                      </>
+                    );
+                }
+              })()}
             </div>
             <div
               css={css({
                 position: "relative",
                 width: "100%",
                 maxWidth: "42rem",
-                margin: "0 auto 1.5rem",
-                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                  margin: "0 auto 3rem",
-                },
+                margin: "0 auto 3rem",
               })}
             >
               <div
@@ -1328,6 +1341,7 @@ const FomoScreen = ({
                   backgroundSize: "200%",
                   position: "relative",
                   overflow: "hidden",
+                  border: "1px solid rgb(0 0 0 / 40%)",
                 })}
               >
                 <div
@@ -2238,4 +2252,16 @@ const Switch = ({ id, label, ...props }) => (
     />
     {label}
   </label>
+);
+
+const Emoji = ({ style, ...props }) => (
+  <span
+    style={{
+      display: "inline-flex",
+      transform: "scale(1.2)",
+      margin: "0 0.2rem",
+      ...style,
+    }}
+    {...props}
+  />
 );
