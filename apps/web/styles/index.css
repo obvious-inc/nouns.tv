@@ -46,6 +46,10 @@ button {
   height: 100%;
 }
 
+[data-address] {
+  font-variant: no-contextual;
+}
+
 /* .test { */
 /*   container-type: size; */
 /* } */

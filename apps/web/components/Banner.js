@@ -42,6 +42,7 @@ const BidBlock = ({ bid }) => {
         <Link
           href={bidderEtherscanLink}
           css={css({ display: "block", fontWeight: "400" })}
+          data-address
         >
           {ensName || shortenAddress(bid.bidderAddress)}
         </Link>

@@ -1673,7 +1673,7 @@ const AuctionScreenHeader = ({
             }}
           >
             <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
-            <Heading2>
+            <Heading2 data-address>
               {auction.settled
                 ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
                 : auctionEnded
