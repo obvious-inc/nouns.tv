@@ -1177,7 +1177,7 @@ const FomoScreen = ({
                 isVotingActive={isVotingActive}
                 currentVote={vote}
                 vote="dislike"
-                label="NO"
+                label="Nah"
                 gifUrl={noGifUrl}
                 onClick={dislike}
               />
@@ -1218,43 +1218,19 @@ const FomoScreen = ({
                     }
                   })()}
                 </div>
-                <div
-                  css={css({
-                    height: "5rem",
-                    width: "100%",
-                    borderRadius: "0.5rem",
-                    background: rainbowGradient,
-                    animation: `${progressGradientAnimation} 6s linear infinite`,
-                    backgroundSize: "200%",
-                    position: "relative",
-                    overflow: "hidden",
-                    border: "1px solid rgb(0 0 0 / 40%)",
-                  })}
-                >
-                  <div
-                    css={css({
-                      position: "absolute",
-                      right: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: `${
-                        100 -
-                        (settlementAttempted
-                          ? 100
-                          : Math.max(5, Math.min(100, score * 100)))
-                      }%`,
-                      transition:
-                        "0.2s width ease-out, 0.2s background ease-out",
-                      background: isVotingActive ? "white" : "hsl(0 0% 70%)",
-                    })}
-                  />
-                </div>
+                <ProgressBar
+                  progress={
+                    settlementAttempted ? 1 : Math.max(0, Math.min(1, score))
+                  }
+                  height="5rem"
+                  disabled={!isVotingActive}
+                />
               </div>
               <VoteGifButton
                 isVotingActive={isVotingActive}
                 currentVote={vote}
                 vote="like"
-                label="YES"
+                label="yas"
                 gifUrl={yesGifUrl}
                 onClick={like}
               />
@@ -1334,36 +1310,13 @@ const FomoScreen = ({
                 margin: "0 auto 3rem",
               })}
             >
-              <div
-                css={css({
-                  height: "2.4rem",
-                  width: "100%",
-                  borderRadius: "0.5rem",
-                  background: rainbowGradient,
-                  animation: `${progressGradientAnimation} 6s linear infinite`,
-                  backgroundSize: "200%",
-                  position: "relative",
-                  overflow: "hidden",
-                  border: "1px solid rgb(0 0 0 / 40%)",
-                })}
-              >
-                <div
-                  css={css({
-                    position: "absolute",
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    width: `${
-                      100 -
-                      (settlementAttempted
-                        ? 100
-                        : Math.max(5, Math.min(100, score * 100)))
-                    }%`,
-                    transition: "0.2s width ease-out, 0.2s background ease-out",
-                    background: isVotingActive ? "white" : "hsl(0 0% 70%)",
-                  })}
-                />
-              </div>
+              <ProgressBar
+                progress={
+                  settlementAttempted ? 1 : Math.max(0, Math.min(1, score))
+                }
+                height="2.4rem"
+                disabled={!isVotingActive}
+              />
               <div
                 style={{
                   position: "absolute",
@@ -1405,7 +1358,7 @@ const FomoScreen = ({
                 isVotingActive={isVotingActive}
                 currentVote={vote}
                 vote="dislike"
-                label="NO"
+                label="nah"
                 gifUrl={noGifUrl}
                 onClick={dislike}
               />
@@ -1413,7 +1366,7 @@ const FomoScreen = ({
                 isVotingActive={isVotingActive}
                 currentVote={vote}
                 vote="like"
-                label="YES"
+                label="yas"
                 gifUrl={yesGifUrl}
                 onClick={like}
               />
@@ -1505,7 +1458,12 @@ const VoteGifButton = ({
             "translateY(-50%) translateX(-50%) rotate(-5deg) scale(0.5)",
           WebkitTextStroke: "1px black",
           transition: "0.07s all ease-in",
+          textTransform: "uppercase",
           opacity: 0,
+          fontSize: "2.8rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            fontSize: "5rem",
+          },
         },
         "&[data-selected=true] .label": {
           opacity: 1,
@@ -1536,9 +1494,7 @@ const VoteGifButton = ({
       data-selected={currentVote === vote}
     >
       <img alt={label} key={gifUrl} src={gifUrl} />
-      <div className="label" style={{ fontSize: "5rem" }}>
-        {label}
-      </div>
+      <div className="label">{label}</div>
     </button>
   );
 };
@@ -2255,6 +2211,34 @@ const Switch = ({ id, label, ...props }) => (
     />
     {label}
   </label>
+);
+
+const ProgressBar = ({ disabled, progress = 0, height = "1rem" }) => (
+  <div
+    css={css({
+      height,
+      width: "100%",
+      borderRadius: "0.5rem",
+      background: rainbowGradient,
+      animation: `${progressGradientAnimation} 6s linear infinite`,
+      backgroundSize: "200%",
+      position: "relative",
+      overflow: "hidden",
+      border: "1px solid rgb(0 0 0 / 40%)",
+    })}
+  >
+    <div
+      css={css({
+        position: "absolute",
+        right: 0,
+        top: 0,
+        bottom: 0,
+        width: `min(calc(100% - 2px),${(1 - progress) * 100}%)`,
+        transition: "0.2s width ease-out, 0.2s background ease-out",
+        background: disabled ? "hsl(0 0% 70%)" : "white",
+      })}
+    />
+  </div>
 );
 
 const Emoji = ({ style, ...props }) => (
