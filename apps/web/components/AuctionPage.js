@@ -1125,19 +1125,52 @@ const FomoScreen = ({
         {noundersNoun != null && (
           <div
             style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "12%",
-              minWidth: "6rem",
               height: "auto",
               transform: "translateX(10%) translateY(10%)",
-              border: "0.1rem solid black",
               borderRadius: "0.5rem",
               overflow: "hidden",
+              background: "white",
             }}
+            css={css({
+              position: "absolute",
+              bottom: "1rem",
+              left: "2rem",
+              width: "5rem",
+              padding: "0.3rem",
+              ".title": { display: "none" },
+              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                padding: "0.5rem",
+                width: "15%",
+                minWidth: "7rem",
+                left: 0,
+                top: 0,
+                bottom: "auto",
+                ".title": { display: "block" },
+              },
+            })}
           >
-            <NounImage noun={noundersNoun} noStats />
+            <div
+              style={{
+                borderRadius: "0.3rem",
+                overflow: "hidden",
+              }}
+            >
+              <NounImage noun={noundersNoun} noStats />
+            </div>
+            <div
+              style={{
+                textAlign: "center",
+                margin: "0.5rem 0 0",
+                fontSize: "1rem",
+                fontWeight: "700",
+                textTransform: "uppercase",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+              }}
+              className="title"
+            >
+              Noun {noundersNoun.id}
+            </div>
           </div>
         )}
       </div>
