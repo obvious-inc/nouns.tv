@@ -17,7 +17,25 @@ import { getNounData } from "@nouns/assets";
 import { getContractAddressesForChainOrThrow } from "@nouns/sdk";
 import useFomo from "../hooks/useFomo";
 import { chains } from "../utils/network";
+import { useLayoutEffect } from "../utils/react";
 import { getImageUrlFromSeed as getNounImageUrl } from "../utils/nouns";
+
+const useWindowEvent = (event, listener) => {
+  const listenerRef = React.useRef(listener);
+  React.useEffect(() => {
+    listenerRef.current = listener;
+  });
+
+  useLayoutEffect(() => {
+    const handler = () => {
+      listenerRef.current();
+    };
+    window.addEventListener(event, handler);
+    return () => {
+      window.removeEventListener(event, handler);
+    };
+  }, [event]);
+};
 
 const useDidMount = () => {
   const [didMount, setDidMount] = React.useState(false);
@@ -194,23 +212,22 @@ const useAuctionBids = () => {
     },
   });
 
-  React.useEffect(() => {
-    const fetchBids = () =>
+  const fetchBids = React.useCallback(
+    () =>
       auctionHouseContract
         .queryFilter(auctionHouseContract.filters.AuctionBid(), 0 - 6500)
         .then((bids) => {
           setBids(bids.map(parseBid));
-        });
+        }),
+    [auctionHouseContract, parseBid]
+  );
 
+  useWindowEvent("focus", fetchBids);
+  useWindowEvent("online", fetchBids);
+
+  React.useEffect(() => {
     fetchBids();
-
-    window.addEventListener("focus", fetchBids);
-    window.addEventListener("online", fetchBids);
-    return () => {
-      window.removeEventListener("focus", fetchBids);
-      window.removeEventListener("online", fetchBids);
-    };
-  }, [auctionHouseContract, parseBid]);
+  }, [fetchBids]);
 
   return bids;
 };
@@ -237,6 +254,9 @@ export const useAuction = () => {
       settled: auction.settled,
     }),
   });
+
+  useWindowEvent("focus", refetchAuction);
+  useWindowEvent("online", refetchAuction);
 
   const { data: seed } = useContractRead({
     addressOrName: contractAddresses.nounsToken,
