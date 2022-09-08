@@ -1,6 +1,12 @@
 import { css, keyframes } from "@emotion/react";
 import React from "react";
-import { useAccount, useProvider, useNetwork, useSignMessage } from "wagmi";
+import {
+  useAccount,
+  useProvider,
+  useNetwork,
+  useSignMessage,
+  useEnsName,
+} from "wagmi";
 import {
   ConnectButton as RainbowConnectButton,
   useConnectModal,
@@ -443,8 +449,21 @@ const parseParts = (parts = []) => {
   return { body, accessory, head, glasses };
 };
 
+const groupBy = (computeKey, list) =>
+  list.reduce((acc, item) => {
+    const keys = computeKey(item, list);
+    for (let key of Array.isArray(keys) ? keys : [keys]) {
+      const group = acc[key] ?? [];
+      acc[key] = [...group, item];
+    }
+    return acc;
+  }, {});
+
 export function AuctionPage({ nouns }) {
   const { auction, auctionEnded, bidding, settling, fomo } = useAuction();
+  const [selectedTraitName, setSelectedTrait] = React.useState(null);
+  const showTraitDialog = selectedTraitName != null;
+  const closeTraitDialog = () => setSelectedTrait(null);
 
   const stats = React.useMemo(() => {
     if (fomo.isActive)
@@ -540,13 +559,24 @@ export function AuctionPage({ nouns }) {
           .map((n) => [n, parts[n]])
           .filter((e) => e[1] != null)
           .map(([name, title]) => (
-            <NounTraitLabel
+            <button
               key={name}
-              name={name}
-              title={title}
-              stats={stats?.[name]}
-              highlight={stats?.[name].count === 1}
-            />
+              onClick={() => setSelectedTrait(name)}
+              css={css({
+                display: "block",
+                width: "max-content",
+                padding: 0,
+                background: "none",
+                border: 0,
+              })}
+            >
+              <NounTraitLabel
+                name={name}
+                title={title}
+                stats={stats?.[name]}
+                highlight={stats?.[name].count === 1}
+              />
+            </button>
           ))}
         {/* {backgroundName != null && ( */}
         {/*   <NounTraitLabel name="background" title={backgroundName} /> */}
@@ -598,6 +628,7 @@ export function AuctionPage({ nouns }) {
                     noun={fomo.noun}
                     stats={stats}
                     forceStats={forceStats}
+                    selectTrait={setSelectedTrait}
                   />
                 }
                 staticNounStatsElement={staticNounStatsElement}
@@ -638,6 +669,7 @@ export function AuctionPage({ nouns }) {
                     noun={auction?.noun}
                     stats={stats}
                     forceStats={forceStats}
+                    selectTrait={setSelectedTrait}
                   />
                 }
                 staticNounStatsElement={staticNounStatsElement}
@@ -892,6 +924,14 @@ export function AuctionPage({ nouns }) {
           </>
         )}
       </Dialog>
+
+      <TraitDialog
+        isOpen={showTraitDialog}
+        onRequestClose={closeTraitDialog}
+        noun={auction?.noun}
+        nouns={nouns}
+        traitName={selectedTraitName}
+      />
     </>
   );
 }
@@ -977,7 +1017,7 @@ const AuctionScreen = ({
   );
 };
 
-const NounImage = ({ noun, stats, forceStats, noStats }) => {
+const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
   const parts = parseParts(noun?.parts);
 
   const backgroundName = {
@@ -1024,13 +1064,15 @@ const NounImage = ({ noun, stats, forceStats, noStats }) => {
           {Object.entries(parts)
             .filter((e) => e[1] != null)
             .map(([name, title]) => (
-              <FloatingNounTraitLabel
-                key={name}
-                name={name}
-                title={title}
-                stats={stats?.[name]}
-                highlight={stats?.[name].count === 1}
-              />
+              <button key={name} onClick={() => selectTrait(name)}>
+                <FloatingNounTraitLabel
+                  name={name}
+                  title={title}
+                  stats={stats?.[name]}
+                  highlight={stats?.[name].count === 1}
+                  style={{ cursor: "pointer" }}
+                />
+              </button>
             ))}
           {backgroundName != null && (
             <FloatingNounTraitLabel name="background" title={backgroundName} />
@@ -1831,7 +1873,232 @@ const NounTraitLabel = ({ highlight = false, name, title, stats }) => {
   );
 };
 
-const FloatingNounTraitLabel = ({ highlight = false, name, title, stats }) => {
+const TraitDialog = ({ isOpen, onRequestClose, traitName, noun, nouns }) => {
+  const traitValue = noun?.seed[traitName];
+
+  const traitHumanReadableName = React.useMemo(() => {
+    if (noun == null) return null;
+    const part = noun.parts.find((p) => {
+      const name = p.filename.split("-")[0];
+      return name === traitName;
+    });
+
+    return part?.filename.split("-").slice(1).join(" ");
+  }, [noun, traitName]);
+
+  const traitNouns = React.useMemo(() => {
+    const nounsByTraits = groupBy(
+      (noun) =>
+        ["head", "glasses", "body", "accessory"].map((partName) =>
+          [partName, noun.seed[partName]].join("-")
+        ),
+      nouns
+    );
+    const trait = [traitName, traitValue].join("-");
+    return nounsByTraits[trait] ?? [];
+  }, [nouns, traitName, traitValue]);
+
+  const nounCount = traitNouns.length;
+
+  return (
+    <DarkDialog
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      style={{ display: "flex", flexDirection: "column" }}
+    >
+      {({ titleProps }) => (
+        <>
+          <div
+            css={css({
+              display: "grid",
+              gridTemplateColumns: "auto auto",
+              gridGap: "1rem",
+              alignItems: "flex-end",
+              justifyContent: "flex-start",
+              padding: "1.5rem",
+              "@media (min-width: 600px)": {
+                padding: "2rem",
+              },
+            })}
+          >
+            <h1
+              {...titleProps}
+              css={css({
+                fontSize: "1.8rem",
+                lineHeight: "1.2",
+                margin: 0,
+              })}
+            >
+              <span style={{ textTransform: "capitalize" }}>
+                {traitHumanReadableName}
+              </span>{" "}
+              {traitName}
+            </h1>
+            <div
+              css={css({
+                color: "hsl(0 0% 56%)",
+                fontSize: "1.1rem",
+                transform: "translateY(-0.2rem)",
+              })}
+            >
+              {nounCount} {nounCount === 1 ? "noun" : "nouns"}
+            </div>
+          </div>
+          <div
+            css={css({
+              flex: "1 1 auto",
+              overflow: "auto",
+              padding: "0 1.5rem 1.5rem",
+              "@media (min-width: 600px)": {
+                padding: "0 2rem 2rem",
+              },
+            })}
+          >
+            <ul
+              css={css({
+                margin: 0,
+                padding: 0,
+                display: "grid",
+                gridGap: "1.5rem",
+                gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+              })}
+            >
+              {traitNouns
+                ?.sort((n1, n2) => {
+                  const [i1, i2] = [n1, n2].map((n) => Number(n.id));
+                  if (i1 > i2) return 1;
+                  if (i1 < i2) return -1;
+                  return 0;
+                })
+                .map((n) => (
+                  <li key={n.id} css={css({ display: "block" })}>
+                    <TraitNounListItem noun={n} />
+                  </li>
+                ))}
+            </ul>
+          </div>
+        </>
+      )}
+    </DarkDialog>
+  );
+};
+
+const TraitNounListItem = ({ noun: n }) => {
+  const { data: ensName } = useEnsName({ address: n.owner.address });
+  const ownerString = ensName ?? shortenAddress(n.owner.address);
+  return (
+    <div
+      css={css({
+        position: "relative",
+      })}
+    >
+      <a
+        href={`https://nouns.wtf/noun/${n.id}`}
+        target="_blank"
+        rel="noreferrer"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+        }}
+        css={css({
+          "@media (hover: hover)": {
+            ":hover + * .noun-link": { textDecoration: "underline" },
+          },
+        })}
+      />
+
+      <div
+        css={css({
+          position: "relative",
+          pointerEvents: "none",
+          display: "grid",
+          gridTemplateColumns: "auto minmax(0,1fr)",
+          gridGap: "1.5rem",
+          alignItems: "center",
+          lineHeight: "1.4",
+          whiteSpace: "nowrap",
+          a: {
+            "@media (hover: hover)": {
+              ":hover": {
+                textDecoration: "underline",
+              },
+            },
+          },
+        })}
+      >
+        <img
+          src={n.imageUrl}
+          alt={`Noun ${n.id}`}
+          css={css({
+            display: "block",
+            width: "4rem",
+            borderRadius: "0.3rem",
+          })}
+        />
+
+        <div>
+          <div
+            className="noun-link"
+            css={css({
+              display: "block",
+              fontSize: "1.4rem",
+              fontWeight: "500",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            })}
+          >
+            Noun {n.id}
+          </div>
+          <a
+            href={`https://etherscan.io/address/${n.owner.address}`}
+            target="_blank"
+            rel="noreferrer"
+            css={css({
+              pointerEvents: "all",
+              display: "block",
+              fontSize: "1.1rem",
+              color: "hsl(0 0% 56%)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            })}
+          >
+            {ownerString}
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DarkDialog = ({ isOpen, onRequestClose, children, style, ...props }) => {
+  return (
+    <Dialog
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      style={{
+        padding: 0,
+        maxWidth: "48rem",
+        background: "hsl(0 0% 10%)",
+        color: "white",
+        ...style,
+      }}
+      {...props}
+    >
+      {children}
+    </Dialog>
+  );
+};
+
+const FloatingNounTraitLabel = ({
+  highlight = false,
+  name,
+  title,
+  stats,
+  ...props
+}) => {
   return (
     <div
       data-noun-trait
@@ -1842,7 +2109,6 @@ const FloatingNounTraitLabel = ({ highlight = false, name, title, stats }) => {
         fontSize: "1.5rem",
         fontWeight: "500",
         borderRadius: "0.3rem",
-        cursor: "default",
         transform: "translateY(-50%) translateX(-1rem)",
         zIndex: 2,
         background: highlight ? highlightGradient : "white",
@@ -1852,6 +2118,7 @@ const FloatingNounTraitLabel = ({ highlight = false, name, title, stats }) => {
         boxShadow: "2px 2px 0 0 rgb(0 0 0 / 10%)",
         ...positionByPartName[name],
       })}
+      {...props}
     >
       <div style={{ display: "flex", alignItems: "center" }}>
         <div css={css({ marginRight: "0.5rem", svg: { display: "block" } })}>

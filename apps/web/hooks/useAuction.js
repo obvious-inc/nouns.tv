@@ -303,7 +303,7 @@ export const useAuction = () => {
       ownerAddress: rawAuction.winnerAddess,
       parts,
       background,
-      imageUrl: getNounImageUrl({ parts, background }),
+      imageUrl: getNounImageUrl(seed),
       seed: Object.fromEntries(
         ["accessory", "body", "head", "glasses", "background"].map((p) => [
           p,

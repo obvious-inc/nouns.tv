@@ -1,4 +1,6 @@
+import { getNounData } from "@nouns/assets";
 import { GetStaticPaths, GetStaticProps } from "next";
+import { getImageUrlFromSeed as getNounImageUrlFromSeed } from "../utils/nouns";
 import { NOUN_TOKEN_ADDRESS } from "../utils/address";
 import { configLookup, NounishConfig } from "./ServiceContext";
 import { GraphQLClient } from "graphql-request";
@@ -29,7 +31,13 @@ export const getStaticAuctionProps: GetStaticProps<
 
   const client = new GraphQLClient(config.baseURI);
   const service = new SubgraphService(address, client);
-  const nouns: Noun[] = await service.getNouns();
+  const nouns_: Noun[] = await service.getNouns();
+
+  const nouns = nouns_.map((n) => {
+    const { parts, background } = getNounData(n.seed);
+    const imageUrl = getNounImageUrlFromSeed(n.seed);
+    return { ...n, parts, background, imageUrl };
+  });
 
   return {
     props: { address, config, nouns },

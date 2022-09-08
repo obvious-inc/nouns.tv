@@ -93,7 +93,11 @@ const useVoting = ({ auction, enabled }) => {
   const { isConnected: isConnectedToBlockSocket } = useNewHeadsSocket(
     (block) => {
       // Ignore chain reorgs
-      if (Number(block.number) < Number(latestBlock.number)) return;
+      if (
+        latestBlock != null &&
+        Number(block.number) < Number(latestBlock.number)
+      )
+        return;
 
       setLatestBlock({ ...block, localTimestamp: new Date().getTime() });
 
@@ -256,8 +260,8 @@ const useFomo = ({ auction, enabled }) => {
 
     const buildNoun = (id, hash) => {
       const seed = getNounSeedFromBlockHash(id, hash);
+      const imageUrl = getNounImageUrl(seed);
       const { parts, background } = getNounData(seed);
-      const imageUrl = getNounImageUrl({ parts, background });
       return { id, parts, background, imageUrl, seed };
     };
 

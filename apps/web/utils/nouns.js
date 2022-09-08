@@ -1,8 +1,9 @@
-import { ImageData } from "@nouns/assets";
+import { ImageData, getNounData } from "@nouns/assets";
 import { buildSVG } from "@nouns/sdk";
 
-export const getImageUrlFromSeed = ({ parts, background }) => {
+export const getImageUrlFromSeed = (seed) => {
   try {
+    const { parts, background } = getNounData(seed);
     const svgBinary = buildSVG(parts, ImageData.palette, background);
     return `data:image/svg+xml;base64,${btoa(svgBinary)}`;
   } catch (e) {

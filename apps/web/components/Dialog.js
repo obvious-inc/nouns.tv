@@ -39,6 +39,7 @@ const Dialog = ({ style, ...props }) => {
         alignItems: "center",
         justifyContent: "center",
         padding: "2rem 2rem 12vh",
+        overflow: "auto",
       }}
       {...underlayProps}
     >
@@ -50,10 +51,16 @@ const Dialog = ({ style, ...props }) => {
           ref={ref}
           style={{
             background: "white",
-            boxShadow: "0 0.6rem 2.4rem 0 rgb(0 0 0 / 5%)",
-            borderRadius: "1rem",
+            // boxShadow: "0 0.6rem 2.4rem 0 rgb(0 0 0 / 5%)",
+            // borderRadius: "1rem",
             padding: "1rem",
-            maxWidth: "100%",
+            width: "100%",
+            maxWidth: "62rem",
+            maxHeight: "min(calc(100% - 3rem), 82rem)",
+            borderRadius: "0.4rem",
+            boxShadow:
+              "rgb(15 15 15 / 10%) 0px 0px 0px 1px, rgb(15 15 15 / 20%) 0px 5px 10px, rgb(15 15 15 / 40%) 0px 15px 40px",
+
             ...style,
           }}
         >
