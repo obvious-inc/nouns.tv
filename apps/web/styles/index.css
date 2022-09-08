@@ -36,6 +36,7 @@ a {
 button {
   font: inherit;
   margin: 0;
+  color: currentColor;
 }
 
 * {
