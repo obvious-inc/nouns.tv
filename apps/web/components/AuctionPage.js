@@ -966,6 +966,7 @@ const AuctionScreen = ({
           paddingRight: "15%",
           // gridTemplateColumns: "repeat(2, minmax(0,1fr))",
           alignItems: "stretch",
+          justifyContent: "center",
           maxHeight: "none",
         },
       })}
