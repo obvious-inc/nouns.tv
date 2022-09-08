@@ -718,7 +718,7 @@ export function AuctionPage({ nouns }) {
                     flex: 1,
                     minHeight: 0,
                     [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                      minHeight: "10rem",
+                      // minHeight: "10rem",
                     },
                   })}
                 >
@@ -962,8 +962,9 @@ const AuctionScreen = ({
         maxHeight: "max(12rem, calc(50vh - 6rem * 3 - 3rem))",
         [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
           flex: "1 1 0",
-          display: "grid",
-          gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+          flexDirection: "row",
+          paddingRight: "15%",
+          // gridTemplateColumns: "repeat(2, minmax(0,1fr))",
           alignItems: "stretch",
           maxHeight: "none",
         },
