@@ -1031,17 +1031,21 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
       className="noun-container"
       css={css({
         "[data-noun-trait]": {
+          pointerEvents: "none",
           opacity: 0,
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            pointerEvents: "all",
             opacity: forceStats ? 1 : 0,
           },
         },
         "@media (hover: hover)": {
           "[data-noun-trait]": {
+            pointerEvents: forceStats ? "all"  : "none",
             opacity: forceStats ? 1 : 0,
             transition: "0.1s opacity ease-out",
           },
           ":hover [data-noun-trait]": {
+            pointerEvents: "all",
             opacity: 1,
           },
         },
