@@ -928,7 +928,7 @@ export function AuctionPage({ nouns }) {
       <TraitDialog
         isOpen={showTraitDialog}
         onRequestClose={closeTraitDialog}
-        noun={auction?.noun}
+        noun={fomo.isActive ? fomo.noun : auction?.noun}
         nouns={nouns}
         traitName={selectedTraitName}
       />
@@ -1040,7 +1040,7 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
         },
         "@media (hover: hover)": {
           "[data-noun-trait]": {
-            pointerEvents: forceStats ? "all"  : "none",
+            pointerEvents: forceStats ? "all" : "none",
             opacity: forceStats ? 1 : 0,
             transition: "0.1s opacity ease-out",
           },
@@ -1068,15 +1068,16 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
           {Object.entries(parts)
             .filter((e) => e[1] != null)
             .map(([name, title]) => (
-              <button key={name} onClick={() => selectTrait(name)}>
-                <FloatingNounTraitLabel
-                  name={name}
-                  title={title}
-                  stats={stats?.[name]}
-                  highlight={stats?.[name].count === 1}
-                  style={{ cursor: "pointer" }}
-                />
-              </button>
+              <FloatingNounTraitLabel
+                key={name}
+                component="button"
+                onClick={() => selectTrait(name)}
+                name={name}
+                title={title}
+                stats={stats?.[name]}
+                highlight={stats?.[name].count === 1}
+                style={{ cursor: "pointer" }}
+              />
             ))}
           {backgroundName != null && (
             <FloatingNounTraitLabel name="background" title={backgroundName} />
@@ -1490,6 +1491,7 @@ const VoteGifButton = ({
   currentVote,
   isVotingActive,
 }) => {
+  const disabled = !isVotingActive || currentVote != null;
   return (
     <button
       css={css({
@@ -1499,7 +1501,7 @@ const VoteGifButton = ({
         padding: "0.5rem",
         borderRadius: "0.5rem",
         background: "hsl(0 0% 85%)",
-        overflow: "hidden",
+        // overflow: "hidden",
         cursor: "pointer",
         transition: "0.1s transform ease-out",
         "@media (hover: hover)": {
@@ -1544,6 +1546,16 @@ const VoteGifButton = ({
             fontSize: "5rem",
           },
         },
+        ".hint": {
+          position: "absolute",
+          top: "calc(100% + 0.8rem)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          fontSize: "1rem",
+          fontWeight: "500",
+          whiteSpace: "nowrap",
+          textAlign: "center",
+        },
         "&[data-selected=true] .label": {
           opacity: 1,
           transform: "translateY(-50%) translateX(-50%) rotate(-5deg) scale(1)",
@@ -1569,11 +1581,19 @@ const VoteGifButton = ({
         },
       })}
       onClick={onClick}
-      disabled={!isVotingActive || currentVote != null}
+      disabled={disabled}
       data-selected={currentVote === vote}
     >
       <img alt={label} key={gifUrl} src={gifUrl} />
       <div className="label">{label}</div>
+      <div className="hint" style={{ opacity: disabled ? 0 : 1 }}>
+        <Emoji style={{ fontSize: "1.4em", margin: "0 0 0.2rem" }}>
+          {"👆"}
+        </Emoji>
+        <div>
+          Vote <span style={{ textTransform: "uppercase" }}>{label}</span>
+        </div>
+      </div>
     </button>
   );
 };
@@ -1991,11 +2011,7 @@ const TraitNounListItem = ({ noun: n }) => {
   const { data: ensName } = useEnsName({ address: n.owner.address });
   const ownerString = ensName ?? shortenAddress(n.owner.address);
   return (
-    <div
-      css={css({
-        position: "relative",
-      })}
-    >
+    <div css={css({ position: "relative", a: { outline: "none" } })}>
       <a
         href={`https://nouns.wtf/noun/${n.id}`}
         target="_blank"
@@ -2097,6 +2113,7 @@ const DarkDialog = ({ isOpen, onRequestClose, children, style, ...props }) => {
 };
 
 const FloatingNounTraitLabel = ({
+  component: Component = "div",
   highlight = false,
   name,
   title,
@@ -2104,7 +2121,7 @@ const FloatingNounTraitLabel = ({
   ...props
 }) => {
   return (
-    <div
+    <Component
       data-noun-trait
       css={css({
         position: "absolute",
@@ -2118,7 +2135,7 @@ const FloatingNounTraitLabel = ({
         background: highlight ? highlightGradient : "white",
         backgroundSize: "600%",
         animation: `${highlightGradientAnimation} 25s linear infinite`,
-        border: highlight ? "1px solid rgb(0 0 0 / 35%)" : undefined,
+        border: highlight ? "1px solid rgb(0 0 0 / 35%)" : "none",
         boxShadow: "2px 2px 0 0 rgb(0 0 0 / 10%)",
         ...positionByPartName[name],
       })}
@@ -2173,7 +2190,7 @@ const FloatingNounTraitLabel = ({
           )}
         </div>
       )}
-    </div>
+    </Component>
   );
 };
 
