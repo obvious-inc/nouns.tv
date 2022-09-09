@@ -11,6 +11,7 @@ import {
   ConnectButton as RainbowConnectButton,
   useConnectModal,
 } from "@rainbow-me/rainbowkit";
+import { getEtherscanLink } from "../utils/url";
 import { SITE_TITLE } from "../utils/seo";
 import { useProfile } from "../hooks/useProfile";
 import { useAuction } from "../hooks/useAuction";
@@ -478,6 +479,8 @@ export function AuctionPage({ nouns }) {
   const [selectedTraitName, setSelectedTrait] = React.useState(null);
   const showTraitDialog = selectedTraitName != null;
   const closeTraitDialog = () => setSelectedTrait(null);
+  const [showBidsDialog, setShowBidsDialog] = React.useState(false);
+  const toggleBidsDialog = () => setShowBidsDialog((s) => !s);
 
   const showLoadingScreen = !fomo.isActive && auction == null;
 
@@ -739,6 +742,7 @@ export function AuctionPage({ nouns }) {
             >
               <Banner
                 bids={isFetchingInitialBids ? null : auction?.bids ?? []}
+                openBidsDialog={toggleBidsDialog}
               />
             </div>
 
@@ -971,6 +975,12 @@ export function AuctionPage({ nouns }) {
         noun={fomo.isActive ? fomo.noun : auction?.noun}
         nouns={nouns}
         traitName={selectedTraitName}
+      />
+
+      <BidsDialog
+        isOpen={showBidsDialog}
+        onRequestClose={toggleBidsDialog}
+        bids={auction?.bids}
       />
     </>
   );
@@ -1955,6 +1965,205 @@ const NounTraitLabel = ({ highlight = false, name, title, stats }) => {
           )}
         </div>
       </div>
+    </div>
+  );
+};
+
+const BidsDialog = ({ isOpen, onRequestClose, bids }) => {
+  const count = bids?.length;
+  return (
+    <DarkDialog
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      style={{ display: "flex", flexDirection: "column" }}
+    >
+      {({ titleProps }) => (
+        <>
+          <div
+            css={css({
+              display: "grid",
+              gridTemplateColumns: "auto auto",
+              gridGap: "1rem",
+              alignItems: "flex-end",
+              justifyContent: "flex-start",
+              padding: "1.5rem 1.5rem 1rem",
+              "@media (min-width: 600px)": {
+                padding: "2rem 2rem 1.5rem",
+              },
+            })}
+          >
+            <h1
+              {...titleProps}
+              css={css({
+                fontSize: "1.8rem",
+                lineHeight: "1.2",
+                margin: 0,
+              })}
+            >
+              Auction bids
+            </h1>
+            <div
+              css={css({
+                color: "hsl(0 0% 56%)",
+                fontSize: "1.1rem",
+                transform: "translateY(-0.2rem)",
+              })}
+            >
+              {count} {count === 1 ? "bid" : "bids"}
+            </div>
+          </div>
+          <div
+            css={css({
+              flex: "1 1 auto",
+              overflow: "auto",
+              padding: "0.5rem 1.5rem 1.5rem",
+              "@media (min-width: 600px)": {
+                padding: "0.5rem 2rem 2rem",
+              },
+            })}
+          >
+            <ul
+              css={css({
+                margin: 0,
+                padding: 0,
+              })}
+            >
+              {bids
+                ?.sort((a, b) => b.blockTimestamp - a.blockTimestamp)
+                .map((b) => (
+                  <li
+                    key={b.id}
+                    css={css({
+                      display: "block",
+                      ":not(:first-of-type)": { marginTop: "1.5rem" },
+                    })}
+                  >
+                    <BidListItem bid={b} />
+                  </li>
+                ))}
+            </ul>
+          </div>
+        </>
+      )}
+    </DarkDialog>
+  );
+};
+
+const BidListItem = ({ bid }) => {
+  const { ensName, avatarURI, balance } = useProfile(
+    bid.bidderAddress,
+    bid.blockNumber
+  );
+
+  return (
+    <div
+      css={css({
+        position: "relative",
+        display: "grid",
+        gridTemplateColumns: "minmax(0,1fr) auto",
+        gridGap: "1.5rem",
+        alignItems: "center",
+        lineHeight: "1.4",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        a: {
+          "@media (hover: hover)": {
+            ":hover .bidder": {
+              textDecoration: "underline",
+            },
+          },
+        },
+      })}
+    >
+      <a
+        href={`https://etherscan.io/address/${bid.bidderAddress}`}
+        target="_blank"
+        rel="noreferrer"
+        css={css({
+          display: "grid",
+          gridTemplateColumns: "auto minmax(0,1fr)",
+          gridGap: "1.5rem",
+          alignItems: "center",
+        })}
+      >
+        {avatarURI != null ? (
+          <img
+            src={avatarURI}
+            alt="ENS Avatar"
+            css={css({
+              display: "block",
+              width: "4rem",
+              height: "4rem",
+              borderRadius: "0.3rem",
+              objectFit: "cover",
+              background: "hsl(0 0% 100% / 10%)",
+            })}
+          />
+        ) : (
+          <div
+            css={css({
+              width: "4rem",
+              height: "4rem",
+              borderRadius: "0.3rem",
+              background: "hsl(0 0% 100% / 10%)",
+            })}
+          />
+        )}
+        <div>
+          <div
+            css={css({
+              display: "block",
+              fontSize: "1.4rem",
+              fontWeight: "500",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: "white",
+            })}
+          >
+            <span className="bidder">
+              {ensName ?? shortenAddress(bid.bidderAddress)}
+            </span>
+            {ensName != null && (
+              <span
+                css={css({
+                  fontSize: "1.1rem",
+                  color: "hsl(0 0% 56%)",
+                  marginLeft: "0.5rem",
+                })}
+              >
+                {shortenAddress(bid.bidderAddress)}
+              </span>
+            )}
+          </div>
+          <div
+            css={css({
+              fontSize: "1.1rem",
+              color: "hsl(0 0% 56%)",
+            })}
+          >
+            {balance == null
+              ? "?"
+              : `Ξ ${parseFloat(formatEther(balance)).toFixed(
+                  2
+                )} wallet baance`}
+          </div>
+        </div>
+      </a>
+
+      <a
+        href={getEtherscanLink("tx", bid.transactionHash)}
+        target="_blank"
+        rel="noreferrer"
+        css={css({
+          fontSize: "1.5rem",
+          fontWeight: "500",
+          color: "white",
+          ":hover": { textDecoration: "underline" },
+        })}
+      >
+        {"Ξ"} {formatEther(bid.amount)}
+      </a>
     </div>
   );
 };
