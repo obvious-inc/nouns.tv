@@ -50,6 +50,13 @@ const highlightGradientAnimation = keyframes({
     backgroundPosition: "600%",
   },
 });
+const hiddenNounAnimation = keyframes({
+  "0%": { transform: "translateY(100%)" },
+  "90%": { transform: "translateY(100%)" },
+  "91%": { transform: "translateY(0)" },
+  "99%": { transform: "translateY(0)" },
+  "100%": { transform: "translateY(100%)" },
+});
 
 const noGifs = [
   "https://c.tenor.com/_Yg4KymK8skAAAAS/hell-nah-i-give-you-the-wag.gif",
@@ -594,7 +601,14 @@ export function AuctionPage({ nouns }) {
 
   return (
     <>
-      <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <div
+        style={{
+          position: "relative",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <Header />
         <div
           style={{
@@ -721,53 +735,6 @@ export function AuctionPage({ nouns }) {
               <Banner
                 bids={isFetchingInitialBids ? null : auction?.bids ?? []}
               />
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div
-                  css={css({
-                    flex: 1,
-                    minHeight: 0,
-                    [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                      // minHeight: "10rem",
-                    },
-                  })}
-                >
-                  {/* TODO */}
-                </div>
-                <div
-                  style={{
-                    background: "black",
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "stretch",
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: "0.7rem 1rem",
-                      fontWeight: "600",
-                      fontSize: "1.2rem",
-                      textTransform: "uppercase",
-                      color: "#fff006",
-                    }}
-                  >
-                    TV controls under construction
-                  </div>
-                  <div
-                    style={{
-                      position: "relative",
-                      zIndex: 1,
-                      alignSelf: "flex-end",
-                      height: 0,
-                      overflow: "visible",
-                      padding: "0 2.3rem 0 0.5rem",
-                      display: "flex",
-                      alignItems: "flex-end",
-                    }}
-                  >
-                    <ConstructionNoun style={{ width: "5rem" }} />
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
           <div
@@ -796,7 +763,29 @@ export function AuctionPage({ nouns }) {
             )}
           </div>
         </div>
+
+        <div
+          css={css({
+            position: "absolute",
+            right: "8rem",
+            top: "100%",
+            zIndex: 1,
+            height: 0,
+            overflow: "visible",
+            display: "flex",
+            alignItems: "flex-end",
+          })}
+        >
+          <div
+            css={css({
+              animation: `${hiddenNounAnimation} 20s linear forwards`,
+            })}
+          >
+            <ConstructionNoun style={{ width: "5rem" }} />
+          </div>
+        </div>
       </div>
+
       <Dialog
         isOpen={displayBidDialog}
         onRequestClose={toggleDisplayBidDialog}
