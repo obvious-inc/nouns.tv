@@ -479,6 +479,8 @@ export function AuctionPage({ nouns }) {
   const showTraitDialog = selectedTraitName != null;
   const closeTraitDialog = () => setSelectedTrait(null);
 
+  const showLoadingScreen = !fomo.isActive && auction == null;
+
   const stats = React.useMemo(() => {
     if (fomo.isActive)
       return fomo.noun == null
@@ -604,6 +606,7 @@ export function AuctionPage({ nouns }) {
       <div
         style={{
           position: "relative",
+          overflow: "hidden",
           height: "100%",
           display: "flex",
           flexDirection: "column",
@@ -625,6 +628,8 @@ export function AuctionPage({ nouns }) {
         >
           <div
             css={css({
+              position: "relative",
+              overflow: "hidden",
               minWidth: 0,
               display: "flex",
               flexDirection: "column",
@@ -735,6 +740,43 @@ export function AuctionPage({ nouns }) {
               <Banner
                 bids={isFetchingInitialBids ? null : auction?.bids ?? []}
               />
+            </div>
+
+            <div
+              css={css({
+                position: "absolute",
+                top: "-50px",
+                left: "-50px",
+                width: "calc(100% + 50px)",
+                height: "calc(100% + 50px)",
+                background:
+                  "repeating-linear-gradient(#000, #000 50%, white 50%, white)",
+                backgroundSize: "2px 2px",
+                filter: "url(#tv-noise)",
+                zIndex: 1,
+                transition: "1s opacity ease-out",
+              })}
+              style={{
+                opacity: showLoadingScreen ? 1 : 0,
+                pointerEvents: showLoadingScreen ? "all" : "none",
+              }}
+            >
+              <svg>
+                <filter id="tv-noise">
+                  <feTurbulence id="turbulence">
+                    <animate
+                      attributeName="baseFrequency"
+                      dur="50s"
+                      values="0.5 0.5;0.8 0.8; 0.9 0.9"
+                      repeatCount="indefinite"
+                    ></animate>
+                  </feTurbulence>
+                  <feDisplacementMap
+                    in="SourceGraphic"
+                    scale="60"
+                  ></feDisplacementMap>
+                </filter>
+              </svg>
             </div>
           </div>
           <div
