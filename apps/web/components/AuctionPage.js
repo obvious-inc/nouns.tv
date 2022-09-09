@@ -1078,18 +1078,38 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
         <>
           {Object.entries(parts)
             .filter((e) => e[1] != null)
-            .map(([name, title]) => (
-              <FloatingNounTraitLabel
-                key={name}
-                component="button"
-                onClick={() => selectTrait(name)}
-                name={name}
-                title={title}
-                stats={stats?.[name]}
-                highlight={stats?.[name].count === 1}
-                style={{ cursor: "pointer" }}
-              />
-            ))}
+            .map(([name, title]) => {
+              const isFirstAppearance = stats?.[name].count === 1;
+              const props = {
+                name,
+                title,
+                stats: stats?.[name],
+              };
+
+              if (isFirstAppearance)
+                return (
+                  <FloatingNounTraitLabel key={name} {...props} highlight />
+                );
+
+              return (
+                <FloatingNounTraitLabel
+                  key={name}
+                  component="button"
+                  onClick={() => selectTrait(name)}
+                  style={{ cursor: "pointer" }}
+                  css={css({
+                    "@media (hover: hover)": {
+                      ":hover": {
+                        boxShadow:
+                          "0 0 0 1px black, 2px 2px 0 1px rgb(0 0 0 / 10%)",
+                      },
+                    },
+                  })}
+                  {...props}
+                />
+              );
+            })}
+
           {backgroundName != null && (
             <FloatingNounTraitLabel name="background" title={backgroundName} />
           )}
@@ -1950,9 +1970,9 @@ const TraitDialog = ({ isOpen, onRequestClose, traitName, noun, nouns }) => {
               gridGap: "1rem",
               alignItems: "flex-end",
               justifyContent: "flex-start",
-              padding: "1.5rem",
+              padding: "1.5rem 1.5rem 1rem",
               "@media (min-width: 600px)": {
-                padding: "2rem",
+                padding: "2rem 2rem 1.5rem",
               },
             })}
           >
@@ -1983,9 +2003,9 @@ const TraitDialog = ({ isOpen, onRequestClose, traitName, noun, nouns }) => {
             css={css({
               flex: "1 1 auto",
               overflow: "auto",
-              padding: "0 1.5rem 1.5rem",
+              padding: "0.5rem 1.5rem 1.5rem",
               "@media (min-width: 600px)": {
-                padding: "0 2rem 2rem",
+                padding: "0.5rem 2rem 2rem",
               },
             })}
           >
@@ -2036,7 +2056,9 @@ const TraitNounListItem = ({ noun: n }) => {
         }}
         css={css({
           "@media (hover: hover)": {
+            "& + * img": { transition: "0.05s transform ease-out" },
             ":hover + * .noun-link": { textDecoration: "underline" },
+            ":hover + * img": { transform: "scale(1.1)" },
           },
         })}
       />
@@ -2052,8 +2074,17 @@ const TraitNounListItem = ({ noun: n }) => {
           lineHeight: "1.4",
           whiteSpace: "nowrap",
           a: {
+            pointerEvents: "all",
+            display: "block",
+            width: "max-content",
+            fontSize: "1.1rem",
+            color: "hsl(0 0% 56%)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
             "@media (hover: hover)": {
+              transition: "0.05s color ease-out",
               ":hover": {
+                color: "hsl(0 0% 70%)",
                 textDecoration: "underline",
               },
             },
@@ -2087,14 +2118,6 @@ const TraitNounListItem = ({ noun: n }) => {
             href={`https://etherscan.io/address/${n.owner.address}`}
             target="_blank"
             rel="noreferrer"
-            css={css({
-              pointerEvents: "all",
-              display: "block",
-              fontSize: "1.1rem",
-              color: "hsl(0 0% 56%)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            })}
           >
             {ownerString}
           </a>
