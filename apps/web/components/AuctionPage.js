@@ -745,10 +745,10 @@ export function AuctionPage({ nouns }) {
             <div
               css={css({
                 position: "absolute",
-                top: "-50px",
-                left: "-50px",
-                width: "calc(100% + 50px)",
-                height: "calc(100% + 50px)",
+                top: "-100px",
+                left: "-100px",
+                width: "calc(100% + 200px)",
+                height: "calc(100% + 200px)",
                 background:
                   "repeating-linear-gradient(#000, #000 50%, white 50%, white)",
                 backgroundSize: "2px 2px",
