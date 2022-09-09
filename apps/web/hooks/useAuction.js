@@ -167,6 +167,7 @@ const useAuctionBids = () => {
   const provider = useProvider();
 
   const [bids, setBids] = React.useState([]);
+  const [hasFetched, setHasFetched] = React.useState(false);
 
   const auctionHouseContract = useContract({
     addressOrName: contractAddresses.nounsAuctionHouseProxy,
@@ -218,6 +219,7 @@ const useAuctionBids = () => {
         .queryFilter(auctionHouseContract.filters.AuctionBid(), 0 - 6500)
         .then((bids) => {
           setBids(bids.map(parseBid));
+          setHasFetched(true);
         }),
     [auctionHouseContract, parseBid]
   );
@@ -229,12 +231,13 @@ const useAuctionBids = () => {
     fetchBids();
   }, [fetchBids]);
 
-  return bids;
+  return { data: bids, isFetchingInitial: !hasFetched };
 };
 
 export const useAuction = () => {
   const didMount = useDidMount();
-  const bids = useAuctionBids();
+  const { data: bids, isFetchingInitial: isFetchingInitialBids } =
+    useAuctionBids();
 
   const [auctionEnded, setAuctionEnded] = React.useState(false);
 
@@ -360,5 +363,6 @@ export const useAuction = () => {
     fomo,
     bidding,
     settling,
+    isFetchingInitialBids,
   };
 };

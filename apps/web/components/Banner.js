@@ -78,7 +78,7 @@ export function Banner({ bids }) {
             alignItems: "center",
           }}
         >
-          {bids.length === 0 ? (
+          {bids == null ? null : bids.length === 0 ? (
             <div
               css={css({
                 height: "100%",

@@ -460,7 +460,14 @@ const groupBy = (computeKey, list) =>
   }, {});
 
 export function AuctionPage({ nouns }) {
-  const { auction, auctionEnded, bidding, settling, fomo } = useAuction();
+  const {
+    auction,
+    auctionEnded,
+    bidding,
+    settling,
+    fomo,
+    isFetchingInitialBids,
+  } = useAuction();
   const [selectedTraitName, setSelectedTrait] = React.useState(null);
   const showTraitDialog = selectedTraitName != null;
   const closeTraitDialog = () => setSelectedTrait(null);
@@ -711,7 +718,9 @@ export function AuctionPage({ nouns }) {
                 },
               })}
             >
-              <Banner bids={auction?.bids ?? []} />
+              <Banner
+                bids={isFetchingInitialBids ? null : auction?.bids ?? []}
+              />
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div
                   css={css({
