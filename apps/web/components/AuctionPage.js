@@ -2282,7 +2282,17 @@ const TraitNounListItem = ({ noun: n }) => {
   const { data: ensName } = useEnsName({ address: n.owner.address });
   const ownerString = ensName ?? shortenAddress(n.owner.address);
   return (
-    <div css={css({ position: "relative", a: { outline: "none" } })}>
+    <div
+      css={css({
+        position: "relative",
+        a: { outline: "none" },
+        ".rainbow-link": { display: "none" },
+        "@media (hover: hover)": {
+          ".rainbow-link": { display: "block", opacity: 0 },
+          ":hover .rainbow-link": { opacity: 1 },
+        },
+      })}
+    >
       <a
         href={`https://nouns.wtf/noun/${n.id}`}
         target="_blank"
@@ -2296,9 +2306,9 @@ const TraitNounListItem = ({ noun: n }) => {
         }}
         css={css({
           "@media (hover: hover)": {
-            "& + * img": { transition: "0.05s transform ease-out" },
+            "& + * .avatar": { transition: "0.05s transform ease-out" },
             ":hover + * .noun-link": { textDecoration: "underline" },
-            ":hover + * img": { transform: "scale(1.1)" },
+            ":hover + * .avatar": { transform: "scale(1.1)" },
           },
         })}
       />
@@ -2332,6 +2342,7 @@ const TraitNounListItem = ({ noun: n }) => {
         })}
       >
         <img
+          className="avatar"
           src={n.imageUrl}
           alt={`Noun ${n.id}`}
           css={css({
@@ -2354,13 +2365,33 @@ const TraitNounListItem = ({ noun: n }) => {
           >
             Noun {n.id}
           </div>
-          <a
-            href={`https://etherscan.io/address/${n.owner.address}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {ownerString}
-          </a>
+          <div css={css({ display: "flex", alignItems: "center" })}>
+            <a
+              href={`https://etherscan.io/address/${n.owner.address}`}
+              target="_blank"
+              rel="noreferrer"
+              css={css({ paddingRight: "0.3rem" })}
+            >
+              {ownerString}
+            </a>
+            <a
+              href={`https://rainbow.me/${n.owner.address}`}
+              target="_blank"
+              rel="noreferrer"
+              className="rainbow-link"
+              css={css({
+                padding: "0 0.2rem",
+                transition: "0.1s transform ease-out",
+                ":hover": { transform: "scale(1.2)" },
+              })}
+            >
+              <img
+                src="/rainbow-icon.png"
+                alt="Rainbow icon"
+                css={css({ display: "block", width: "1.5rem" })}
+              />
+            </a>
+          </div>
         </div>
       </div>
     </div>
