@@ -2146,7 +2146,7 @@ const BidListItem = ({ bid }) => {
               ? "?"
               : `Ξ ${parseFloat(formatEther(balance)).toFixed(
                   2
-                )} wallet balance`}
+                )} left in wallet`}
           </div>
         </div>
       </a>
