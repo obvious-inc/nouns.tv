@@ -467,7 +467,7 @@ const groupBy = (computeKey, list) =>
     return acc;
   }, {});
 
-export function AuctionPage({ nouns }) {
+export function AuctionPage({ noun, nouns }) {
   const {
     auction,
     auctionEnded,
@@ -482,9 +482,11 @@ export function AuctionPage({ nouns }) {
   const [showBidsDialog, setShowBidsDialog] = React.useState(false);
   const toggleBidsDialog = () => setShowBidsDialog((s) => !s);
 
-  const showLoadingScreen = !fomo.isActive && auction == null;
+  const showLoadingScreen = !fomo.isActive && noun == null && auction == null;
 
   const stats = React.useMemo(() => {
+    if (noun != null) return getNounSeedStats(nouns, noun.id);
+
     if (fomo.isActive)
       return fomo.noun == null
         ? null
@@ -498,7 +500,7 @@ export function AuctionPage({ nouns }) {
         : [...nouns, auction.noun],
       auction.nounId
     );
-  }, [fomo.isActive, fomo.noun, auction, nouns]);
+  }, [fomo.isActive, fomo.noun, auction, noun, nouns]);
 
   // const [forceFomo, setForceFomo] = React.useState(false);
   // const toggleForceFomo = () => setForceFomo((s) => !s);
@@ -562,8 +564,8 @@ export function AuctionPage({ nouns }) {
     );
 
   const staticNounStatsElement = React.useMemo(() => {
-    const noun = fomo.isActive ? fomo.noun : auction?.noun;
-    const parts = parseParts(noun?.parts);
+    const noun_ = noun ?? fomo.isActive ? fomo.noun : auction?.noun;
+    const parts = parseParts(noun_?.parts);
     return (
       <div
         style={{
@@ -602,7 +604,7 @@ export function AuctionPage({ nouns }) {
         {/* )} */}
       </div>
     );
-  }, [auction, fomo, stats]);
+  }, [auction, fomo, noun, stats]);
 
   return (
     <>
@@ -642,13 +644,17 @@ export function AuctionPage({ nouns }) {
               },
             })}
           >
-            <AuctionScreenHeader
-              auction={auction}
-              bidding={bidding}
-              settling={settling}
-              auctionEnded={auctionEnded}
-              auctionActionButtonElement={auctionActionButtonElement}
-            />
+            {noun == null ? (
+              <AuctionScreenHeader
+                auction={auction}
+                bidding={bidding}
+                settling={settling}
+                auctionEnded={auctionEnded}
+                auctionActionButtonElement={auctionActionButtonElement}
+              />
+            ) : (
+              <NounScreenHeader noun={noun} />
+            )}
             {fomo.isActive ? (
               <FomoScreen
                 {...fomo}
@@ -692,10 +698,10 @@ export function AuctionPage({ nouns }) {
               />
             ) : (
               <AuctionScreen
-                auction={auction}
+                noun={noun ?? auction?.noun}
                 nounImageElement={
                   <NounImage
-                    noun={auction?.noun}
+                    noun={noun ?? auction?.noun}
                     stats={stats}
                     forceStats={forceStats}
                     selectTrait={setSelectedTrait}
@@ -732,19 +738,21 @@ export function AuctionPage({ nouns }) {
                 }
               />
             )}
-            <div
-              css={css({
-                display: fomo.isActive ? "none" : "block",
-                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                  display: "block",
-                },
-              })}
-            >
-              <Banner
-                bids={isFetchingInitialBids ? null : auction?.bids ?? []}
-                openBidsDialog={toggleBidsDialog}
-              />
-            </div>
+            {noun == null && (
+              <div
+                css={css({
+                  display: fomo.isActive ? "none" : "block",
+                  [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                    display: "block",
+                  },
+                })}
+              >
+                <Banner
+                  bids={isFetchingInitialBids ? null : auction?.bids ?? []}
+                  openBidsDialog={toggleBidsDialog}
+                />
+              </div>
+            )}
 
             <div
               css={css({
@@ -987,13 +995,12 @@ export function AuctionPage({ nouns }) {
 }
 
 const AuctionScreen = ({
-  auction,
+  noun,
   nounImageElement,
   controlsElement,
   auctionActionButtonElement,
   staticNounStatsElement,
 }) => {
-  const noun = auction?.noun;
   const isMobileLayout = useMediaQuery(
     `(max-width: ${STACKED_MODE_BREAKPOINT})`
   );
@@ -1878,6 +1885,58 @@ const AuctionScreenHeader = ({
         })}
       >
         {auctionActionButtonElement}
+      </div>
+    </ScreenHeader>
+  );
+};
+
+const NounScreenHeader = ({ noun }) => {
+  const { ensName: ownerENSName } = useProfile(noun.owner.address);
+  const ownerName = ownerENSName ?? shortenAddress(noun.owner.address);
+
+  return (
+    <ScreenHeader>
+      <div
+        css={css({
+          display: "none",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            display: "block",
+            flex: 1,
+            paddingRight: "1em",
+          },
+        })}
+      >
+        <div style={{ fontSize: "3em", fontWeight: "900" }}>Noun {noun.id}</div>
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridAutoFlow: "column",
+          gridAutoColumns: "auto",
+          alignItems: "center",
+          gridGap: "2em",
+        }}
+      >
+        <div style={{ minWidth: 0, overflow: "hidden" }}>
+          <Label>Owner</Label>
+          <Heading2 data-address>{ownerName}</Heading2>
+        </div>
+        {/* <div> */}
+        {/*   {auction?.amount != null && ( */}
+        {/*     <> */}
+        {/*       <Label>{auctionEnded ? "Winning bid" : "Current bid"}</Label> */}
+        {/*       <Heading2> */}
+        {/*         {auction.amount.isZero() ? ( */}
+        {/*           "-" */}
+        {/*         ) : ( */}
+        {/*           <> */}
+        {/*             {"Ξ"} {formatEther(auction.amount)} */}
+        {/*           </> */}
+        {/*         )} */}
+        {/*       </Heading2> */}
+        {/*     </> */}
+        {/*   )} */}
+        {/* </div> */}
       </div>
     </ScreenHeader>
   );
