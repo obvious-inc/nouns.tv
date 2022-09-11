@@ -20,7 +20,10 @@ import { useAuction } from "../hooks/useAuction";
 import useMediaQuery from "../hooks/useMediaQuery";
 import { shortenAddress } from "../utils/address";
 import { useLayoutEffect } from "../utils/react";
-import { getSeedStats as getNounSeedStats } from "../utils/nouns";
+import {
+  getSeedStats as getNounSeedStats,
+  enhance as enhanceNoun,
+} from "../utils/nouns";
 import { CountdownDisplay } from "./CountdownDisplay";
 import Dialog from "./Dialog";
 import { Banner } from "./Banner";
@@ -469,7 +472,13 @@ const groupBy = (computeKey, list) =>
     return acc;
   }, {});
 
-export function AuctionPage({ noun, nouns }) {
+export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
+  const noun = React.useMemo(
+    () => (noun_ == null ? null : enhanceNoun(noun_)),
+    [noun_]
+  );
+  const nouns = React.useMemo(() => nouns_.map(enhanceNoun), [nouns_]);
+
   const {
     auction,
     auctionEnded,
@@ -481,18 +490,22 @@ export function AuctionPage({ noun, nouns }) {
   const router = useRouter();
 
   const selectedTraitName = router.query.trait;
-  const setSelectedTrait = React.useCallback((trait) => {
-    const searchParams = new URLSearchParams(location.search);
-    if (trait == null) searchParams.delete("trait");
-    else searchParams.set("trait", trait);
-    router.replace(
-      [location.pathname, searchParams.toString()].join("?"),
-      undefined,
-      {
-        shallow: true,
-      }
-    );
-  }, []);
+  const setSelectedTrait = React.useCallback(
+    (trait) => {
+      const searchParams = new URLSearchParams(location.search);
+      if (trait == null) searchParams.delete("trait");
+      else searchParams.set("trait", trait);
+      router.replace(
+        [location.pathname, searchParams.toString()].join("?"),
+        undefined,
+        {
+          shallow: true,
+        }
+      );
+    },
+    [router]
+  );
+
   const showTraitDialog = selectedTraitName != null;
   const closeTraitDialog = () => setSelectedTrait(null);
 

@@ -41,3 +41,9 @@ export const getSeedStats = (nouns, nounId) => {
     })
   );
 };
+
+export const enhance = (n) => {
+  const { parts, background } = getNounData(n.seed);
+  const imageUrl = getImageUrlFromSeed(n.seed);
+  return { ...n, parts, background, imageUrl };
+};

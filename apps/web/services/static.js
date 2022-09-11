@@ -1,5 +1,3 @@
-import { getNounData } from "@nouns/assets";
-import { getImageUrlFromSeed as getNounImageUrlFromSeed } from "../utils/nouns";
 import { NOUN_TOKEN_ADDRESS } from "../utils/address";
 import { configLookup } from "./ServiceContext";
 import { GraphQLClient } from "graphql-request";
@@ -13,21 +11,12 @@ export const getStaticAuctionProps = async ({ params }) => {
 
   const client = new GraphQLClient(config.baseURI);
   const service = new SubgraphService(address, client);
-  const nouns_ = await service.getNouns();
-
-  const nouns = nouns_.map((n) => {
-    const { parts, background } = getNounData(n.seed);
-    const imageUrl = getNounImageUrlFromSeed(n.seed);
-    return { ...n, parts, background, imageUrl };
-  });
+  const nouns = await service.getNouns();
 
   let noun = null;
 
   if (params?.["noun-id"] != null) {
     noun = nouns.find((n) => n.id === params["noun-id"]);
-    const { parts, background } = getNounData(noun.seed);
-    noun.parts = parts;
-    noun.background = background;
     noun.auction = (await service.getAuction(noun.id)) ?? null;
     delete noun.auction?.noun;
   }
