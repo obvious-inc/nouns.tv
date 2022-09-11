@@ -7,7 +7,8 @@ import { formatEther } from "ethers/lib/utils";
 import { shortenAddress } from "../utils/address";
 
 const BidBlock = ({ bid }) => {
-  const { ensName, avatarURI } = useProfile(bid.bidderAddress, bid.blockNumber);
+  const bidderAddress = bid.bidderAddress ?? bid.bidder.address;
+  const { ensName, avatarURI } = useProfile(bidderAddress, bid.blockNumber);
 
   return (
     <Box display="flex" flexDirection="row" alignItems="center">
@@ -30,7 +31,7 @@ const BidBlock = ({ bid }) => {
           {"Ξ"} {formatEther(bid.amount)}
         </div>
         <div css={css({ fontWeight: "400" })} data-address>
-          {ensName || shortenAddress(bid.bidderAddress)}
+          {ensName || shortenAddress(bidderAddress)}
         </div>
       </div>
     </Box>

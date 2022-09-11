@@ -1,5 +1,7 @@
 import { css, keyframes } from "@emotion/react";
 import React from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import {
   useAccount,
   useProvider,
@@ -476,9 +478,24 @@ export function AuctionPage({ noun, nouns }) {
     fomo,
     isFetchingInitialBids,
   } = useAuction();
-  const [selectedTraitName, setSelectedTrait] = React.useState(null);
+  const router = useRouter();
+
+  const selectedTraitName = router.query.trait;
+  const setSelectedTrait = React.useCallback((trait) => {
+    const searchParams = new URLSearchParams(location.search);
+    if (trait == null) searchParams.delete("trait");
+    else searchParams.set("trait", trait);
+    router.replace(
+      [location.pathname, searchParams.toString()].join("?"),
+      undefined,
+      {
+        shallow: true,
+      }
+    );
+  }, []);
   const showTraitDialog = selectedTraitName != null;
   const closeTraitDialog = () => setSelectedTrait(null);
+
   const [showBidsDialog, setShowBidsDialog] = React.useState(false);
   const toggleBidsDialog = () => setShowBidsDialog((s) => !s);
 
@@ -604,7 +621,7 @@ export function AuctionPage({ noun, nouns }) {
         {/* )} */}
       </div>
     );
-  }, [auction, fomo, noun, stats]);
+  }, [auction, fomo, noun, stats, setSelectedTrait]);
 
   return (
     <>
@@ -738,7 +755,8 @@ export function AuctionPage({ noun, nouns }) {
                 }
               />
             )}
-            {noun == null && (
+
+            {(noun == null || noun.auction != null) && (
               <div
                 css={css({
                   display: fomo.isActive ? "none" : "block",
@@ -748,7 +766,13 @@ export function AuctionPage({ noun, nouns }) {
                 })}
               >
                 <Banner
-                  bids={isFetchingInitialBids ? null : auction?.bids ?? []}
+                  bids={
+                    noun == null
+                      ? isFetchingInitialBids
+                        ? null
+                        : auction?.bids ?? []
+                      : noun.auction.bids
+                  }
                   openBidsDialog={toggleBidsDialog}
                 />
               </div>
@@ -1689,41 +1713,45 @@ const Header = () => (
       color: "white",
     }}
   >
-    <div style={{ width: "5rem", marginRight: "1rem" }}>
-      <svg
-        width="50"
-        height="30"
-        viewBox="0 0 50 30"
-        fill="none"
-        style={{ width: "100%", height: "auto" }}
-      >
-        <rect width="50" height="30" fill="#FF1AD2" />
-        <rect x="5" y="5" width="10" height="10" fill="black" />
-        <rect x="5" y="15" width="10" height="10" fill="white" />
-        <rect x="15" y="5" width="10" height="10" fill="white" />
-        <rect x="15" y="15" width="10" height="10" fill="black" />
-        <rect x="25" y="5" width="10" height="10" fill="black" />
-        <rect x="25" y="15" width="10" height="10" fill="white" />
-        <rect x="35" y="5" width="10" height="10" fill="white" />
-        <rect x="35" y="15" width="10" height="10" fill="black" />
-      </svg>
-    </div>
+    <Link href="/">
+      <a style={{ display: "flex", alignItems: "center" }}>
+        <div style={{ width: "5rem", marginRight: "1rem" }}>
+          <svg
+            width="50"
+            height="30"
+            viewBox="0 0 50 30"
+            fill="none"
+            style={{ width: "100%", height: "auto" }}
+          >
+            <rect width="50" height="30" fill="#FF1AD2" />
+            <rect x="5" y="5" width="10" height="10" fill="black" />
+            <rect x="5" y="15" width="10" height="10" fill="white" />
+            <rect x="15" y="5" width="10" height="10" fill="white" />
+            <rect x="15" y="15" width="10" height="10" fill="black" />
+            <rect x="25" y="5" width="10" height="10" fill="black" />
+            <rect x="25" y="15" width="10" height="10" fill="white" />
+            <rect x="35" y="5" width="10" height="10" fill="white" />
+            <rect x="35" y="15" width="10" height="10" fill="black" />
+          </svg>
+        </div>
 
-    <div
-      style={{
-        color: "white",
-        fontSize: "1.8rem",
-        fontWeight: "700",
-        textTransform: "uppercase",
-        flex: 1,
-        minWidth: 0,
-        paddingRight: "1rem",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      }}
-    >
-      {SITE_TITLE}
-    </div>
+        <div
+          style={{
+            color: "white",
+            fontSize: "1.8rem",
+            fontWeight: "700",
+            textTransform: "uppercase",
+            minWidth: 0,
+            paddingRight: "1rem",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {SITE_TITLE}
+        </div>
+      </a>
+    </Link>
+    <div style={{ flex: 1 }} />
     <div>
       <RainbowConnectButton />
     </div>
@@ -1918,25 +1946,17 @@ const NounScreenHeader = ({ noun }) => {
         }}
       >
         <div style={{ minWidth: 0, overflow: "hidden" }}>
-          <Label>Owner</Label>
+          <Label>Winning bid</Label>
+          <Heading2>
+            {noun.auction == null
+              ? "-"
+              : `Ξ ${formatEther(noun.auction.amount)}`}
+          </Heading2>
+        </div>
+        <div style={{ minWidth: 0, overflow: "hidden" }}>
+          <Label>Holder</Label>
           <Heading2 data-address>{ownerName}</Heading2>
         </div>
-        {/* <div> */}
-        {/*   {auction?.amount != null && ( */}
-        {/*     <> */}
-        {/*       <Label>{auctionEnded ? "Winning bid" : "Current bid"}</Label> */}
-        {/*       <Heading2> */}
-        {/*         {auction.amount.isZero() ? ( */}
-        {/*           "-" */}
-        {/*         ) : ( */}
-        {/*           <> */}
-        {/*             {"Ξ"} {formatEther(auction.amount)} */}
-        {/*           </> */}
-        {/*         )} */}
-        {/*       </Heading2> */}
-        {/*     </> */}
-        {/*   )} */}
-        {/* </div> */}
       </div>
     </ScreenHeader>
   );
@@ -2352,25 +2372,25 @@ const TraitNounListItem = ({ noun: n }) => {
         },
       })}
     >
-      <a
-        href={`https://nouns.wtf/noun/${n.id}`}
-        target="_blank"
-        rel="noreferrer"
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-        }}
-        css={css({
-          "@media (hover: hover)": {
-            "& + * .avatar": { transition: "0.05s transform ease-out" },
-            ":hover + * .noun-link": { textDecoration: "underline" },
-            ":hover + * .avatar": { transform: "scale(1.1)" },
-          },
-        })}
-      />
+      <Link href={`/${n.id}`}>
+        <a
+          style={{
+            cursor: "pointer",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+          css={css({
+            "@media (hover: hover)": {
+              "& + * .avatar": { transition: "0.05s transform ease-out" },
+              ":hover + * .noun-link": { textDecoration: "underline" },
+              ":hover + * .avatar": { transform: "scale(1.1)" },
+            },
+          })}
+        />
+      </Link>
 
       <div
         css={css({

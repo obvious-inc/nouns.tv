@@ -191,6 +191,11 @@ export class SubgraphService implements NounService {
     return resp.nouns;
   }
 
+  public async getAllAuctions(): Promise<Auction[]> {
+    const resp = await this.client.request(GET_AUCTIONS_BY_ID, { limit: 1000 });
+    return resp.auctions;
+  }
+
   public async getBids(
     { address, blockNumber, offset = 0 }: GetBidOptions,
     bids: Bid[] = []
