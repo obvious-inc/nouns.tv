@@ -2385,7 +2385,7 @@ const TraitNounListItem = ({ noun: n }) => {
         },
       })}
     >
-      <Link href={`/${n.id}`}>
+      <Link href={`/nouns/${n.id}`}>
         <a
           style={{
             cursor: "pointer",

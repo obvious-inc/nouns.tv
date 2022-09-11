@@ -1,8 +1,8 @@
 import React from "react";
-import { ServiceCtxProvider } from "../services/ServiceContext";
-import { getStaticAuctionProps, getStaticAuctionPaths } from "../services/static";
-import { Page } from "../components/Page";
-import { AuctionPage } from "../components/AuctionPage";
+import { ServiceCtxProvider } from "../../services/ServiceContext";
+import { getStaticAuctionProps, getStaticAuctionPaths } from "../../services/static";
+import { Page } from "../../components/Page";
+import { AuctionPage } from "../../components/AuctionPage";
 
 const ViewNouns = ({  address, config, ...props }) => {
   return (
