@@ -1017,7 +1017,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
       <TraitDialog
         isOpen={showTraitDialog}
         onRequestClose={closeTraitDialog}
-        noun={fomo.isActive ? fomo.noun : auction?.noun}
+        noun={noun ?? (fomo.isActive ? fomo.noun : auction?.noun)}
         nouns={nouns}
         traitName={selectedTraitName}
       />
