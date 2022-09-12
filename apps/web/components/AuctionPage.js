@@ -609,29 +609,29 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
         {["head", "glasses", "body", "accessory"]
           .map((n) => [n, parts[n]])
           .filter((e) => e[1] != null)
-          .map(([name, title]) => (
-            <button
-              key={name}
-              onClick={() => setSelectedTrait(name)}
-              css={css({
-                display: "block",
-                width: "max-content",
-                padding: 0,
-                background: "none",
-                border: 0,
-              })}
-            >
-              <NounTraitLabel
-                name={name}
-                title={title}
-                stats={stats?.[name]}
-                highlight={stats?.[name].count === 1}
-              />
-            </button>
-          ))}
-        {/* {backgroundName != null && ( */}
-        {/*   <NounTraitLabel name="background" title={backgroundName} /> */}
-        {/* )} */}
+          .map(([name, title]) => {
+            const labelProps = { name, title, stats: stats?.[name] };
+            const isFirstAppearance = labelProps.stats?.count === 1;
+
+            if (isFirstAppearance)
+              return <NounTraitLabel key={name} {...labelProps} highlight />;
+
+            return (
+              <button
+                key={name}
+                onClick={() => setSelectedTrait(name)}
+                css={css({
+                  display: "block",
+                  width: "max-content",
+                  padding: 0,
+                  background: "none",
+                  border: 0,
+                })}
+              >
+                <NounTraitLabel {...labelProps} />
+              </button>
+            );
+          })}
       </div>
     );
   }, [auction, fomo, noun, stats, setSelectedTrait]);
@@ -727,7 +727,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                 auctionActionButtonElement={auctionActionButtonElement}
               />
             ) : (
-              <AuctionScreen
+              <NounScreen
                 noun={noun ?? auction?.noun}
                 nounImageElement={
                   <NounImage
@@ -1031,7 +1031,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
   );
 }
 
-const AuctionScreen = ({
+const NounScreen = ({
   noun,
   nounImageElement,
   controlsElement,
@@ -1052,8 +1052,8 @@ const AuctionScreen = ({
         minHeight: "12rem",
         position: "relative",
         overflow: "hidden",
-        // Top nav and header + bids banner is 3 x 6rem hight, + 3rem for the "under construction" banner
-        maxHeight: "max(12rem, calc(50vh - 6rem * 3 - 3rem))",
+        // Top nav and header + bids banner is 3 x 6rem hight
+        maxHeight: "max(12rem, calc(50vh - 6rem * 3))",
         [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
           flex: "1 1 0",
           flexDirection: "row",
