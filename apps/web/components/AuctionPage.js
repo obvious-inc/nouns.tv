@@ -1379,6 +1379,8 @@ const FomoScreen = ({
           alignItems: "center",
           minHeight: 0,
           position: "relative",
+          zIndex: 2,
+          pointerEvents: "none",
         })}
       >
         {!isConnected || block == null ? (
@@ -1395,7 +1397,13 @@ const FomoScreen = ({
             {/* <GrayButton onClick={reconnect}>Reconnect</GrayButton> */}
           </div>
         ) : isMobileLayout ? (
-          <div css={css({ width: "100%", padding: "1.5rem" })}>
+          <div
+            css={css({
+              width: "100%",
+              padding: "1.5rem",
+              pointerEvents: "all",
+            })}
+          >
             <div
               css={css({
                 display: "grid",
@@ -1420,6 +1428,7 @@ const FomoScreen = ({
                     fontWeight: "500",
                     margin: "0 0 0.5rem",
                     textAlign: "center",
+                    minHeight: "1.6rem",
                   })}
                 >
                   {(() => {
@@ -1653,6 +1662,7 @@ const VoteGifButton = ({
         padding: "0.5rem",
         borderRadius: "0.5rem",
         background: "hsl(0 0% 85%)",
+        pointerEvents: "all",
         // overflow: "hidden",
         cursor: "pointer",
         transition: "0.1s transform ease-out",
