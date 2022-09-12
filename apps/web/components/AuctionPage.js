@@ -512,31 +512,45 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
   const [showBidsDialog, setShowBidsDialog] = React.useState(false);
   const toggleBidsDialog = () => setShowBidsDialog((s) => !s);
 
-  const showLoadingScreen = !fomo.isActive && noun == null && auction == null;
+  const screenMode = React.useMemo(() => {
+    if (noun != null) return "static-noun";
+    if (fomo.isActive) return "fomo";
+    return "auction";
+  }, [noun, auction, fomo.isActive]);
+
+  const auctionMode = React.useMemo(() => {
+    if (auction == null) return "loading";
+    if (auctionEnded) return "awaiting-settle";
+    return "bidding";
+  }, [auction, auctionEnded]);
+
+  const showLoadingScreen = screenMode === "auction" && auction == null;
 
   const stats = React.useMemo(() => {
-    if (noun != null) return getNounSeedStats(nouns, noun.id);
+    switch (screenMode) {
+      case "static-noun":
+        return getNounSeedStats(nouns, noun.id);
+      case "fomo":
+        return fomo.noun == null
+          ? null
+          : getNounSeedStats([...nouns, fomo.noun], fomo.noun.id);
+      case "auction":
+        return auction == null
+          ? null
+          : getNounSeedStats(
+              nouns.some((n) => Number(n.id) === auction.nounId)
+                ? nouns
+                : [...nouns, auction.noun],
+              auction.nounId
+            );
+      default:
+        throw new Error();
+    }
+  }, [screenMode, fomo.noun, auction, noun, nouns]);
 
-    if (fomo.isActive)
-      return fomo.noun == null
-        ? null
-        : getNounSeedStats([...nouns, fomo.noun], fomo.noun.id);
-
-    if (auction == null) return null;
-
-    return getNounSeedStats(
-      nouns.some((n) => Number(n.id) === auction.nounId)
-        ? nouns
-        : [...nouns, auction.noun],
-      auction.nounId
-    );
-  }, [fomo.isActive, fomo.noun, auction, noun, nouns]);
-
-  // const [forceFomo, setForceFomo] = React.useState(false);
-  // const toggleForceFomo = () => setForceFomo((s) => !s);
   const [forceStats_, setForceStats] = React.useState(undefined);
   const forceStats =
-    typeof forceStats_ === "boolean" ? forceStats_ : fomo.isActive;
+    typeof forceStats_ === "boolean" ? forceStats_ : screenMode === "fomo";
   const toggleForceStats = () => setForceStats(() => !forceStats);
 
   const iFrameRef = React.useRef(null);
@@ -544,12 +558,6 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
 
   const [displayBidDialog, setDisplayBidDialog] = React.useState(false);
   const toggleDisplayBidDialog = () => setDisplayBidDialog((s) => !s);
-
-  const auctionMode = React.useMemo(() => {
-    if (auction == null) return "loading";
-    if (auctionEnded) return "awaiting-settle";
-    return "bidding";
-  }, [auction, auctionEnded]);
 
   const {
     bid,
@@ -593,9 +601,21 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
       </GrayButton>
     );
 
+  const displayedNoun = React.useMemo(() => {
+    switch (screenMode) {
+      case "static-noun":
+        return noun;
+      case "fomo":
+        return fomo.noun;
+      case "auction":
+        return auction?.noun;
+      default:
+        throw new Error();
+    }
+  }, [screenMode, noun, fomo.noun, auction]);
+
   const staticNounStatsElement = React.useMemo(() => {
-    const noun_ = noun ?? (fomo.isActive ? fomo.noun : auction?.noun);
-    const parts = parseParts(noun_?.parts);
+    const parts = parseParts(displayedNoun?.parts);
     return (
       <div
         style={{
@@ -634,7 +654,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
           })}
       </div>
     );
-  }, [auction, fomo, noun, stats, setSelectedTrait]);
+  }, [displayedNoun, stats, setSelectedTrait]);
 
   return (
     <>
@@ -674,23 +694,37 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
               },
             })}
           >
-            {noun == null ? (
+            {screenMode === "static-noun" ? (
+              <NounScreenHeader
+                noun={displayedNoun}
+                navigationElement={
+                  <HeaderNounNavigation
+                    nounId={Number(displayedNoun.id)}
+                    nounCount={nouns.length}
+                  />
+                }
+              />
+            ) : (
               <AuctionScreenHeader
+                navigationElement={
+                  <HeaderNounNavigation
+                    nounId={Number(displayedNoun?.id)}
+                    nounCount={nouns.length}
+                  />
+                }
                 auction={auction}
                 bidding={bidding}
                 settling={settling}
                 auctionEnded={auctionEnded}
                 auctionActionButtonElement={auctionActionButtonElement}
               />
-            ) : (
-              <NounScreenHeader noun={noun} />
             )}
-            {fomo.isActive ? (
+            {screenMode === "fomo" ? (
               <FomoScreen
                 {...fomo}
                 nounImageElement={
                   <NounImage
-                    noun={fomo.noun}
+                    noun={displayedNoun}
                     stats={stats}
                     forceStats={forceStats}
                     selectTrait={setSelectedTrait}
@@ -728,10 +762,10 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
               />
             ) : (
               <NounScreen
-                noun={noun ?? auction?.noun}
+                noun={displayedNoun}
                 nounImageElement={
                   <NounImage
-                    noun={noun ?? auction?.noun}
+                    noun={displayedNoun}
                     stats={stats}
                     forceStats={forceStats}
                     selectTrait={setSelectedTrait}
@@ -739,7 +773,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                 }
                 staticNounStatsElement={staticNounStatsElement}
                 auctionActionButtonElement={
-                  noun == null ? auctionActionButtonElement : null
+                  screenMode === "auction" ? auctionActionButtonElement : null
                 }
                 controlsElement={
                   <div
@@ -760,21 +794,16 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                       checked={forceStats}
                       onChange={toggleForceStats}
                     />
-                    {/* <Switch */}
-                    {/*   id="fomo-switch" */}
-                    {/*   label="FOMO" */}
-                    {/*   checked={forceFomo} */}
-                    {/*   onChange={toggleForceFomo} */}
-                    {/* /> */}
                   </div>
                 }
               />
             )}
 
-            {(noun == null || noun.auction != null) && (
+            {(screenMode !== "static-noun" ||
+              displayedNoun.auction != null) && (
               <div
                 css={css({
-                  display: fomo.isActive ? "none" : "block",
+                  display: screenMode === "fomo" ? "none" : "block",
                   [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
                     display: "block",
                   },
@@ -782,11 +811,11 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
               >
                 <Banner
                   bids={
-                    noun == null
-                      ? isFetchingInitialBids
-                        ? null
-                        : auction?.bids ?? []
-                      : noun.auction.bids
+                    screenMode === "static-noun"
+                      ? displayedNoun.auction.bids
+                      : isFetchingInitialBids
+                      ? null
+                      : auction?.bids ?? []
                   }
                   openBidsDialog={toggleBidsDialog}
                 />
@@ -1019,7 +1048,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
       <TraitDialog
         isOpen={showTraitDialog}
         onRequestClose={closeTraitDialog}
-        noun={noun ?? (fomo.isActive ? fomo.noun : auction?.noun)}
+        noun={displayedNoun}
         nouns={nouns}
         traitName={selectedTraitName}
       />
@@ -1027,7 +1056,11 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
       <BidsDialog
         isOpen={showBidsDialog}
         onRequestClose={toggleBidsDialog}
-        bids={auction?.bids}
+        bids={
+          screenMode === "static-noun"
+            ? displayedNoun.auction?.bids
+            : auction?.bids
+        }
       />
     </>
   );
@@ -1207,7 +1240,6 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
 };
 
 const FomoScreen = ({
-  // isActive,
   noun,
   noundersNoun,
   block,
@@ -1794,6 +1826,7 @@ const AuctionScreenHeader = ({
   auction,
   auctionEnded,
   auctionActionButtonElement,
+  navigationElement,
 }) => {
   const [isTimer, setIsTimer] = React.useState(true);
   const toggleTimer = () => setIsTimer((s) => !s);
@@ -1809,20 +1842,23 @@ const AuctionScreenHeader = ({
     <ScreenHeader>
       <div
         css={css({
-          display: "none",
-          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            display: "block",
-            flex: 1,
-            paddingRight: "1em",
-          },
+          flex: "1 1 auto",
+          display: "flex",
+          alignItems: "center",
+          paddingRight: "2rem",
         })}
       >
         {auction?.noun != null && (
           <div
-            style={{
-              fontSize: "3em",
-              fontWeight: "900",
-            }}
+            css={css({
+              display: "none",
+              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                display: "block",
+                fontSize: "3em",
+                fontWeight: "900",
+                marginRight: "1rem",
+              },
+            })}
           >
             Noun {auction.noun.id}{" "}
             {auctionEnded && (
@@ -1832,23 +1868,23 @@ const AuctionScreenHeader = ({
             )}
           </div>
         )}
+        <div css={css({})}>{navigationElement}</div>
       </div>
       {auction != null && (
         <div
-          style={{
+          css={css({
             display: "grid",
             gridAutoFlow: "column",
             gridAutoColumns: "auto",
             alignItems: "center",
             gridGap: "2em",
-          }}
-        >
-          <div
-            style={{
+            "& > *": {
               minWidth: 0,
               overflow: "hidden",
-            }}
-          >
+            },
+          })}
+        >
+          <div>
             <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
             <Heading2 data-address>
               {auction.settled
@@ -1933,13 +1969,52 @@ const AuctionScreenHeader = ({
   );
 };
 
-const NounScreenHeader = ({ noun }) => {
+const HeaderNounNavigation = ({ nounId, nounCount, ...props }) => (
+  <div
+    css={css({
+      display: "grid",
+      gridAutoColumns: "auto",
+      gridAutoFlow: "column",
+      alignItems: "center",
+      gridGap: "0.5rem",
+    })}
+    {...props}
+  >
+    <Link href={`/nouns/${nounId - 1}`}>
+      <GrayButton
+        component="a"
+        disabled={nounId === 0}
+        css={css({ height: "3rem", width: "3rem", minHeight: 0 })}
+      >
+        &larr;
+      </GrayButton>
+    </Link>
+    <Link href={nounId === nounCount - 2 ? "/" : `/nouns/${nounId + 1}`}>
+      <GrayButton
+        component="a"
+        disabled={nounId === nounCount - 1}
+        css={css({ height: "3rem", width: "3rem", minHeight: 0 })}
+      >
+        &rarr;
+      </GrayButton>
+    </Link>
+  </div>
+);
+
+const NounScreenHeader = ({ noun, navigationElement }) => {
   const { ensName: ownerENSName } = useProfile(noun.owner.address);
   const ownerName = ownerENSName ?? shortenAddress(noun.owner.address);
 
   return (
     <ScreenHeader>
-      <div css={css({ flex: 1, paddingRight: "1em" })}>
+      <div
+        css={css({
+          flex: "1 1 auto",
+          paddingRight: "2rem",
+          display: "flex",
+          alignItems: "center",
+        })}
+      >
         <div
           css={css({
             fontSize: "2.6rem",
@@ -1951,6 +2026,7 @@ const NounScreenHeader = ({ noun }) => {
         >
           Noun {noun.id}
         </div>
+        <div css={css({ marginLeft: "1rem" })}>{navigationElement}</div>
       </div>
       <div
         style={{
@@ -1959,9 +2035,13 @@ const NounScreenHeader = ({ noun }) => {
           gridAutoColumns: "auto",
           alignItems: "center",
           gridGap: "2em",
+          "& > *": {
+            minWidth: 0,
+            overflow: "hidden",
+          },
         }}
       >
-        <div style={{ minWidth: 0, overflow: "hidden" }}>
+        <div>
           <Label>Winning bid</Label>
           <Heading2>
             {noun.auction == null
@@ -1975,12 +2055,10 @@ const NounScreenHeader = ({ noun }) => {
           rel="noreferrer"
           css={css({
             display: "block",
-            minWidth: 0,
-            overflow: "hidden",
             "@media (hover: hover)": {
               ":hover [data-address]": {
                 textDecoration: "underline",
-                color: "hsl(0 0% 5%)",
+                color: "hsl(0 0% 15%)",
               },
             },
           })}
@@ -2846,60 +2924,75 @@ const Spinner = ({
   </svg>
 );
 
-const GrayButton = ({
-  component: Component = "button",
-  isLoading,
-  error,
-  hint,
-  children,
-  ...props
-}) => (
-  <Component
-    css={css({
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      border: "0.1rem solid black",
-      borderRadius: "0.5rem",
-      background: "hsl(0 0% 85%)",
-      cursor: "pointer",
-      padding: "0 1rem",
-      minHeight: "4rem",
-      fontSize: "1.5rem",
-      fontFamily: "inherit",
-      fontWeight: "500",
-      textAlign: "left",
-      color: "black",
-      ":disabled": {
-        cursor: "not-allowed",
-        pointerEvents: "none",
-        borderColor: "hsl(0 0% 65%)",
-        color: "hsl(0 0% 46%)",
-      },
-      "@media (hover: hover)": {
-        ":hover": {
-          background: "hsl(0 0% 80%)",
-        },
-      },
-    })}
-    {...props}
-  >
-    <div>
-      {children}
-      {(hint != null || error != null) && (
-        <div
-          css={css({
-            fontSize: "1rem",
-            fontWeight: "500",
-            color: error != null ? "red" : undefined,
-          })}
-        >
-          {error ?? hint}
+const GrayButton = React.forwardRef(
+  (
+    {
+      component: Component = "button",
+      isLoading,
+      error,
+      hint,
+      disabled,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    let disabledProps;
+    if (disabled)
+      disabledProps =
+        Component === "button" ? { disabled } : { "data-disabled": true };
+
+    return (
+      <Component
+        ref={ref}
+        css={css({
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          border: "0.1rem solid black",
+          borderRadius: "0.5rem",
+          background: "hsl(0 0% 85%)",
+          cursor: "pointer",
+          padding: "0 1rem",
+          minHeight: "4rem",
+          fontSize: "1.5rem",
+          fontFamily: "inherit",
+          fontWeight: "500",
+          textAlign: "left",
+          color: "black",
+          ":disabled, &[data-disabled]": {
+            cursor: "not-allowed",
+            pointerEvents: "none",
+            borderColor: "hsl(0 0% 65%)",
+            color: "hsl(0 0% 46%)",
+          },
+          "@media (hover: hover)": {
+            ":hover": {
+              background: "hsl(0 0% 80%)",
+            },
+          },
+        })}
+        {...disabledProps}
+        {...props}
+      >
+        <div>
+          {children}
+          {(hint != null || error != null) && (
+            <div
+              css={css({
+                fontSize: "1rem",
+                fontWeight: "500",
+                color: error != null ? "red" : undefined,
+              })}
+            >
+              {error ?? hint}
+            </div>
+          )}
         </div>
-      )}
-    </div>
-    {isLoading && <Spinner size="1.5rem" style={{ marginLeft: "1rem" }} />}
-  </Component>
+        {isLoading && <Spinner size="1.5rem" style={{ marginLeft: "1rem" }} />}
+      </Component>
+    );
+  }
 );
 
 const Switch = ({ id, label, ...props }) => (
