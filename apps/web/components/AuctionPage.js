@@ -594,7 +594,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
     );
 
   const staticNounStatsElement = React.useMemo(() => {
-    const noun_ = noun ?? fomo.isActive ? fomo.noun : auction?.noun;
+    const noun_ = noun ?? (fomo.isActive ? fomo.noun : auction?.noun);
     const parts = parseParts(noun_?.parts);
     return (
       <div
@@ -738,7 +738,9 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                   />
                 }
                 staticNounStatsElement={staticNounStatsElement}
-                auctionActionButtonElement={auctionActionButtonElement}
+                auctionActionButtonElement={
+                  noun == null ? auctionActionButtonElement : null
+                }
                 controlsElement={
                   <div
                     css={css({
@@ -1937,17 +1939,18 @@ const NounScreenHeader = ({ noun }) => {
 
   return (
     <ScreenHeader>
-      <div
-        css={css({
-          display: "none",
-          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            display: "block",
-            flex: 1,
-            paddingRight: "1em",
-          },
-        })}
-      >
-        <div style={{ fontSize: "3em", fontWeight: "900" }}>Noun {noun.id}</div>
+      <div css={css({ flex: 1, paddingRight: "1em" })}>
+        <div
+          css={css({
+            fontSize: "2.6rem",
+            fontWeight: "900",
+            [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+              fontSize: "3rem",
+            },
+          })}
+        >
+          Noun {noun.id}
+        </div>
       </div>
       <div
         style={{
@@ -1966,10 +1969,25 @@ const NounScreenHeader = ({ noun }) => {
               : `Ξ ${formatEther(noun.auction.amount)}`}
           </Heading2>
         </div>
-        <div style={{ minWidth: 0, overflow: "hidden" }}>
+        <a
+          href={`https://etherscan.io/address/${noun.owner.address}`}
+          target="_blank"
+          rel="noreferrer"
+          css={css({
+            display: "block",
+            minWidth: 0,
+            overflow: "hidden",
+            "@media (hover: hover)": {
+              ":hover [data-address]": {
+                textDecoration: "underline",
+                color: "hsl(0 0% 5%)",
+              },
+            },
+          })}
+        >
           <Label>Holder</Label>
           <Heading2 data-address>{ownerName}</Heading2>
-        </div>
+        </a>
       </div>
     </ScreenHeader>
   );
