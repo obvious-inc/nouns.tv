@@ -35,7 +35,7 @@ export async function getStaticAuctionPaths() {
   const nouns = await service.getNouns();
   return {
     paths: nouns.map((n) => ({ params: { "noun-id": n.id } })),
-    fallback: false, // can also be true or 'blocking'
+    fallback: "blocking", // can also be true or 'blocking'
   };
 }
 
