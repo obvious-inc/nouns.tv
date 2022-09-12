@@ -25,42 +25,54 @@ const useNewHeadsSocket = (listener) => {
     const requestId = 1;
     let subscriptionId = null;
 
-    const socket = new WebSocket(
-      `wss://${url.hostname}${url.pathname}/${ALCHEMY_API_KEY}`
-    );
+    let socket;
 
-    socket.addEventListener("open", () => {
-      socket.send(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          id: requestId,
-          method: "eth_subscribe",
-          params: ["newHeads"],
-        })
+    const connect = () => {
+      socket = new WebSocket(
+        `wss://${url.hostname}${url.pathname}/${ALCHEMY_API_KEY}`
       );
-    });
-    socket.addEventListener("message", (message) => {
-      try {
-        const data = JSON.parse(message.data);
-        if (data.id === requestId) {
-          subscriptionId = data.result;
-          setConnected(true);
+
+      socket.addEventListener("open", () => {
+        socket.send(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            id: requestId,
+            method: "eth_subscribe",
+            params: ["newHeads"],
+          })
+        );
+      });
+      socket.addEventListener("message", (message) => {
+        try {
+          const data = JSON.parse(message.data);
+          if (data.id === requestId) {
+            subscriptionId = data.result;
+            setConnected(true);
+          }
+          if (data.params?.subscription === subscriptionId)
+            listenerRef.current(data.params.result);
+        } catch (e) {
+          console.error(e);
         }
-        if (data.params?.subscription === subscriptionId)
-          listenerRef.current(data.params.result);
-      } catch (e) {
-        console.error(e);
-      }
-    });
-    socket.addEventListener("error", () => {
-      socket.close();
-    });
-    socket.addEventListener("close", () => {
-      setConnected(false);
-    });
+      });
+      socket.addEventListener("error", () => {
+        socket.close();
+      });
+      socket.addEventListener("close", () => {
+        setConnected(false);
+      });
+    };
+
+    connect();
+
+    const focusHandler = () => {
+      if (socket.readyState === "CLOSED") connect();
+    };
+    window.addEventListener("focus", focusHandler);
 
     return () => {
       socket.close();
+      window.removeEventListener("focus", focusHandler);
     };
   }, [alchemyRpcUrl]);
 
