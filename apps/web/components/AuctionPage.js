@@ -707,6 +707,9 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
               />
             ) : (
               <AuctionScreenHeader
+                auction={auction}
+                auctionEnded={auctionEnded}
+                toggleBidsDialog={toggleBidsDialog}
                 navigationElement={
                   <HeaderNounNavigation
                     auctionNounId={Number(auction?.noun.id)}
@@ -714,10 +717,6 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                     nextNounId={Number(auction?.noun.id) + 1}
                   />
                 }
-                auction={auction}
-                bidding={bidding}
-                settling={settling}
-                auctionEnded={auctionEnded}
                 auctionActionButtonElement={auctionActionButtonElement}
               />
             )}
@@ -1837,6 +1836,7 @@ const ScreenHeader = ({ children }) => (
 const AuctionScreenHeader = ({
   auction,
   auctionEnded,
+  toggleBidsDialog,
   auctionActionButtonElement,
   navigationElement,
 }) => {
@@ -1927,7 +1927,15 @@ const AuctionScreenHeader = ({
                 : bidderShort}
             </Heading2>
           </a>
-          <div>
+          <button
+            onClick={toggleBidsDialog}
+            style={{
+              background: "none",
+              border: 0,
+              padding: 0,
+              cursor: "pointer",
+            }}
+          >
             {auction?.amount != null && (
               <>
                 <Label>{auctionEnded ? "Winning bid" : "Current bid"}</Label>
@@ -1942,7 +1950,7 @@ const AuctionScreenHeader = ({
                 </Heading2>
               </>
             )}
-          </div>
+          </button>
           {!auctionEnded && (
             <button
               onClick={toggleTimer}
@@ -2063,7 +2071,7 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
         <div css={css({ marginLeft: "1rem" })}>{navigationElement}</div>
       </div>
       <div
-        style={{
+        css={css({
           display: "grid",
           gridAutoFlow: "column",
           gridAutoColumns: "auto",
@@ -2073,7 +2081,7 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
             minWidth: 0,
             overflow: "hidden",
           },
-        }}
+        })}
       >
         <div>
           <Label>Winning bid</Label>
@@ -2204,7 +2212,8 @@ const BidsDialog = ({ isOpen, onRequestClose, bids }) => {
           <div
             css={css({
               display: "grid",
-              gridTemplateColumns: "auto auto",
+              gridAutoColumns: "auto",
+              gridAutoFlow: "column",
               gridGap: "1rem",
               alignItems: "flex-end",
               justifyContent: "flex-start",
@@ -2224,15 +2233,17 @@ const BidsDialog = ({ isOpen, onRequestClose, bids }) => {
             >
               Auction bids
             </h1>
-            <div
-              css={css({
-                color: "hsl(0 0% 56%)",
-                fontSize: "1.1rem",
-                transform: "translateY(-0.2rem)",
-              })}
-            >
-              {count} {count === 1 ? "bid" : "bids"}
-            </div>
+            {count !== 0 && (
+              <div
+                css={css({
+                  color: "hsl(0 0% 56%)",
+                  fontSize: "1.1rem",
+                  transform: "translateY(-0.2rem)",
+                })}
+              >
+                {count} {count === 1 ? "bid" : "bids"}
+              </div>
+            )}
           </div>
           <div
             css={css({
@@ -2244,26 +2255,38 @@ const BidsDialog = ({ isOpen, onRequestClose, bids }) => {
               },
             })}
           >
-            <ul
-              css={css({
-                margin: 0,
-                padding: 0,
-              })}
-            >
-              {bids
-                ?.sort((a, b) => b.blockTimestamp - a.blockTimestamp)
-                .map((b) => (
-                  <li
-                    key={b.id}
-                    css={css({
-                      display: "block",
-                      ":not(:first-of-type)": { marginTop: "1.5rem" },
-                    })}
-                  >
-                    <BidListItem bid={b} />
-                  </li>
-                ))}
-            </ul>
+            {count === 0 ? (
+              <div
+                css={css({
+                  color: "hsl(0 0% 56%)",
+                  textAlign: "center",
+                  padding: "4rem 0",
+                })}
+              >
+                No bids
+              </div>
+            ) : (
+              <ul
+                css={css({
+                  margin: 0,
+                  padding: 0,
+                })}
+              >
+                {bids
+                  ?.sort((a, b) => b.blockTimestamp - a.blockTimestamp)
+                  .map((b) => (
+                    <li
+                      key={b.id}
+                      css={css({
+                        display: "block",
+                        ":not(:first-of-type)": { marginTop: "1.5rem" },
+                      })}
+                    >
+                      <BidListItem bid={b} />
+                    </li>
+                  ))}
+              </ul>
+            )}
           </div>
         </>
       )}
@@ -2273,7 +2296,7 @@ const BidsDialog = ({ isOpen, onRequestClose, bids }) => {
 
 const BidListItem = ({ bid }) => {
   const { ensName, avatarURI, balance } = useProfile(
-    bid.bidderAddress,
+    bid.bidder.address,
     bid.blockNumber
   );
 
@@ -2299,7 +2322,7 @@ const BidListItem = ({ bid }) => {
       })}
     >
       <a
-        href={`https://etherscan.io/address/${bid.bidderAddress}`}
+        href={`https://etherscan.io/address/${bid.bidder.address}`}
         target="_blank"
         rel="noreferrer"
         css={css({
@@ -2344,7 +2367,7 @@ const BidListItem = ({ bid }) => {
             })}
           >
             <span className="bidder">
-              {ensName ?? shortenAddress(bid.bidderAddress)}
+              {ensName ?? shortenAddress(bid.bidder.address)}
             </span>
             {ensName != null && (
               <span
@@ -2354,7 +2377,7 @@ const BidListItem = ({ bid }) => {
                   marginLeft: "0.5rem",
                 })}
               >
-                {shortenAddress(bid.bidderAddress)}
+                {shortenAddress(bid.bidder.address)}
               </span>
             )}
           </div>

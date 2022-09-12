@@ -181,9 +181,9 @@ const useAuctionBids = () => {
       blockNumber: bid.blockNumber,
       transactionIndex: bid.transactionIndex,
       nounId: parseInt(bid.args.nounId),
-      bidderAddress: bid.args.sender,
       amount: bid.args.value,
       transactionHash: bid.transactionHash,
+      bidder: { address: bid.args.sender },
     }),
     []
   );
