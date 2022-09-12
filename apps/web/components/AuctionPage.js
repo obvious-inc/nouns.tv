@@ -1333,7 +1333,7 @@ const FomoScreen = ({
             css={css({
               position: "absolute",
               bottom: "1rem",
-              left: "2rem",
+              left: "1rem",
               width: "5rem",
               padding: "0.3rem",
               ".title": { display: "none" },
