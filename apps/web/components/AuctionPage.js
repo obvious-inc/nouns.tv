@@ -2948,76 +2948,74 @@ const Spinner = ({
   </svg>
 );
 
-const GrayButton = React.forwardRef(
-  (
-    {
-      component: Component = "button",
-      isLoading,
-      error,
-      hint,
-      disabled,
-      children,
-      ...props
-    },
-    ref
-  ) => {
-    let disabledProps;
-    if (disabled)
-      disabledProps =
-        Component === "button" ? { disabled } : { "data-disabled": true };
+const GrayButton = React.forwardRef(function GrayButton_(
+  {
+    component: Component = "button",
+    isLoading,
+    error,
+    hint,
+    disabled,
+    children,
+    ...props
+  },
+  ref
+) {
+  let disabledProps;
+  if (disabled)
+    disabledProps =
+      Component === "button" ? { disabled } : { "data-disabled": true };
 
-    return (
-      <Component
-        ref={ref}
-        css={css({
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "0.1rem solid black",
-          borderRadius: "0.5rem",
-          background: "hsl(0 0% 85%)",
-          cursor: "pointer",
-          padding: "0 1rem",
-          minHeight: "4rem",
-          fontSize: "1.5rem",
-          fontFamily: "inherit",
-          fontWeight: "500",
-          textAlign: "left",
-          color: "black",
-          ":disabled, &[data-disabled]": {
-            cursor: "not-allowed",
-            pointerEvents: "none",
-            borderColor: "hsl(0 0% 65%)",
-            color: "hsl(0 0% 46%)",
+  return (
+    <Component
+      ref={ref}
+      css={css({
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        border: "0.1rem solid black",
+        borderRadius: "0.5rem",
+        background: "hsl(0 0% 85%)",
+        cursor: "pointer",
+        padding: "0 1rem",
+        minHeight: "4rem",
+        fontSize: "1.5rem",
+        fontFamily: "inherit",
+        fontWeight: "500",
+        textAlign: "left",
+        color: "black",
+        ":disabled, &[data-disabled]": {
+          cursor: "not-allowed",
+          pointerEvents: "none",
+          borderColor: "hsl(0 0% 65%)",
+          color: "hsl(0 0% 46%)",
+        },
+        "@media (hover: hover)": {
+          ":hover": {
+            background: "hsl(0 0% 80%)",
           },
-          "@media (hover: hover)": {
-            ":hover": {
-              background: "hsl(0 0% 80%)",
-            },
-          },
-        })}
-        {...disabledProps}
-        {...props}
-      >
-        <div>
-          {children}
-          {(hint != null || error != null) && (
-            <div
-              css={css({
-                fontSize: "1rem",
-                fontWeight: "500",
-                color: error != null ? "red" : undefined,
-              })}
-            >
-              {error ?? hint}
-            </div>
-          )}
-        </div>
-        {isLoading && <Spinner size="1.5rem" style={{ marginLeft: "1rem" }} />}
-      </Component>
-    );
-  }
-);
+        },
+      })}
+      {...disabledProps}
+      {...props}
+    >
+      <div>
+        {children}
+        {(hint != null || error != null) && (
+          <div
+            css={css({
+              fontSize: "1rem",
+              fontWeight: "500",
+              color: error != null ? "red" : undefined,
+            })}
+          >
+            {error ?? hint}
+          </div>
+        )}
+      </div>
+      {isLoading && <Spinner size="1.5rem" style={{ marginLeft: "1rem" }} />}
+    </Component>
+  );
+});
 
 const Switch = ({ id, label, ...props }) => (
   <label
