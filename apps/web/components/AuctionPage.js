@@ -699,8 +699,9 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                 noun={displayedNoun}
                 navigationElement={
                   <HeaderNounNavigation
-                    nounId={Number(displayedNoun.id)}
-                    nounCount={nouns.length}
+                    auctionNounId={Number(auction?.noun.id)}
+                    prevNounId={Number(displayedNoun.id) - 1}
+                    nextNounId={Number(displayedNoun.id) + 1}
                   />
                 }
               />
@@ -708,8 +709,9 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
               <AuctionScreenHeader
                 navigationElement={
                   <HeaderNounNavigation
-                    nounId={Number(displayedNoun?.id)}
-                    nounCount={nouns.length}
+                    auctionNounId={Number(auction?.noun.id)}
+                    prevNounId={Number(auction?.noun.id) - 1}
+                    nextNounId={Number(auction?.noun.id) + 1}
                   />
                 }
                 auction={auction}
@@ -1969,7 +1971,12 @@ const AuctionScreenHeader = ({
   );
 };
 
-const HeaderNounNavigation = ({ nounId, nounCount, ...props }) => (
+const HeaderNounNavigation = ({
+  auctionNounId,
+  prevNounId,
+  nextNounId,
+  ...props
+}) => (
   <div
     css={css({
       display: "grid",
@@ -1980,19 +1987,19 @@ const HeaderNounNavigation = ({ nounId, nounCount, ...props }) => (
     })}
     {...props}
   >
-    <Link href={`/nouns/${nounId - 1}`}>
+    <Link href={`/nouns/${prevNounId}`}>
       <GrayButton
         component="a"
-        disabled={nounId === 0}
+        disabled={prevNounId < 0}
         css={css({ height: "3rem", width: "3rem", minHeight: 0 })}
       >
         &larr;
       </GrayButton>
     </Link>
-    <Link href={nounId === nounCount - 2 ? "/" : `/nouns/${nounId + 1}`}>
+    <Link href={nextNounId === auctionNounId ? "/" : `/nouns/${nextNounId}`}>
       <GrayButton
         component="a"
-        disabled={nounId === nounCount - 1}
+        disabled={nextNounId > auctionNounId}
         css={css({ height: "3rem", width: "3rem", minHeight: 0 })}
       >
         &rarr;
