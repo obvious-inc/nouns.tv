@@ -1886,7 +1886,24 @@ const AuctionScreenHeader = ({
             },
           })}
         >
-          <div>
+          <a
+            href={`https://etherscan.io/address/${
+              auction?.settled
+                ? auction?.noun.ownerAddress
+                : auction?.bidderAddress
+            }`}
+            target="_blank"
+            rel="noreferrer"
+            css={css({
+              display: "block",
+              "@media (hover: hover)": {
+                ":hover [data-address]": {
+                  textDecoration: "underline",
+                  color: "hsl(0 0% 25%)",
+                },
+              },
+            })}
+          >
             <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
             <Heading2 data-address>
               {auction.settled
@@ -1899,7 +1916,7 @@ const AuctionScreenHeader = ({
                 ? "No bids"
                 : bidderShort}
             </Heading2>
-          </div>
+          </a>
           <div>
             {auction?.amount != null && (
               <>
@@ -2065,7 +2082,7 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
             "@media (hover: hover)": {
               ":hover [data-address]": {
                 textDecoration: "underline",
-                color: "hsl(0 0% 15%)",
+                color: "hsl(0 0% 25%)",
               },
             },
           })}
