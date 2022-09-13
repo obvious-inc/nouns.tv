@@ -156,6 +156,7 @@ const ChatLayout = ({ showLoadingScreen, children }) => {
       <div
         style={{
           flex: "1 1 0",
+          minHeight: 0,
           display: "flex",
           alignItems: "stretch",
           background: "rgb(25 25 25)",

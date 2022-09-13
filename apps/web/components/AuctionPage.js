@@ -337,6 +337,16 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
     [noun_]
   );
   const nouns = React.useMemo(() => nouns_.map(enhanceNoun), [nouns_]);
+  const nounIdsByHolderAddresses = React.useMemo(
+    () =>
+      nouns.reduce((ns, n) => {
+        const holderAddress = n.owner.address.toLowerCase();
+        const holderNouns = ns[holderAddress] ?? [];
+        ns[holderAddress] = [...holderNouns, n.id];
+        return ns;
+      }, {}),
+    [nouns]
+  );
 
   const {
     auction,
@@ -530,6 +540,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
           <AuctionScreenHeader
             auction={auction}
             auctionEnded={auctionEnded}
+            nounIdsByHolderAddresses={nounIdsByHolderAddresses}
             toggleBidsDialog={toggleBidsDialog}
             navigationElement={
               <HeaderNounNavigation
@@ -797,6 +808,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
             ? displayedNoun.auction?.bids
             : auction?.bids
         }
+        nounIdsByHolderAddresses={nounIdsByHolderAddresses}
       />
     </>
   );
@@ -1518,6 +1530,7 @@ const ScreenHeader = ({ children }) => (
 const AuctionScreenHeader = ({
   auction,
   auctionEnded,
+  nounIdsByHolderAddresses,
   toggleBidsDialog,
   auctionActionButtonElement,
   navigationElement,
@@ -1531,6 +1544,34 @@ const AuctionScreenHeader = ({
     auction?.bidderAddress == null
       ? null
       : bidderENSName ?? shortenAddress(auction.bidderAddress);
+
+  const bidderHasNouns =
+    auction != null &&
+    (
+      nounIdsByHolderAddresses[
+        (auction.settled
+          ? auction.noun.ownerAddress
+          : auction.bidderAddress
+        ).toLowerCase()
+      ] ?? []
+    ).length !== 0;
+
+  const bidderLinkContent = auction != null && (
+    <>
+      <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
+      <Heading2 data-address>
+        {auction.settled
+          ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
+          : auctionEnded
+          ? auction.amount.isZero()
+            ? "-"
+            : bidderShort
+          : auction.amount.isZero()
+          ? "No bids"
+          : bidderShort}
+      </Heading2>
+    </>
+  );
 
   return (
     <ScreenHeader>
@@ -1578,17 +1619,7 @@ const AuctionScreenHeader = ({
               minWidth: 0,
               overflow: "hidden",
             },
-          })}
-        >
-          <a
-            href={`https://etherscan.io/address/${
-              auction?.settled
-                ? auction?.noun.ownerAddress
-                : auction?.bidderAddress
-            }`}
-            target="_blank"
-            rel="noreferrer"
-            css={css({
+            a: {
               display: "block",
               "@media (hover: hover)": {
                 ":hover [data-address]": {
@@ -1596,21 +1627,32 @@ const AuctionScreenHeader = ({
                   color: "hsl(0 0% 25%)",
                 },
               },
-            })}
-          >
-            <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
-            <Heading2 data-address>
-              {auction.settled
-                ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
-                : auctionEnded
-                ? auction.amount.isZero()
-                  ? "-"
-                  : bidderShort
-                : auction.amount.isZero()
-                ? "No bids"
-                : bidderShort}
-            </Heading2>
-          </a>
+            },
+          })}
+        >
+          {bidderHasNouns ? (
+            <Link
+              href={`/holders/${
+                auction?.settled
+                  ? auction?.noun.ownerAddress
+                  : auction?.bidderAddress
+              }`}
+            >
+              <a>{bidderLinkContent}</a>
+            </Link>
+          ) : (
+            <a
+              href={`https://etherscan.io/address/${
+                auction?.settled
+                  ? auction?.noun.ownerAddress
+                  : auction?.bidderAddress
+              }`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {bidderLinkContent}
+            </a>
+          )}
           <button
             onClick={toggleBidsDialog}
             style={{
@@ -1777,35 +1819,35 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
               : `Ξ ${formatEther(noun.auction.amount)}`}
           </Heading2>
         </div>
-        <a
-          href={`https://etherscan.io/address/${noun.owner.address}`}
-          target="_blank"
-          rel="noreferrer"
-          css={css({
-            display: "block",
-            "@media (hover: hover)": {
-              ":hover [data-address]": {
-                textDecoration: "underline",
-                color: "hsl(0 0% 25%)",
+        <Link href={`/holders/${noun.owner.address}`}>
+          <a
+            css={css({
+              cursor: "pointer",
+              display: "block",
+              "@media (hover: hover)": {
+                ":hover [data-address]": {
+                  textDecoration: "underline",
+                  color: "hsl(0 0% 25%)",
+                },
               },
-            },
-          })}
-        >
-          <Label>Holder</Label>
-          <Heading2 data-address>{ownerName}</Heading2>
-        </a>
+            })}
+          >
+            <Label>Holder</Label>
+            <Heading2 data-address>{ownerName}</Heading2>
+          </a>
+        </Link>
       </div>
     </ScreenHeader>
   );
 };
 
-const Label = ({ style, ...props }) => (
+export const Label = ({ style, ...props }) => (
   <div
     style={{
       minWidth: 0,
       overflow: "hidden",
       textOverflow: "ellipsis",
-      fontSize: "1.1em",
+      fontSize: "1.1rem",
       textTransform: "uppercase",
       fontWeight: "700",
       ...style,
@@ -1814,13 +1856,13 @@ const Label = ({ style, ...props }) => (
   />
 );
 
-const Heading2 = ({ style, ...props }) => (
+export const Heading2 = ({ style, ...props }) => (
   <div
     style={{
       minWidth: 0,
       overflow: "hidden",
       textOverflow: "ellipsis",
-      fontSize: "2em",
+      fontSize: "2rem",
       fontWeight: "700",
       ...style,
     }}
@@ -1885,7 +1927,12 @@ const NounTraitLabel = ({ highlight = false, name, title, stats }) => {
   );
 };
 
-const BidsDialog = ({ isOpen, onRequestClose, bids }) => {
+const BidsDialog = ({
+  isOpen,
+  onRequestClose,
+  bids,
+  nounIdsByHolderAddresses,
+}) => {
   const count = bids?.length;
   return (
     <DarkDialog
@@ -1968,7 +2015,14 @@ const BidsDialog = ({ isOpen, onRequestClose, bids }) => {
                         ":not(:first-of-type)": { marginTop: "1.5rem" },
                       })}
                     >
-                      <BidListItem bid={b} />
+                      <BidListItem
+                        bid={b}
+                        bidderNounIds={
+                          nounIdsByHolderAddresses[
+                            b.bidder.address.toLowerCase()
+                          ] ?? []
+                        }
+                      />
                     </li>
                   ))}
               </ul>
@@ -1980,10 +2034,83 @@ const BidsDialog = ({ isOpen, onRequestClose, bids }) => {
   );
 };
 
-const BidListItem = ({ bid }) => {
+const BidListItem = ({ bid, bidderNounIds }) => {
   const { ensName, avatarURI, balance } = useProfile(
     bid.bidder.address,
     bid.blockNumber
+  );
+
+  const hasNouns = bidderNounIds.length !== 0;
+
+  const bidderLinkContent = (
+    <>
+      {avatarURI != null ? (
+        <img
+          src={avatarURI}
+          alt="ENS Avatar"
+          css={css({
+            display: "block",
+            width: "4rem",
+            height: "4rem",
+            borderRadius: "0.3rem",
+            objectFit: "cover",
+            background: "hsl(0 0% 100% / 10%)",
+          })}
+        />
+      ) : (
+        <div
+          css={css({
+            width: "4rem",
+            height: "4rem",
+            borderRadius: "0.3rem",
+            background: "hsl(0 0% 100% / 10%)",
+          })}
+        />
+      )}
+      <div>
+        <div
+          css={css({
+            display: "block",
+            fontSize: "1.4rem",
+            fontWeight: "500",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            color: "white",
+          })}
+        >
+          <span className="bidder">
+            {ensName ?? shortenAddress(bid.bidder.address)}
+          </span>
+          {ensName != null && (
+            <span
+              css={css({
+                fontSize: "1.1rem",
+                color: "hsl(0 0% 56%)",
+                marginLeft: "0.5rem",
+              })}
+            >
+              {shortenAddress(bid.bidder.address)}
+            </span>
+          )}
+        </div>
+        <div
+          css={css({
+            fontSize: "1.1rem",
+            color: "hsl(0 0% 56%)",
+          })}
+        >
+          {balance == null
+            ? "?"
+            : `Ξ ${parseFloat(formatEther(balance)).toFixed(2)} left in wallet`}
+          {bidderNounIds.length !== 0 && (
+            <span style={{ marginLeft: "0.8rem" }}>
+              {bidderNounIds.length}{" "}
+              {bidderNounIds.length === 1 ? "noun" : "nouns"}
+            </span>
+          )}
+        </div>
+      </div>
+    </>
   );
 
   return (
@@ -1999,6 +2126,11 @@ const BidListItem = ({ bid }) => {
         overflow: "hidden",
         textOverflow: "ellipsis",
         a: {
+          display: "grid",
+          gridTemplateColumns: "auto minmax(0,1fr)",
+          gridGap: "1.5rem",
+          alignItems: "center",
+          cursor: "pointer",
           "@media (hover: hover)": {
             ":hover .bidder": {
               textDecoration: "underline",
@@ -2007,83 +2139,22 @@ const BidListItem = ({ bid }) => {
         },
       })}
     >
-      <a
-        href={`https://etherscan.io/address/${bid.bidder.address}`}
-        target="_blank"
-        rel="noreferrer"
-        css={css({
-          display: "grid",
-          gridTemplateColumns: "auto minmax(0,1fr)",
-          gridGap: "1.5rem",
-          alignItems: "center",
-        })}
-      >
-        {avatarURI != null ? (
-          <img
-            src={avatarURI}
-            alt="ENS Avatar"
-            css={css({
-              display: "block",
-              width: "4rem",
-              height: "4rem",
-              borderRadius: "0.3rem",
-              objectFit: "cover",
-              background: "hsl(0 0% 100% / 10%)",
-            })}
-          />
-        ) : (
-          <div
-            css={css({
-              width: "4rem",
-              height: "4rem",
-              borderRadius: "0.3rem",
-              background: "hsl(0 0% 100% / 10%)",
-            })}
-          />
-        )}
-        <div>
-          <div
-            css={css({
-              display: "block",
-              fontSize: "1.4rem",
-              fontWeight: "500",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              color: "white",
-            })}
-          >
-            <span className="bidder">
-              {ensName ?? shortenAddress(bid.bidder.address)}
-            </span>
-            {ensName != null && (
-              <span
-                css={css({
-                  fontSize: "1.1rem",
-                  color: "hsl(0 0% 56%)",
-                  marginLeft: "0.5rem",
-                })}
-              >
-                {shortenAddress(bid.bidder.address)}
-              </span>
-            )}
-          </div>
-          <div
-            css={css({
-              fontSize: "1.1rem",
-              color: "hsl(0 0% 56%)",
-            })}
-          >
-            {balance == null
-              ? "?"
-              : `Ξ ${parseFloat(formatEther(balance)).toFixed(
-                  2
-                )} left in wallet`}
-          </div>
-        </div>
-      </a>
+      {hasNouns ? (
+        <Link href={`/holders/${bid.bidder.address}`}>
+          <a>{bidderLinkContent}</a>
+        </Link>
+      ) : (
+        <a
+          href={`https://etherscan.io/address/${bid.bidder.address}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {bidderLinkContent}
+        </a>
+      )}
 
       <a
-        href={getEtherscanLink("tx", bid.transactionHash)}
+        href={getEtherscanLink("tx", bid.transactionHash ?? bid.id)}
         target="_blank"
         rel="noreferrer"
         css={css({
@@ -2217,10 +2288,10 @@ const TraitNounListItem = ({ noun: n }) => {
       css={css({
         position: "relative",
         a: { outline: "none" },
-        ".rainbow-link": { display: "none" },
+        ".hover-link": { display: "none" },
         "@media (hover: hover)": {
-          ".rainbow-link": { display: "block", opacity: 0 },
-          ":hover .rainbow-link": { opacity: 1 },
+          ".hover-link": { display: "block", opacity: 0 },
+          ":hover .hover-link": { opacity: 1 },
         },
       })}
     >
@@ -2297,21 +2368,18 @@ const TraitNounListItem = ({ noun: n }) => {
             Noun {n.id}
           </div>
           <div css={css({ display: "flex", alignItems: "center" })}>
-            <a
-              href={`https://etherscan.io/address/${n.owner.address}`}
-              target="_blank"
-              rel="noreferrer"
-              css={css({ paddingRight: "0.3rem" })}
-            >
-              {ownerString}
-            </a>
+            <Link href={`/holders/${n.owner.address}`}>
+              <a css={css({ cursor: "pointer", paddingRight: "0.2rem" })}>
+                {ownerString}
+              </a>
+            </Link>
             <a
               href={`https://rainbow.me/${n.owner.address}`}
               target="_blank"
               rel="noreferrer"
-              className="rainbow-link"
+              className="hover-link"
               css={css({
-                padding: "0 0.2rem",
+                padding: "0 0.3rem",
                 transition: "0.1s transform ease-out",
                 ":hover": { transform: "scale(1.2)" },
               })}
@@ -2320,6 +2388,23 @@ const TraitNounListItem = ({ noun: n }) => {
                 src="/rainbow-icon.png"
                 alt="Rainbow icon"
                 css={css({ display: "block", width: "1.5rem" })}
+              />
+            </a>
+            <a
+              href={`https://etherscan.io/address/${n.owner.address}`}
+              target="_blank"
+              rel="noreferrer"
+              className="hover-link"
+              css={css({
+                padding: "0 0.3rem",
+                transition: "0.1s transform ease-out",
+                ":hover": { transform: "scale(1.2)" },
+              })}
+            >
+              <img
+                src="/etherscan-icon-light.png"
+                alt="Etherscan icon"
+                css={css({ display: "block", width: "1.4rem" })}
               />
             </a>
           </div>
