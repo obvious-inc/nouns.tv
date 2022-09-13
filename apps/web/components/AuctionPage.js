@@ -1764,11 +1764,14 @@ const Header = () => (
     style={{
       background: "black",
       display: "flex",
-      minHeight: "6rem",
       alignItems: "center",
-      padding: "0 2rem",
-      paddingRight: "1.5rem", // To match the chat
+      padding: "1rem 1.5rem",
       color: "white",
+      [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+        minHeight: "6rem",
+        padding: "0 2rem",
+        paddingRight: "1.5rem", // To match the chat
+      },
     }}
   >
     <Link href="/">
@@ -1820,13 +1823,17 @@ const ScreenHeader = ({ children }) => (
   <div
     style={{
       fontSize: "1rem",
-      minHeight: "6em",
       background: "white",
       color: "black",
       display: "flex",
       alignItems: "center",
-      padding: "1em 2em",
+      padding: "1rem 1.5rem",
       whiteSpace: "nowrap",
+      [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+        fontSize: "3rem",
+        padding: "1rem 2rem",
+        minHeight: "6rem",
+      },
     }}
   >
     {children}
@@ -1854,12 +1861,15 @@ const AuctionScreenHeader = ({
     <ScreenHeader>
       <div
         css={css({
-          flex: "1 1 auto",
           display: "flex",
           alignItems: "center",
           paddingRight: "2rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            flex: "1 1 auto",
+          },
         })}
       >
+        <div>{navigationElement}</div>
         {auction?.noun != null && (
           <div
             css={css({
@@ -1868,7 +1878,7 @@ const AuctionScreenHeader = ({
                 display: "block",
                 fontSize: "3em",
                 fontWeight: "900",
-                marginRight: "1rem",
+                marginLeft: "1.5rem",
               },
             })}
           >
@@ -1880,7 +1890,6 @@ const AuctionScreenHeader = ({
             )}
           </div>
         )}
-        <div css={css({})}>{navigationElement}</div>
       </div>
       {auction != null && (
         <div
@@ -2057,18 +2066,20 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
           alignItems: "center",
         })}
       >
+        <div>{navigationElement}</div>
         <div
           css={css({
-            fontSize: "2.6rem",
+            marginLeft: "1rem",
+            fontSize: "2.4rem",
             fontWeight: "900",
             [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+              marginLeft: "1.5rem",
               fontSize: "3rem",
             },
           })}
         >
           Noun {noun.id}
         </div>
-        <div css={css({ marginLeft: "1rem" })}>{navigationElement}</div>
       </div>
       <div
         css={css({
