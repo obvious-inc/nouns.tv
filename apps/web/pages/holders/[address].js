@@ -149,22 +149,39 @@ const Holder = ({ address, config, holder }) => {
                 li: { listStyle: "none" },
                 a: {
                   display: "block",
-                  ":hover img": {
+                  ":hover .image-container": {
                     transform: "scale(1.025)",
-                    boxShadow: "3px 3px 0 0 rgb(0 0 0 / 15%)",
+                  },
+                  ":hover .power-light": {
+                    background: "#00c100",
+                    boxShadow: "0 0 0 0.1rem #00ff08",
                   },
                 },
-                img: {
-                  display: "block",
+                ".image-container": {
+                  position: "relative",
                   width: "100%",
-                  border: "2px solid black",
-                  boxShadow: "2px 2px 0 0 rgb(0 0 0 / 15%)",
-                  transition: "0.075s all ease-out",
+                  // boxShadow: "2px 2px 0 0 rgb(0 0 0 / 15%)",
+                  // transition: "0.075s all ease-out",
+                  border: "0.1rem solid black",
+                  padding: "0.5rem",
+                  paddingBottom: "1.5rem",
+                  borderRadius: "0.5rem",
+                  background: "hsl(0 0% 85%)",
+                  boxShadow: "0px 3px 0 0 rgb(0 0 0 / 15%)",
                 },
                 ".title": {
                   textAlign: "center",
                   marginTop: "0.8rem",
                   fontWeight: "600",
+                  whiteSpace: "nowrap",
+                },
+                img: {
+                  display: "block",
+                  width: "100%",
+                  // boxShadow: "2px 2px 0 0 rgb(0 0 0 / 15%)",
+                  // transition: "0.075s all ease-out",
+                  border: "0.1rem solid rgb(0 0 0 / 50%)",
+                  borderRadius: "2px",
                 },
               })}
             >
@@ -181,7 +198,81 @@ const Holder = ({ address, config, holder }) => {
                     <li key={n.id}>
                       <Link href={`/nouns/${n.id}`}>
                         <a>
-                          <img src={imageUrl} />
+                          <div className="image-container">
+                            <img src={imageUrl} />
+                            <div
+                              style={{
+                                position: "absolute",
+                                left: 0,
+                                bottom: "0.5rem",
+                                width: "100%",
+                                padding: "0 0.6rem",
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "0.1rem",
+                                  height: "0.5rem",
+                                  background: "black",
+                                  marginRight: "1px",
+                                }}
+                              />
+                              <div
+                                style={{
+                                  width: "0.1rem",
+                                  height: "0.5rem",
+                                  background: "black",
+                                  marginRight: "1px",
+                                }}
+                              />
+                              <div
+                                style={{
+                                  width: "0.1rem",
+                                  height: "0.5rem",
+                                  background: "black",
+                                  marginRight: "1px",
+                                }}
+                              />
+                              <div
+                                style={{
+                                  width: "0.1rem",
+                                  height: "0.5rem",
+                                  background: "black",
+                                  marginRight: "1px",
+                                }}
+                              />
+                              <div
+                                style={{
+                                  width: "0.1rem",
+                                  height: "0.5rem",
+                                  background: "black",
+                                  marginRight: "1px",
+                                }}
+                              />
+                              <div style={{ flex: 1 }} />
+                              <div
+                                className="power-light"
+                                css={css({
+                                  width: "0.3rem",
+                                  height: "0.3rem",
+                                  borderRadius: "50%",
+                                  background: "rgb(0 0 0 / 10%)",
+                                  boxShadow: "0 0 0 0.1rem rgb(0 0 0 / 45%)",
+                                })}
+                              />
+                              <div
+                                style={{
+                                  width: "0.8rem",
+                                  height: "0.5rem",
+                                  background: "#4b4b4b",
+                                  borderRadius: "0.2rem",
+                                  marginLeft: "0.4rem",
+                                }}
+                              />
+                            </div>
+                          </div>
                           <div className="title">Noun {n.id}</div>
                         </a>
                       </Link>
