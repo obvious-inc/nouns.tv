@@ -1,5 +1,6 @@
 import { css, keyframes } from "@emotion/react";
 import React from "react";
+import { useRect } from "@reach/rect";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEnsName } from "wagmi";
@@ -843,7 +844,7 @@ const NounScreen = ({
           paddingRight: "15%",
           // gridTemplateColumns: "repeat(2, minmax(0,1fr))",
           alignItems: "stretch",
-          justifyContent: "center",
+          justifyContent: "stretch",
           maxHeight: "none",
         },
       })}
@@ -855,12 +856,10 @@ const NounScreen = ({
           gridTemplateColumns: "16rem minmax(0,1fr)",
           padding: "0 1.5rem",
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            display: "flex",
-            alignItems: "stretch",
-            justifyContent: "flex-start",
+            display: "block",
+            width: "100%",
+            height: "100%",
             padding: 0,
-            paddingLeft: "2rem",
-            justifyContent: "center",
           },
         })}
       >
@@ -904,9 +903,21 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
     d5d7e1: "Cold",
   }[noun?.background.toLowerCase()];
 
+  const ref = React.useRef(null);
+  const rect = useRect(ref, { observe: true });
+  const size = rect == null ? 0 : Math.min(rect.width, rect.height);
+
   return (
     <div
-      style={{ position: "relative" }}
+      ref={ref}
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "center",
+      }}
       className="noun-container"
       css={css({
         "[data-noun-trait]": {
@@ -930,59 +941,71 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
         },
       })}
     >
-      {/* eslint-disable-next-line */}
-      <img
-        src={noun?.imageUrl ?? "../assets/loading-skull-noun.gif"}
-        alt={`Noun ${noun?.id}`}
+      <div
         style={{
-          display: "block",
-          width: "100%",
-          height: "100%",
-          objectFit: "contain",
-          objectPosition: "bottom",
+          position: "relative",
+          width: `${size}px`,
+          height: `${size}px`,
         }}
-      />
-      {!noStats && (
-        <>
-          {Object.entries(parts)
-            .filter((e) => e[1] != null)
-            .map(([name, title]) => {
-              const isFirstAppearance = stats?.[name].count === 1;
-              const props = {
-                name,
-                title,
-                stats: stats?.[name],
-              };
+      >
+        {/* eslint-disable-next-line */}
+        <img
+          src={noun?.imageUrl ?? "../assets/loading-skull-noun.gif"}
+          alt={`Noun ${noun?.id}`}
+          style={{
+            display: "block",
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            objectPosition: "bottom",
+          }}
+        />
 
-              if (isFirstAppearance)
+        {!noStats && (
+          <>
+            {Object.entries(parts)
+              .filter((e) => e[1] != null)
+              .map(([name, title]) => {
+                const isFirstAppearance = stats?.[name].count === 1;
+                const props = {
+                  name,
+                  title,
+                  stats: stats?.[name],
+                };
+
+                if (isFirstAppearance)
+                  return (
+                    <FloatingNounTraitLabel key={name} {...props} highlight />
+                  );
+
                 return (
-                  <FloatingNounTraitLabel key={name} {...props} highlight />
-                );
-
-              return (
-                <FloatingNounTraitLabel
-                  key={name}
-                  component="button"
-                  onClick={() => selectTrait(name)}
-                  style={{ cursor: "pointer" }}
-                  css={css({
-                    "@media (hover: hover)": {
-                      ":hover": {
-                        boxShadow:
-                          "0 0 0 1px black, 2px 2px 0 1px rgb(0 0 0 / 10%)",
+                  <FloatingNounTraitLabel
+                    key={name}
+                    component="button"
+                    onClick={() => selectTrait(name)}
+                    style={{ cursor: "pointer" }}
+                    css={css({
+                      "@media (hover: hover)": {
+                        ":hover": {
+                          boxShadow:
+                            "0 0 0 1px black, 2px 2px 0 1px rgb(0 0 0 / 10%)",
+                        },
                       },
-                    },
-                  })}
-                  {...props}
-                />
-              );
-            })}
+                    })}
+                    {...props}
+                  />
+                );
+              })}
 
-          {backgroundName != null && (
-            <FloatingNounTraitLabel name="background" title={backgroundName} />
-          )}
-        </>
-      )}
+            {backgroundName != null && (
+              <FloatingNounTraitLabel
+                name="background"
+                title={backgroundName}
+              />
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
@@ -1053,15 +1076,13 @@ const FomoScreen = ({
           gridTemplateColumns: "12rem minmax(0, 1fr)",
           padding: "0 4.5rem",
           position: "relative",
+          minHeight: 0,
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
             padding: 0,
-            height: "auto",
             flex: "none",
-            paddingLeft: "2rem",
-            display: "flex",
-            alignItems: "stretch",
-            justifyContent: "flex-start",
-            justifyContent: "center",
+            display: "block",
+            width: "100%",
+            height: "100%",
           },
         })}
       >
@@ -1508,7 +1529,7 @@ const VoteGifButton = ({
 
 const ScreenHeader = ({ children }) => (
   <div
-    style={{
+    css={css({
       fontSize: "1rem",
       background: "white",
       color: "black",
@@ -1517,11 +1538,10 @@ const ScreenHeader = ({ children }) => (
       padding: "1rem 1.5rem",
       whiteSpace: "nowrap",
       [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-        fontSize: "3rem",
         padding: "1rem 2rem",
         minHeight: "6rem",
       },
-    }}
+    })}
   >
     {children}
   </div>

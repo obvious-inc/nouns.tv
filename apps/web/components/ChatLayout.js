@@ -410,7 +410,7 @@ const ConstructionNoun = ({ style }) => (
 
 const Header = () => (
   <div
-    style={{
+    css={css({
       background: "black",
       display: "flex",
       alignItems: "center",
@@ -421,7 +421,7 @@ const Header = () => (
         padding: "0 2rem",
         paddingRight: "1.5rem", // To match the chat
       },
-    }}
+    })}
   >
     <Link href="/">
       <a style={{ display: "flex", alignItems: "center" }}>
