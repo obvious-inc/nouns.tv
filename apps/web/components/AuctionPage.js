@@ -950,7 +950,7 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
       >
         {/* eslint-disable-next-line */}
         <img
-          src={noun?.imageUrl ?? "../assets/loading-skull-noun.gif"}
+          src={noun?.imageUrlTransparent ?? "../assets/loading-skull-noun.gif"}
           alt={`Noun ${noun?.id}`}
           style={{
             display: "block",

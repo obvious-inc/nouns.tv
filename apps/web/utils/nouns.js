@@ -1,10 +1,14 @@
 import { ImageData, getNounData } from "@nouns/assets";
 import { buildSVG } from "@nouns/sdk";
 
-export const getImageUrlFromSeed = (seed) => {
+export const getImageUrlFromSeed = (seed, { transparent = false } = {}) => {
   try {
     const { parts, background } = getNounData(seed);
-    const svgBinary = buildSVG(parts, ImageData.palette, background);
+    const svgBinary = buildSVG(
+      parts,
+      ImageData.palette,
+      transparent ? "00000000" : background
+    );
     return `data:image/svg+xml;base64,${btoa(svgBinary)}`;
   } catch (e) {
     console.error(e);
@@ -45,5 +49,8 @@ export const getSeedStats = (nouns, nounId) => {
 export const enhance = (n) => {
   const { parts, background } = getNounData(n.seed);
   const imageUrl = getImageUrlFromSeed(n.seed);
-  return { ...n, parts, background, imageUrl };
+  const imageUrlTransparent = getImageUrlFromSeed(n.seed, {
+    transparent: true,
+  });
+  return { ...n, parts, background, imageUrl, imageUrlTransparent };
 };
