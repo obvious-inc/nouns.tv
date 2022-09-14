@@ -144,9 +144,12 @@ const Holder = ({ address, config, holder }) => {
                 margin: 0,
                 padding: "1.5rem",
                 display: "grid",
-                gridTemplateColumns: "repeat(6, minmax(0,1fr))",
+                gridTemplateColumns: "repeat(4, minmax(0,1fr))",
                 gridGap: "1.5rem",
                 li: { listStyle: "none" },
+                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                  gridTemplateColumns: "repeat(6, minmax(0,1fr))",
+                },
                 a: {
                   display: "block",
                   ":hover .image-container": {
