@@ -7,17 +7,21 @@ html {
 }
 body {
   font-size: 1.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  margin: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  background: rgb(25 25 25);
+  color: white;
+  overflow: hidden;
+  text-rendering: optimizeLegibility;
 }
 
 html,
 body {
   margin: 0;
-  padding: 0;
-  font-family: var(--fonts-sans);
-  background: var(--colors-black);
-  color: var(--colors-text);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: auto;
+  overflow: hidden;
   width: 100%;
   height: 100%;
 }

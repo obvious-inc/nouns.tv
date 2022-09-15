@@ -1,8 +1,8 @@
 import React from "react";
 import { useProvider, useNetwork } from "wagmi";
-import { getNounData, getNounSeedFromBlockHash } from "@nouns/assets";
+import { getNounSeedFromBlockHash } from "@nouns/assets";
 import { ALCHEMY_API_KEY, chains } from "../utils/network";
-import { getImageUrlFromSeed as getNounImageUrl } from "../utils/nouns";
+import { enhance as enhanceNoun } from "../utils/nouns";
 import { useLayoutEffect } from "../utils/react";
 
 const useNewHeadsSocket = (listener) => {
@@ -233,6 +233,7 @@ const useVoting = ({ auction, enabled }) => {
 
   React.useEffect(() => {
     if (!isInactive) return;
+    if (voteSocket.readyState !== "OPEN") return;
     voteSocket.send(
       JSON.stringify({ action: "changestatus", status: "inactive" })
     );
@@ -272,9 +273,8 @@ const useFomo = ({ auction, enabled }) => {
 
     const buildNoun = (id, hash) => {
       const seed = getNounSeedFromBlockHash(id, hash);
-      const imageUrl = getNounImageUrl(seed);
-      const { parts, background } = getNounData(seed);
-      return { id, parts, background, imageUrl, seed };
+      const noun = { id, seed };
+      return enhanceNoun(noun);
     };
 
     const id = auction.nounId + 1;

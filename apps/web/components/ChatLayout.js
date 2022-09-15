@@ -1,13 +1,13 @@
 import { css, keyframes } from "@emotion/react";
 import React from "react";
-import Link from "next/link";
+// import Link from "next/link";
 import { useAccount, useProvider, useNetwork, useSignMessage } from "wagmi";
 import {
-  ConnectButton as RainbowConnectButton,
+  // ConnectButton as RainbowConnectButton,
   useConnectModal,
 } from "@rainbow-me/rainbowkit";
 import { STACKED_MODE_BREAKPOINT } from "../constants/layout";
-import { SITE_TITLE } from "../utils/seo";
+// import { SITE_TITLE } from "../utils/seo";
 import { useLayoutEffect } from "../utils/react";
 
 const chatUrl = new URL(process.env.NEXT_PUBLIC_EMBEDDED_CHANNEL_URL);
@@ -139,7 +139,7 @@ const useEmbeddedChatMessager = (iFrameRef) => {
   }, [processWalletMessage]);
 };
 
-const ChatLayout = ({ showLoadingScreen, children }) => {
+const ChatLayout = ({ showLoadingScreen, background, children }) => {
   const iFrameRef = React.useRef(null);
   useEmbeddedChatMessager(iFrameRef);
   return (
@@ -152,20 +152,21 @@ const ChatLayout = ({ showLoadingScreen, children }) => {
         flexDirection: "column",
       }}
     >
-      <Header />
+      {/* <Header /> */}
       <div
-        style={{
-          flex: "1 1 0",
-          minHeight: 0,
-          display: "flex",
-          alignItems: "stretch",
-          background: "rgb(25 25 25)",
-        }}
-        css={css({
-          [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            flexDirection: "column",
-          },
-        })}
+        css={(theme) =>
+          css({
+            flex: "1 1 0",
+            minHeight: 0,
+            display: "flex",
+            alignItems: "stretch",
+            // background: "rgb(25 25 25)",
+            background: background ?? theme.colors.backgroundSecondary,
+            [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
+              flexDirection: "column",
+            },
+          })
+        }
       >
         <div
           css={css({
@@ -174,7 +175,6 @@ const ChatLayout = ({ showLoadingScreen, children }) => {
             minWidth: 0,
             display: "flex",
             flexDirection: "column",
-            background: "rgb(38 38 38)",
             [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
               flex: "1 1 0",
             },
@@ -225,7 +225,7 @@ const ChatLayout = ({ showLoadingScreen, children }) => {
             maxWidth: "100%",
             minHeight: 0,
             [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-              width: "44rem",
+              width: "48rem",
               flex: "none",
             },
           })}
@@ -233,7 +233,7 @@ const ChatLayout = ({ showLoadingScreen, children }) => {
           {chatUrl != null && (
             <iframe
               ref={iFrameRef}
-              src={`${chatUrl.href}?compact=1`}
+              src={`${chatUrl.href}&compact=1`}
               allow="clipboard-read; clipboard-write"
               style={{
                 display: "block",
@@ -408,64 +408,64 @@ const ConstructionNoun = ({ style }) => (
   </svg>
 );
 
-const Header = () => (
-  <div
-    css={css({
-      background: "black",
-      display: "flex",
-      alignItems: "center",
-      padding: "1rem 1.5rem",
-      color: "white",
-      [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-        minHeight: "6rem",
-        padding: "0 2rem",
-        paddingRight: "1.5rem", // To match the chat
-      },
-    })}
-  >
-    <Link href="/">
-      <a style={{ display: "flex", alignItems: "center" }}>
-        <div style={{ width: "5rem", marginRight: "1rem" }}>
-          <svg
-            width="50"
-            height="30"
-            viewBox="0 0 50 30"
-            fill="none"
-            style={{ width: "100%", height: "auto" }}
-          >
-            <rect width="50" height="30" fill="#FF1AD2" />
-            <rect x="5" y="5" width="10" height="10" fill="black" />
-            <rect x="5" y="15" width="10" height="10" fill="white" />
-            <rect x="15" y="5" width="10" height="10" fill="white" />
-            <rect x="15" y="15" width="10" height="10" fill="black" />
-            <rect x="25" y="5" width="10" height="10" fill="black" />
-            <rect x="25" y="15" width="10" height="10" fill="white" />
-            <rect x="35" y="5" width="10" height="10" fill="white" />
-            <rect x="35" y="15" width="10" height="10" fill="black" />
-          </svg>
-        </div>
+// const Header = () => (
+//   <div
+//     css={css({
+//       background: "black",
+//       display: "flex",
+//       alignItems: "center",
+//       padding: "1rem 1.5rem",
+//       color: "white",
+//       [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+//         minHeight: "6rem",
+//         padding: "0 2rem",
+//         paddingRight: "1.5rem", // To match the chat
+//       },
+//     })}
+//   >
+//     <Link href="/">
+//       <a style={{ display: "flex", alignItems: "center" }}>
+//         <div style={{ width: "5rem", marginRight: "1rem" }}>
+//           <svg
+//             width="50"
+//             height="30"
+//             viewBox="0 0 50 30"
+//             fill="none"
+//             style={{ width: "100%", height: "auto" }}
+//           >
+//             <rect width="50" height="30" fill="#FF1AD2" />
+//             <rect x="5" y="5" width="10" height="10" fill="black" />
+//             <rect x="5" y="15" width="10" height="10" fill="white" />
+//             <rect x="15" y="5" width="10" height="10" fill="white" />
+//             <rect x="15" y="15" width="10" height="10" fill="black" />
+//             <rect x="25" y="5" width="10" height="10" fill="black" />
+//             <rect x="25" y="15" width="10" height="10" fill="white" />
+//             <rect x="35" y="5" width="10" height="10" fill="white" />
+//             <rect x="35" y="15" width="10" height="10" fill="black" />
+//           </svg>
+//         </div>
 
-        <div
-          style={{
-            color: "white",
-            fontSize: "1.8rem",
-            fontWeight: "700",
-            textTransform: "uppercase",
-            minWidth: 0,
-            paddingRight: "1rem",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {SITE_TITLE}
-        </div>
-      </a>
-    </Link>
-    <div style={{ flex: 1 }} />
-    <div>
-      <RainbowConnectButton />
-    </div>
-  </div>
-);
+//         <div
+//           style={{
+//             color: "white",
+//             fontSize: "1.8rem",
+//             fontWeight: "700",
+//             textTransform: "uppercase",
+//             minWidth: 0,
+//             paddingRight: "1rem",
+//             overflow: "hidden",
+//             textOverflow: "ellipsis",
+//           }}
+//         >
+//           {SITE_TITLE}
+//         </div>
+//       </a>
+//     </Link>
+//     <div style={{ flex: 1 }} />
+//     <div>
+//       <RainbowConnectButton />
+//     </div>
+//   </div>
+// );
 
 export default ChatLayout;
