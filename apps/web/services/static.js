@@ -11,7 +11,7 @@ export const getStaticAuctionProps = async ({ params }) => {
 
   const client = new GraphQLClient(config.baseURI);
   const service = new SubgraphService(address, client);
-  const nouns = []; // await service.getNouns();
+  // const nouns = []; // await service.getNouns();
 
   let noun = null;
 
@@ -22,7 +22,7 @@ export const getStaticAuctionProps = async ({ params }) => {
   }
 
   return {
-    props: { address, config, noun, nouns },
+    props: { address, config, noun, nouns: [noun].filter(Boolean) },
     revalidate: 30,
   };
 };
