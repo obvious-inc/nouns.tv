@@ -11,12 +11,12 @@ export const getStaticAuctionProps = async ({ params }) => {
 
   const client = new GraphQLClient(config.baseURI);
   const service = new SubgraphService(address, client);
-  const nouns = await service.getNouns();
+  const nouns = []; // await service.getNouns();
 
   let noun = null;
 
   if (params?.["noun-id"] != null) {
-    noun = nouns.find((n) => n.id === params["noun-id"]);
+    noun = await service.getNoun(params["noun-id"]);
     noun.auction = (await service.getAuction(noun.id)) ?? null;
     delete noun.auction?.noun;
   }

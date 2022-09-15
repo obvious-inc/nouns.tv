@@ -145,56 +145,69 @@ const useVoting = ({ auction, enabled }) => {
   }, [provider, latestBlock]);
 
   React.useEffect(() => {
-    voteSocket = new WebSocket(process.env.NEXT_PUBLIC_VOTING_SOCKET);
+    const connect = () => {
+      voteSocket = new WebSocket(process.env.NEXT_PUBLIC_VOTING_SOCKET);
 
-    voteSocket.addEventListener("message", (message) => {
-      try {
-        const data = JSON.parse(String(message.data));
-        console.log("vote socket message", data);
-        if (data.vote) {
-          setVoteCountsByBlockHash((cs) => {
-            const counts = cs[data.blockhash] ?? { like: 0, dislike: 0 };
-            const voteType = { voteLike: "like", voteDislike: "dislike" }[
-              data.vote
-            ];
-            if (voteType == null) return cs;
-            return {
-              ...cs,
-              [data.blockhash]: { ...counts, [voteType]: counts[voteType] + 1 },
-            };
-          });
+      voteSocket.addEventListener("message", (message) => {
+        try {
+          const data = JSON.parse(String(message.data));
+          console.log("vote socket message", data);
+          if (data.vote) {
+            setVoteCountsByBlockHash((cs) => {
+              const counts = cs[data.blockhash] ?? { like: 0, dislike: 0 };
+              const voteType = { voteLike: "like", voteDislike: "dislike" }[
+                data.vote
+              ];
+              if (voteType == null) return cs;
+              return {
+                ...cs,
+                [data.blockhash]: {
+                  ...counts,
+                  [voteType]: counts[voteType] + 1,
+                },
+              };
+            });
+          }
+          if ("score" in data) {
+            setScore(data.score);
+          }
+          if (data.settlementAttempted) {
+            setSettlementAttempted(true);
+            // store.dispatch(setAttemptedSettleBlockHash(data.blockhash));
+          }
+          // if ("connections" in data) {
+          //   store.dispatch(setNumConnections(data.connections));
+          // }
+          // if ("activeVoters" in data) {
+          //   store.dispatch(setActiveVoters(data.activeVoters));
+          // }
+        } catch (err) {
+          console.error(err);
         }
-        if ("score" in data) {
-          setScore(data.score);
-        }
-        if (data.settlementAttempted) {
-          setSettlementAttempted(true);
-          // store.dispatch(setAttemptedSettleBlockHash(data.blockhash));
-        }
-        // if ("connections" in data) {
-        //   store.dispatch(setNumConnections(data.connections));
-        // }
-        // if ("activeVoters" in data) {
-        //   store.dispatch(setActiveVoters(data.activeVoters));
-        // }
-      } catch (err) {
-        console.error(err);
-      }
-    });
+      });
 
-    voteSocket.addEventListener("open", () => {
-      setConnectedToVotingSocket(true);
-    });
+      voteSocket.addEventListener("open", () => {
+        setConnectedToVotingSocket(true);
+      });
 
-    voteSocket.addEventListener("error", () => {
-      voteSocket.close();
-    });
-    voteSocket.addEventListener("close", () => {
-      setConnectedToVotingSocket(false);
-    });
+      voteSocket.addEventListener("error", () => {
+        voteSocket.close();
+      });
+      voteSocket.addEventListener("close", () => {
+        setConnectedToVotingSocket(false);
+      });
+    };
+
+    const focusHandler = () => {
+      if (voteSocket.readyState === "CLOSED") connect();
+    };
+    window.addEventListener("focus", focusHandler);
+
+    connect();
 
     return () => {
       voteSocket.close();
+      window.removeEventListener("focus", focusHandler);
     };
   }, []);
 
