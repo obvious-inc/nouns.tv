@@ -425,7 +425,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
     }
   }, [screenMode, fomo.noun, auction, noun, nouns]);
 
-  const [isBackgroundActive, setBackgroundActive] = React.useState(false);
+  const [isBackgroundActive, setBackgroundActive] = React.useState(true);
   const toggleBackground = () => setBackgroundActive((s) => !s);
 
   const defaultTheme = useTheme();
