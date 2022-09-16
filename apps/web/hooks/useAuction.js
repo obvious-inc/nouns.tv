@@ -13,12 +13,11 @@ import {
   useNetwork,
 } from "wagmi";
 import { NounsAuctionHouseABI, NounsTokenABI } from "@nouns/contracts";
-import { getNounData } from "@nouns/assets";
 import { getContractAddressesForChainOrThrow } from "@nouns/sdk";
 import useFomo from "../hooks/useFomo";
 import { chains } from "../utils/network";
 import { useLayoutEffect } from "../utils/react";
-import { getImageUrlFromSeed as getNounImageUrl } from "../utils/nouns";
+import { enhance as enhanceNoun } from "../utils/nouns";
 
 const useWindowEvent = (event, listener) => {
   const listenerRef = React.useRef(listener);
@@ -299,14 +298,9 @@ export const useAuction = () => {
   const auction = React.useMemo(() => {
     if (rawAuction == null || seed == null) return null;
 
-    const { parts, background } = getNounData(seed);
-
     const noun = {
       id: rawAuction.nounId,
       ownerAddress: rawAuction.winnerAddess,
-      parts,
-      background,
-      imageUrl: getNounImageUrl(seed),
       seed: Object.fromEntries(
         ["accessory", "body", "head", "glasses", "background"].map((p) => [
           p,
@@ -319,7 +313,7 @@ export const useAuction = () => {
       ...rawAuction,
       reservePrice,
       minBidIncrementPercentage,
-      noun,
+      noun: enhanceNoun(noun),
       bids: bids
         .filter((b) => b.nounId === rawAuction.nounId)
         .sort((b1, b2) => {

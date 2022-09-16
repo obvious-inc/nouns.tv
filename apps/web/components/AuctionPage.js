@@ -1,4 +1,4 @@
-import { css, keyframes } from "@emotion/react";
+import { css, keyframes, useTheme } from "@emotion/react";
 import React from "react";
 import { useRect } from "@reach/rect";
 import Link from "next/link";
@@ -17,7 +17,8 @@ import {
 import { CountdownDisplay } from "./CountdownDisplay";
 import Dialog from "./Dialog";
 import ChatLayout from "./ChatLayout";
-import { Banner } from "./Banner";
+import Button from "./Button";
+import Switch from "./Switch";
 import { formatEther } from "ethers/lib/utils";
 
 const random = (seed) => {
@@ -332,7 +333,7 @@ const groupBy = (computeKey, list) =>
     return acc;
   }, {});
 
-export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
+export function AuctionPage({ noun: noun_, nouns: nouns_, setTheme }) {
   const noun = React.useMemo(
     () => (noun_ == null ? null : enhanceNoun(noun_)),
     [noun_]
@@ -355,7 +356,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
     bidding,
     settling,
     fomo,
-    isFetchingInitialBids,
+    // isFetchingInitialBids,
   } = useAuction();
   const router = useRouter();
 
@@ -386,7 +387,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
     if (noun != null) return "static-noun";
     if (fomo.isActive) return "fomo";
     return "auction";
-  }, [noun, auction, fomo.isActive]);
+  }, [noun, fomo.isActive]);
 
   const auctionMode = React.useMemo(() => {
     if (auction == null) return "loading";
@@ -426,6 +427,11 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
   const [displayBidDialog, setDisplayBidDialog] = React.useState(false);
   const toggleDisplayBidDialog = () => setDisplayBidDialog((s) => !s);
 
+  const theme = useTheme();
+  const isBackgroundActive = theme.light ?? false;
+  const toggleBackground = () =>
+    setTheme((t) => (t === "light" ? "dark" : "light"));
+
   const {
     bid,
     amount,
@@ -459,13 +465,14 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
         {hasPendingSettleAttempt ? "Settling auction..." : "Settle auction"}
       </GrayButton>
     ) : (
-      <GrayButton
+      <Button
+        size="default"
         onClick={() => {
           toggleDisplayBidDialog();
         }}
       >
         Place a bid
-      </GrayButton>
+      </Button>
     );
 
   const displayedNoun = React.useMemo(() => {
@@ -525,7 +532,14 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
 
   return (
     <>
-      <ChatLayout showLoadingScreen={showLoadingScreen}>
+      <ChatLayout
+        background={
+          isBackgroundActive && displayedNoun != null
+            ? `#${displayedNoun.background}`
+            : undefined
+        }
+        showLoadingScreen={showLoadingScreen}
+      >
         {screenMode === "static-noun" ? (
           <NounScreenHeader
             noun={displayedNoun}
@@ -579,10 +593,9 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                 })}
               >
                 <Switch
-                  id="stats-switch"
                   label="Stats"
-                  checked={forceStats}
-                  onChange={toggleForceStats}
+                  isActive={forceStats}
+                  onClick={toggleForceStats}
                 />
                 {/* <Switch */}
                 {/*   id="fomo-switch" */}
@@ -593,6 +606,15 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
               </div>
             }
             auctionActionButtonElement={auctionActionButtonElement}
+            backgroundSwitchElement={
+              <Switch
+                label="Background"
+                isActive={isBackgroundActive}
+                onClick={() => {
+                  toggleBackground();
+                }}
+              />
+            }
           />
         ) : (
           <NounScreen
@@ -609,78 +631,61 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
             auctionActionButtonElement={
               screenMode === "auction" ? auctionActionButtonElement : null
             }
-            controlsElement={
-              <div
-                css={css({
-                  display: "grid",
-                  gridAutoColumns: "auto",
-                  gridAutoFlow: "column",
-                  gridGap: "1.5rem",
-                  pointerEvents: "none",
-                  [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                    display: "none",
-                  },
-                })}
-              >
-                <Switch
-                  id="stats-switch"
-                  label="Stats"
-                  checked={forceStats}
-                  onChange={toggleForceStats}
-                />
-              </div>
+            backgroundSwitchElement={
+              <Switch
+                label="Background"
+                isActive={isBackgroundActive}
+                onClick={() => {
+                  toggleBackground();
+                }}
+              />
             }
           />
         )}
 
-        {(screenMode !== "static-noun" || displayedNoun.auction != null) && (
-          <div
-            css={css({
-              display: screenMode === "fomo" ? "none" : "block",
-              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                display: "block",
-              },
-            })}
-          >
-            <Banner
-              bids={
-                screenMode === "static-noun"
-                  ? displayedNoun.auction.bids
-                  : isFetchingInitialBids
-                  ? null
-                  : auction?.bids ?? []
-              }
-              openBidsDialog={toggleBidsDialog}
-            />
-          </div>
-        )}
+        {/* {(screenMode !== "static-noun" || displayedNoun.auction != null) && ( */}
+        {/*   <div */}
+        {/*     css={css({ */}
+        {/*       display: screenMode === "fomo" ? "none" : "block", */}
+        {/*       [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: { */}
+        {/*         display: "block", */}
+        {/*       }, */}
+        {/*     })} */}
+        {/*   > */}
+        {/*     <Banner */}
+        {/*       bids={ */}
+        {/*         screenMode === "static-noun" */}
+        {/*           ? displayedNoun.auction.bids */}
+        {/*           : isFetchingInitialBids */}
+        {/*           ? null */}
+        {/*           : auction?.bids ?? [] */}
+        {/*       } */}
+        {/*       openBidsDialog={toggleBidsDialog} */}
+        {/*     /> */}
+        {/*   </div> */}
+        {/* )} */}
       </ChatLayout>
 
-      <Dialog
+      <DarkDialog
         isOpen={displayBidDialog}
         onRequestClose={toggleDisplayBidDialog}
-        style={{ padding: "2.5rem 2rem 3.5rem", width: "35rem" }}
+        style={{ padding: "2rem", width: "32rem" }}
       >
         {({ titleProps }) => (
           <>
-            <header style={{ textAlign: "center" }}>
-              <h3
+            <header style={{ margin: "0 0 1.5rem" }}>
+              <h1
                 {...titleProps}
-                style={{ margin: 0, fontSize: "3rem", fontWeight: "900" }}
-              >
-                TV SHOP
-              </h3>
-              <div
-                style={{
-                  fontSize: "1.4rem",
-                  fontWeight: "700",
-                  margin: "0 0 2rem",
-                }}
+                css={css({
+                  fontSize: "1.8rem",
+                  lineHeight: "1.2",
+                  margin: "0",
+                })}
               >
                 Place a bid on noun {auction?.nounId}
-              </div>
+              </h1>
             </header>
-            <main>
+            <main css={(theme) => css({ fontSize: theme.fontSizes.default })}>
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -688,38 +693,39 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                     setDisplayBidDialog(false);
                   });
                 }}
-                style={{
-                  width: "25rem",
-                  maxWidth: "100%",
-                  margin: "0 auto",
-                }}
               >
                 <div
-                  css={css({
-                    height: "5rem",
-                    width: "100%",
-                    background: "white",
-                    border: "0.1rem solid black",
-                    borderRadius: "1rem",
-                    fontSize: "1.5rem",
-                    fontWeight: "600",
-                    padding: "0 1rem",
-                    display: "flex",
-                    alignItems: "center",
-                    margin: "0 0 1rem",
-                  })}
-                  style={{
-                    borderColor: hasPendingBid ? "hsl(0 0% 70%)" : undefined,
-                  }}
+                  css={(theme) =>
+                    css({
+                      display: "flex",
+                      alignItems: "center",
+                      height: "4.2rem",
+                      color: theme.colors.textNormal,
+                      background: theme.colors.backgroundSecondary,
+                      fontSize: theme.fontSizes.default,
+                      fontWeight: "400",
+                      borderRadius: "0.3rem",
+                      padding: "0.5rem 0.7rem",
+                      width: "100%",
+                      outline: "none",
+                      border: theme.light ? "1px solid rgb(0 0 0 / 20%)" : 0,
+                      margin: "0 0 1.5rem",
+                      "&:focus-within": {
+                        boxShadow: `0 0 0 0.2rem ${theme.colors.primary}`,
+                      },
+                    })
+                  }
                 >
                   <div
-                    style={{
-                      padding: "0 0.5rem",
-                      color:
-                        hasPendingBid || amount.trim() === ""
-                          ? "rgb(0 0 0 / 54%)"
-                          : "inherit",
-                    }}
+                    css={(theme) =>
+                      css({
+                        padding: "0 0.5rem",
+                        color:
+                          hasPendingBid || amount.trim() === ""
+                            ? theme.colors.textDimmed
+                            : "inherit",
+                      })
+                    }
                   >
                     {"Ξ"}
                   </div>
@@ -745,42 +751,57 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                           )} or higher`
                     }
                     autoComplete="off"
-                    css={css({
-                      flex: 1,
-                      background: "none",
-                      border: 0,
-                      fontSize: "inherit",
-                      fontWeight: "inherit",
-                      fontFamily: "inherit",
-                      padding: "0",
-                      outline: "none",
-                      "::placeholder": { color: "rgb(0 0 0 / 54%)" },
-                      ":disabled": {
-                        pointerEvents: "none",
-                      },
-                    })}
+                    css={(theme) =>
+                      css({
+                        flex: 1,
+                        background: "none",
+                        border: 0,
+                        color: "inherit",
+                        fontSize: "inherit",
+                        fontWeight: "inherit",
+                        fontFamily: "inherit",
+                        padding: "0",
+                        outline: "none",
+                        "::placeholder": { color: theme.colors.textDimmed },
+                        ":disabled": {
+                          pointerEvents: "none",
+                        },
+                        // Prevents iOS zooming in on input fields
+                        "@supports (-webkit-touch-callout: none)": {
+                          fontSize: "1.6rem",
+                        },
+                      })
+                    }
                   />
                 </div>
                 <Button
                   type="submit"
+                  size="large"
+                  fullWidth
+                  variant="primary"
                   disabled={!biddingEnabled}
-                  isLoading={hasPendingBid}
-                  hint={hasPendingBidTransactionCall && "Check your wallet"}
-                  style={{
-                    borderRadius: "1rem",
-                    width: "100%",
-                    minHeight: "5rem",
-                  }}
+                  // isLoading={hasPendingBid}
                 >
                   {hasPendingBid ? "Placing bid..." : "Place bid"}
                 </Button>
+                {hasPendingBidTransactionCall && (
+                  <div
+                    css={(theme) =>
+                      css({
+                        color: theme.colors.textDimmed,
+                        textAlign: "center",
+                        marginTop: "1rem",
+                      })
+                    }
+                  >
+                    Check your wallet
+                  </div>
+                )}
                 {biddingError != null && (
                   <div
                     css={css({
                       marginTop: "1rem",
                       color: TEXT_ERROR,
-                      fontSize: "1.4rem",
-                      fontWeight: "500",
                       ":first-letter": { textTransform: "uppercase" },
                     })}
                   >
@@ -791,7 +812,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
             </main>
           </>
         )}
-      </Dialog>
+      </DarkDialog>
 
       <TraitDialog
         isOpen={showTraitDialog}
@@ -816,11 +837,11 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
 }
 
 const NounScreen = ({
-  noun,
+  // noun,
   nounImageElement,
-  controlsElement,
   auctionActionButtonElement,
   staticNounStatsElement,
+  backgroundSwitchElement,
 }) => {
   const isMobileLayout = useMediaQuery(
     `(max-width: ${STACKED_MODE_BREAKPOINT})`
@@ -832,16 +853,15 @@ const NounScreen = ({
         display: "flex",
         flexDirection: "column",
         transition: "0.2s background ease-out",
-        background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
         minHeight: "12rem",
         position: "relative",
         overflow: "hidden",
-        // Top nav and header + bids banner is 3 x 6rem hight
-        maxHeight: "max(12rem, calc(50vh - 6rem * 3))",
+        // // Top nav and header + bids banner is 3 x 6rem hight
+        // maxHeight: "max(12rem, calc(50vh - 6rem * 3))",
         [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
           flex: "1 1 0",
           flexDirection: "row",
-          paddingRight: "15%",
+          // paddingRight: "15%",
           // gridTemplateColumns: "repeat(2, minmax(0,1fr))",
           alignItems: "stretch",
           justifyContent: "stretch",
@@ -866,30 +886,37 @@ const NounScreen = ({
         {nounImageElement}
         {isMobileLayout && staticNounStatsElement}
       </div>
-      <div />
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          bottom: 0,
-          padding: "1rem 1.5rem",
-        }}
-      >
-        {controlsElement}
-      </div>
       <div
         css={css({
-          display: "none",
-          [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            display: "block",
-            position: "absolute",
-            top: 0,
-            right: 0,
-            padding: "1rem 1.5rem",
+          position: "absolute",
+          top: 0,
+          right: 0,
+          padding: "0 1.5rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            padding: "1.8rem",
+            top: "auto",
+            right: "auto",
+            left: 0,
+            bottom: 0,
           },
         })}
       >
         {auctionActionButtonElement}
+      </div>
+      <div
+        css={css({
+          display: "none",
+          position: "absolute",
+          bottom: 0,
+          right: 0,
+          padding: "0.5rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            display: "block",
+            padding: "1.8rem",
+          },
+        })}
+      >
+        {backgroundSwitchElement}
       </div>
     </div>
   );
@@ -950,7 +977,7 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
       >
         {/* eslint-disable-next-line */}
         <img
-          src={noun?.imageUrl ?? "../assets/loading-skull-noun.gif"}
+          src={noun?.imageUrlTransparent ?? "../assets/loading-skull-noun.gif"}
           alt={`Noun ${noun?.id}`}
           style={{
             display: "block",
@@ -984,14 +1011,19 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
                     component="button"
                     onClick={() => selectTrait(name)}
                     style={{ cursor: "pointer" }}
-                    css={css({
-                      "@media (hover: hover)": {
-                        ":hover": {
-                          boxShadow:
-                            "0 0 0 1px black, 2px 2px 0 1px rgb(0 0 0 / 10%)",
+                    css={(theme) =>
+                      css({
+                        "@media (hover: hover)": {
+                          ":hover": {
+                            // boxShadow:
+                            //   "0 0 0 1px black, 2px 2px 0 1px rgb(0 0 0 / 10%)",
+                            filter: theme.light
+                              ? "brightness(95%)"
+                              : "brightness(110%)",
+                          },
                         },
-                      },
-                    })}
+                      })
+                    }
                     {...props}
                   />
                 );
@@ -1011,7 +1043,7 @@ const NounImage = ({ noun, stats, forceStats, noStats, selectTrait }) => {
 };
 
 const FomoScreen = ({
-  noun,
+  // noun,
   noundersNoun,
   block,
   vote,
@@ -1020,11 +1052,12 @@ const FomoScreen = ({
   dislike,
   score,
   settlementAttempted,
-  voteCounts,
+  // voteCounts,
   isConnected,
   nounImageElement,
   controlsElement,
   staticNounStatsElement,
+  backgroundSwitchElement,
   // auctionActionButtonElement,
   // reconnect,
 }) => {
@@ -1055,99 +1088,25 @@ const FomoScreen = ({
   return (
     <div
       css={css({
+        pointerEvents: "all",
         display: "flex",
-        flexDirection: "column-reverse",
-        transition: "0.2s background ease-out",
-        background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
+        flexDirection: "column",
         minHeight: 0,
         position: "relative",
         [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
           flex: "1 1 0",
-          display: "grid",
-          gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-          alignItems: "stretch",
         },
       })}
     >
-      <div
-        css={css({
-          flex: "1 1 auto",
-          display: "grid",
-          gridTemplateColumns: "12rem minmax(0, 1fr)",
-          padding: "0 4.5rem",
-          position: "relative",
-          minHeight: 0,
-          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            padding: 0,
-            flex: "none",
-            display: "block",
-            width: "100%",
-            height: "100%",
-          },
-        })}
-      >
-        {nounImageElement}
-        {isMobileLayout && staticNounStatsElement}
-        {noundersNoun != null && (
-          <div
-            style={{
-              height: "auto",
-              transform: "translateX(10%) translateY(10%)",
-              borderRadius: "0.5rem",
-              overflow: "hidden",
-              background: "white",
-            }}
-            css={css({
-              position: "absolute",
-              bottom: "1rem",
-              left: "1rem",
-              width: "5rem",
-              padding: "0.3rem",
-              ".title": { display: "none" },
-              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                padding: "0.5rem",
-                width: "15%",
-                minWidth: "7rem",
-                left: 0,
-                top: 0,
-                bottom: "auto",
-                ".title": { display: "block" },
-              },
-            })}
-          >
-            <div
-              style={{
-                borderRadius: "0.3rem",
-                overflow: "hidden",
-              }}
-            >
-              <NounImage noun={noundersNoun} noStats />
-            </div>
-            <div
-              style={{
-                textAlign: "center",
-                margin: "0.5rem 0 0",
-                fontSize: "1rem",
-                fontWeight: "700",
-                textTransform: "uppercase",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-              }}
-              className="title"
-            >
-              Noun {noundersNoun.id}
-            </div>
-          </div>
-        )}
-      </div>
       <div
         css={css({
           display: "flex",
           alignItems: "center",
           minHeight: 0,
           position: "relative",
-          zIndex: 2,
-          pointerEvents: "none",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            minHeight: "24.6rem",
+          },
         })}
       >
         {!isConnected || block == null ? (
@@ -1167,7 +1126,7 @@ const FomoScreen = ({
           <div
             css={css({
               width: "100%",
-              padding: "1.5rem",
+              padding: "0.5rem 1.5rem 2.5rem",
               pointerEvents: "all",
             })}
           >
@@ -1249,15 +1208,19 @@ const FomoScreen = ({
             css={css({
               width: "100%",
               textAlign: "center",
-              padding: "2rem 4rem 2rem 1rem",
+              padding: "2rem 4rem",
             })}
           >
             <div
-              css={css({
-                fontSize: "2.8rem",
-                fontWeight: "700",
-                margin: "0 0 0.7rem",
-              })}
+              css={(theme) =>
+                css({
+                  fontFamily: theme.fontStacks.headers,
+                  color: theme.colors.textHeader,
+                  lineHeight: 1.2,
+                  fontSize: "4.6rem",
+                  fontWeight: "600",
+                })
+              }
             >
               {settlementAttempted
                 ? "Attempting to settle..."
@@ -1266,12 +1229,14 @@ const FomoScreen = ({
                 : "Ok, let’s try another one"}
             </div>
             <div
-              css={css({
-                color: "hsl(0 0% 40%)",
-                margin: "0 0 2.2rem",
-                fontSize: "1.6rem",
-                fontWeight: "600",
-              })}
+              css={(theme) =>
+                css({
+                  color: theme.colors.textDimmed,
+                  margin: "0 0 2.8rem",
+                  fontSize: "1.6rem",
+                  fontWeight: "400",
+                })
+              }
             >
               {(() => {
                 switch (state) {
@@ -1312,72 +1277,139 @@ const FomoScreen = ({
             </div>
             <div
               css={css({
-                position: "relative",
-                width: "100%",
-                maxWidth: "42rem",
-                margin: "0 auto 3rem",
-              })}
-            >
-              <ProgressBar
-                progress={
-                  settlementAttempted ? 1 : Math.max(0, Math.min(1, score))
-                }
-                height="2.4rem"
-                disabled={!isVotingActive}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  right: "100%",
-                  padding: "0 0.8rem",
-                  fontSize: "1.3rem",
-                  fontWeight: "500",
-                }}
-              >
-                {String(voteCounts.dislike ?? 0)}
-              </div>
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  left: "100%",
-                  padding: "0 0.8rem",
-                  fontSize: "1.3rem",
-                  fontWeight: "500",
-                }}
-              >
-                {String(voteCounts.like ?? 0)}
-              </div>
-            </div>
-            <div
-              css={css({
                 display: "grid",
-                maxWidth: "42rem",
-                margin: "0 auto",
-                gridTemplateColumns: "repeat(2, minmax(0,auto))",
-                justifyContent: "space-evenly",
+                gridTemplateColumns: "auto minmax(0,1fr) auto",
+                alignItems: "stretch",
+                gridGap: "2rem",
                 userSelect: "none",
+                margin: "0 auto",
               })}
             >
               <VoteGifButton
                 isVotingActive={isVotingActive}
                 currentVote={vote}
                 vote="dislike"
-                label="nah"
+                label="No"
+                symbol={"👎"}
                 gifUrl={noGifUrl}
                 onClick={dislike}
               />
+              <div css={css({ position: "relative", width: "100%" })}>
+                <ProgressBar
+                  progress={
+                    settlementAttempted ? 1 : Math.max(0, Math.min(1, score))
+                  }
+                  height="100%"
+                  disabled={!settlementAttempted && !isVotingActive}
+                />
+                {/* <div */}
+                {/*   style={{ */}
+                {/*     position: "absolute", */}
+                {/*     top: "50%", */}
+                {/*     transform: "translateY(-50%)", */}
+                {/*     right: "100%", */}
+                {/*     padding: "0 0.8rem", */}
+                {/*     fontSize: "1.3rem", */}
+                {/*     fontWeight: "500", */}
+                {/*   }} */}
+                {/* > */}
+                {/*   {String(voteCounts.dislike ?? 0)} */}
+                {/* </div> */}
+                {/* <div */}
+                {/*   style={{ */}
+                {/*     position: "absolute", */}
+                {/*     top: "50%", */}
+                {/*     transform: "translateY(-50%)", */}
+                {/*     left: "100%", */}
+                {/*     padding: "0 0.8rem", */}
+                {/*     fontSize: "1.3rem", */}
+                {/*     fontWeight: "500", */}
+                {/*   }} */}
+                {/* > */}
+                {/*   {String(voteCounts.like ?? 0)} */}
+                {/* </div> */}
+              </div>
               <VoteGifButton
                 isVotingActive={isVotingActive}
                 currentVote={vote}
                 vote="like"
-                label="yas"
+                label="Yes"
+                symbol={"👍"}
                 gifUrl={yesGifUrl}
                 onClick={like}
               />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div
+        css={css({
+          flex: "1 1 auto",
+          display: "grid",
+          gridTemplateColumns: "12rem minmax(0, 1fr)",
+          padding: "0 1.5rem",
+          position: "relative",
+          minHeight: 0,
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            padding: 0,
+            flex: "1 1 0",
+            display: "block",
+            width: "100%",
+            height: "100%",
+          },
+        })}
+      >
+        {nounImageElement}
+        {isMobileLayout && staticNounStatsElement}
+        {noundersNoun != null && (
+          <div
+            style={{
+              height: "auto",
+              transform: "translateX(10%) translateY(10%)",
+              borderRadius: "0.5rem",
+              overflow: "hidden",
+              background: "white",
+            }}
+            css={css({
+              position: "absolute",
+              bottom: "1rem",
+              left: "1rem",
+              width: "5rem",
+              padding: "0.3rem",
+              ".title": { display: "none" },
+              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                padding: "0.5rem",
+                width: "15%",
+                minWidth: "7rem",
+                left: 0,
+                top: 0,
+                bottom: "auto",
+                ".title": { display: "block" },
+              },
+            })}
+          >
+            <div
+              style={{
+                borderRadius: "0.3rem",
+                overflow: "hidden",
+              }}
+            >
+              <NounImage noun={noundersNoun} noStats />
+            </div>
+            <div
+              style={{
+                textAlign: "center",
+                margin: "0.5rem 0 0",
+                fontSize: "1rem",
+                fontWeight: "700",
+                textTransform: "uppercase",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+              }}
+              className="title"
+            >
+              Noun {noundersNoun.id}
             </div>
           </div>
         )}
@@ -1388,10 +1420,28 @@ const FomoScreen = ({
           position: "absolute",
           bottom: 0,
           left: 0,
-          padding: "1rem 1.5rem",
+          padding: "0.5rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            padding: "1.8rem",
+          },
         }}
       >
         {controlsElement}
+      </div>
+      <div
+        style={{
+          display: "none",
+          position: "absolute",
+          bottom: 0,
+          right: 0,
+          padding: "0.5rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            display: "block",
+            padding: "1.8rem",
+          },
+        }}
+      >
+        {backgroundSwitchElement}
       </div>
       {/* <div */}
       {/*   css={css({ */}
@@ -1413,6 +1463,7 @@ const FomoScreen = ({
 
 const VoteGifButton = ({
   label,
+  symbol,
   onClick,
   gifUrl,
   vote,
@@ -1422,106 +1473,102 @@ const VoteGifButton = ({
   const disabled = !isVotingActive || currentVote != null;
   return (
     <button
-      css={css({
-        position: "relative",
-        display: "block",
-        border: "0.1rem solid black",
-        padding: "0.5rem",
-        borderRadius: "0.5rem",
-        background: "hsl(0 0% 85%)",
-        pointerEvents: "all",
-        // overflow: "hidden",
-        cursor: "pointer",
-        transition: "0.1s transform ease-out",
-        "@media (hover: hover)": {
-          ":hover": {
-            background: "hsl(0 0% 80%)",
+      css={(theme) =>
+        css({
+          border: theme.light
+            ? "1px solid rgb(0 0 0 / 20%)"
+            : "1px solid rgba(255, 255, 255, 0.13)",
+          position: "relative",
+          display: "block",
+          padding: "0.5rem",
+          borderRadius: "0.5rem",
+          background: "none",
+          pointerEvents: "all",
+          // overflow: "hidden",
+          cursor: "pointer",
+          transition: "0.1s transform ease-out",
+          ":disabled": {
+            cursor: "not-allowed",
+            pointerEvents: "none",
           },
-          ":hover img": {
-            filter: "saturate(1.25)",
+          "@media (hover: hover)": {
+            ":hover": {
+              background: theme.light ? "rgb(55 52 47 / 8%)" : "rgb(47 47 47)",
+            },
+            ":hover img": {
+              filter: "saturate(1.25)",
+            },
+            ":hover .label, &[data-selected=true] .label": {
+              opacity: 1,
+              transform:
+                "translateY(-50%) translateX(-50%) rotate(-5deg) scale(1)",
+            },
           },
-        },
-        "&[data-selected=true]": {
-          boxShadow: "0 0 0 0.3rem #667af9",
-        },
-        "&[data-selected=true] img": {
-          filter: "saturate(1.2)",
-        },
-        ":disabled": {
-          cursor: "not-allowed",
-          pointerEvents: "none",
-        },
-        ":not([data-selected=true]):disabled": {
-          borderColor: "hsl(0 0% 60%)",
-        },
-        ":not([data-selected=true]):disabled img": {
-          filter: "saturate(0) contrast(60%)",
-        },
-        ".label": {
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          padding: "1rem 1.5rem",
-          fontWeight: "800",
-          color: "white",
-          transform:
-            "translateY(-50%) translateX(-50%) rotate(-5deg) scale(0.5)",
-          WebkitTextStroke: "1px black",
-          transition: "0.07s all ease-in",
-          textTransform: "uppercase",
-          opacity: 0,
-          fontSize: "2.8rem",
-          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            fontSize: "5rem",
+          "&[data-selected=true]": {
+            boxShadow:
+              "rgb(46 170 220 / 70%) 0px 0px 0px 1px inset, rgb(46 170 220 / 40%) 0px 0px 0px 3px",
           },
-        },
-        ".hint": {
-          position: "absolute",
-          top: "calc(100% + 0.8rem)",
-          left: "50%",
-          transform: "translateX(-50%)",
-          fontSize: "1rem",
-          fontWeight: "500",
-          whiteSpace: "nowrap",
-          textAlign: "center",
-        },
-        "&[data-selected=true] .label": {
-          opacity: 1,
-          transform: "translateY(-50%) translateX(-50%) rotate(-5deg) scale(1)",
-        },
-        "@media (hover: hover)": {
-          ":hover .label, &[data-selected=true] .label": {
+          "&[data-selected=true] img": {
+            filter: "saturate(1.2)",
+          },
+          "&[data-selected=true] .label": {
             opacity: 1,
             transform:
               "translateY(-50%) translateX(-50%) rotate(-5deg) scale(1)",
           },
-        },
-        img: {
-          display: "block",
-          width: "6rem",
-          height: "6rem",
-          objectFit: "cover",
-          transition: "0.1s transform ease-out",
-          borderRadius: "0.2rem",
-          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            width: "12rem",
-            height: "12rem",
+          // ":not([data-selected=true]):disabled": {
+          //   borderColor: "hsl(0 0% 60%)",
+          // },
+          ":not([data-selected=true]):disabled img": {
+            filter: "saturate(0) contrast(60%)",
           },
-        },
-      })}
+          ".label": {
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            padding: "1rem 1.5rem",
+            fontWeight: "800",
+            color: "white",
+            transform: "translateY(-50%) translateX(-50%) scale(0.5)",
+            transition: "0.07s all ease-in",
+            opacity: 0,
+            fontSize: "2.8rem",
+            [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+              fontSize: "5rem",
+            },
+          },
+          ".hint": {
+            position: "absolute",
+            top: "calc(100% + 0.8rem)",
+            left: "50%",
+            transform: "translateX(-50%)",
+            fontSize: "1.4rem",
+            fontWeight: "500",
+            whiteSpace: "nowrap",
+            textAlign: "center",
+          },
+          img: {
+            display: "block",
+            width: "6rem",
+            height: "6rem",
+            objectFit: "cover",
+            transition: "0.1s transform ease-out",
+            borderRadius: "0.2rem",
+            [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+              width: "10rem",
+              height: "10rem",
+            },
+          },
+        })
+      }
       onClick={onClick}
       disabled={disabled}
       data-selected={currentVote === vote}
     >
       <img alt={label} key={gifUrl} src={gifUrl} />
-      <div className="label">{label}</div>
+      <div className="label">{symbol}</div>
       <div className="hint" style={{ opacity: disabled ? 0 : 1 }}>
-        <Emoji style={{ fontSize: "1.4em", margin: "0 0 0.2rem" }}>
-          {"👆"}
-        </Emoji>
-        <div>
-          Vote <span style={{ textTransform: "uppercase" }}>{label}</span>
-        </div>
+        {label}
       </div>
     </button>
   );
@@ -1531,14 +1578,12 @@ const ScreenHeader = ({ children }) => (
   <div
     css={css({
       fontSize: "1rem",
-      background: "white",
-      color: "black",
       display: "flex",
       alignItems: "center",
-      padding: "1rem 1.5rem",
+      padding: "0 1.5rem",
       whiteSpace: "nowrap",
       [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-        padding: "1rem 2rem",
+        padding: "0 2rem",
         minHeight: "6rem",
       },
     })}
@@ -1550,9 +1595,9 @@ const ScreenHeader = ({ children }) => (
 const AuctionScreenHeader = ({
   auction,
   auctionEnded,
-  nounIdsByHolderAddresses,
+  // nounIdsByHolderAddresses,
   toggleBidsDialog,
-  auctionActionButtonElement,
+  // auctionActionButtonElement,
   navigationElement,
 }) => {
   const [isTimer, setIsTimer] = React.useState(true);
@@ -1565,33 +1610,33 @@ const AuctionScreenHeader = ({
       ? null
       : bidderENSName ?? shortenAddress(auction.bidderAddress);
 
-  const bidderHasNouns =
-    auction != null &&
-    (
-      nounIdsByHolderAddresses[
-        (auction.settled
-          ? auction.noun.ownerAddress
-          : auction.bidderAddress
-        ).toLowerCase()
-      ] ?? []
-    ).length !== 0;
+  // const bidderHasNouns =
+  //   auction != null &&
+  //   (
+  //     nounIdsByHolderAddresses[
+  //       (auction.settled
+  //         ? auction.noun.ownerAddress
+  //         : auction.bidderAddress
+  //       ).toLowerCase()
+  //     ] ?? []
+  //   ).length !== 0;
 
-  const bidderLinkContent = auction != null && (
-    <>
-      <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
-      <Heading2 data-address>
-        {auction.settled
-          ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
-          : auctionEnded
-          ? auction.amount.isZero()
-            ? "-"
-            : bidderShort
-          : auction.amount.isZero()
-          ? "No bids"
-          : bidderShort}
-      </Heading2>
-    </>
-  );
+  // const bidderLinkContent = auction != null && (
+  //   <>
+  //     <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
+  //     <Heading2 data-address>
+  //       {auction.settled
+  //         ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
+  //         : auctionEnded
+  //         ? auction.amount.isZero()
+  //           ? "-"
+  //           : bidderShort
+  //         : auction.amount.isZero()
+  //         ? "No bids"
+  //         : bidderShort}
+  //     </Heading2>
+  //   </>
+  // );
 
   return (
     <ScreenHeader>
@@ -1605,18 +1650,23 @@ const AuctionScreenHeader = ({
           },
         })}
       >
-        <div>{navigationElement}</div>
+        <div css={css({ padding: "2rem 0" })}>{navigationElement}</div>
         {auction?.noun != null && (
           <div
-            css={css({
-              display: "none",
-              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                display: "block",
-                fontSize: "3em",
-                fontWeight: "900",
-                marginLeft: "1.5rem",
-              },
-            })}
+            css={(theme) =>
+              css({
+                display: "none",
+                [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                  fontFamily: theme.fontStacks.headers,
+                  display: "block",
+                  textTransform: "uppercase",
+                  fontSize: "3.6rem",
+                  fontWeight: "600",
+                  marginLeft: "1.5rem",
+                  color: theme.colors.textHeader,
+                },
+              })
+            }
           >
             Noun {auction.noun.id}{" "}
             {auctionEnded && (
@@ -1629,50 +1679,53 @@ const AuctionScreenHeader = ({
       </div>
       {auction != null && (
         <div
-          css={css({
-            display: "grid",
-            gridAutoFlow: "column",
-            gridAutoColumns: "auto",
-            alignItems: "center",
-            gridGap: "2em",
-            "& > *": {
-              minWidth: 0,
-              overflow: "hidden",
-            },
-            a: {
-              display: "block",
+          css={(theme) =>
+            css({
+              display: "grid",
+              gridAutoFlow: "column",
+              gridAutoColumns: "auto",
+              alignItems: "center",
+              gridGap: "3rem",
+              "& > *": {
+                minWidth: 0,
+                overflow: "hidden",
+              },
+              a: { display: "block" },
               "@media (hover: hover)": {
-                ":hover [data-address]": {
-                  textDecoration: "underline",
-                  color: "hsl(0 0% 25%)",
+                "a, button": {
+                  ":hover [data-underline]": {
+                    textDecoration: "underline",
+                  },
+                  ":hover [data-dim]": {
+                    color: theme.colors.textDimmed,
+                  },
                 },
               },
-            },
-          })}
+            })
+          }
         >
-          {bidderHasNouns ? (
-            <Link
-              href={`/holders/${
-                auction?.settled
-                  ? auction?.noun.ownerAddress
-                  : auction?.bidderAddress
-              }`}
-            >
-              <a>{bidderLinkContent}</a>
-            </Link>
-          ) : (
-            <a
-              href={`https://etherscan.io/address/${
-                auction?.settled
-                  ? auction?.noun.ownerAddress
-                  : auction?.bidderAddress
-              }`}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {bidderLinkContent}
-            </a>
-          )}
+          <a
+            href={`https://etherscan.io/address/${
+              auction?.settled
+                ? auction?.noun.ownerAddress
+                : auction?.bidderAddress
+            }`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
+            <Heading2 data-address data-underline data-dim>
+              {auction.settled
+                ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
+                : auctionEnded
+                ? auction.amount.isZero()
+                  ? "-"
+                  : bidderShort
+                : auction.amount.isZero()
+                ? "No bids"
+                : bidderShort}
+            </Heading2>
+          </a>
           <button
             onClick={toggleBidsDialog}
             style={{
@@ -1685,12 +1738,12 @@ const AuctionScreenHeader = ({
             {auction?.amount != null && (
               <>
                 <Label>{auctionEnded ? "Winning bid" : "Current bid"}</Label>
-                <Heading2>
+                <Heading2 data-dim>
                   {auction.amount.isZero() ? (
                     "-"
                   ) : (
                     <>
-                      {"Ξ"} {formatEther(auction.amount)}
+                      <HeadingEthSymbol /> {formatEther(auction.amount)}
                     </>
                   )}
                 </Heading2>
@@ -1710,7 +1763,7 @@ const AuctionScreenHeader = ({
               }}
             >
               <Label>{isTimer ? "Auction ends in" : "Auction ends at"}</Label>
-              <Heading2>
+              <Heading2 data-dim>
                 {isTimer ? (
                   <CountdownDisplay to={auction.endTime} />
                 ) : (
@@ -1737,17 +1790,17 @@ const AuctionScreenHeader = ({
         </div>
       )}
 
-      <div
-        css={css({
-          display: "none",
-          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            display: "block",
-            marginLeft: "1.5rem",
-          },
-        })}
-      >
-        {auctionActionButtonElement}
-      </div>
+      {/* <div */}
+      {/*   css={css({ */}
+      {/*     display: "none", */}
+      {/*     [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: { */}
+      {/*       display: "block", */}
+      {/*       marginLeft: "1.5rem", */}
+      {/*     }, */}
+      {/*   })} */}
+      {/* > */}
+      {/*   {auctionActionButtonElement} */}
+      {/* </div> */}
     </ScreenHeader>
   );
 };
@@ -1769,22 +1822,34 @@ const HeaderNounNavigation = ({
     {...props}
   >
     <Link href={`/nouns/${prevNounId}`}>
-      <GrayButton
+      <Button
+        size="default"
         component="a"
         disabled={prevNounId < 0}
-        css={css({ height: "3rem", width: "3rem", minHeight: 0 })}
+        css={css({
+          height: "3rem",
+          width: "3rem",
+          minHeight: 0,
+          "&[disabled]": { pointerEvents: "none" },
+        })}
       >
         &larr;
-      </GrayButton>
+      </Button>
     </Link>
     <Link href={nextNounId === auctionNounId ? "/" : `/nouns/${nextNounId}`}>
-      <GrayButton
+      <Button
+        size="default"
         component="a"
         disabled={nextNounId > auctionNounId}
-        css={css({ height: "3rem", width: "3rem", minHeight: 0 })}
+        css={css({
+          height: "3rem",
+          width: "3rem",
+          minHeight: 0,
+          "&[disabled]": { pointerEvents: "none" },
+        })}
       >
         &rarr;
-      </GrayButton>
+      </Button>
     </Link>
   </div>
 );
@@ -1803,17 +1868,22 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
           alignItems: "center",
         })}
       >
-        <div>{navigationElement}</div>
+        <div css={css({ padding: "2rem 0" })}>{navigationElement}</div>
         <div
-          css={css({
-            marginLeft: "1rem",
-            fontSize: "2.4rem",
-            fontWeight: "900",
-            [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-              marginLeft: "1.5rem",
+          css={(theme) =>
+            css({
+              fontFamily: theme.fontStacks.headers,
+              marginLeft: "1rem",
               fontSize: "3rem",
-            },
-          })}
+              fontWeight: "600",
+              textTransform: "uppercase",
+              color: theme.colors.textHeader,
+              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                marginLeft: "1.5rem",
+                fontSize: "3.6rem",
+              },
+            })
+          }
         >
           Noun {noun.id}
         </div>
@@ -1834,9 +1904,13 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
         <div>
           <Label>Winning bid</Label>
           <Heading2>
-            {noun.auction == null
-              ? "-"
-              : `Ξ ${formatEther(noun.auction.amount)}`}
+            {noun.auction == null ? (
+              "-"
+            ) : (
+              <>
+                <HeadingEthSymbol /> {formatEther(noun.auction.amount)}
+              </>
+            )}
           </Heading2>
         </div>
         <Link href={`/holders/${noun.owner.address}`}>
@@ -1861,31 +1935,36 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
   );
 };
 
-export const Label = ({ style, ...props }) => (
+export const Label = (props) => (
   <div
-    style={{
-      minWidth: 0,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      fontSize: "1.1rem",
-      textTransform: "uppercase",
-      fontWeight: "700",
-      ...style,
-    }}
+    css={(theme) =>
+      css({
+        minWidth: 0,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        fontSize: "1.2rem",
+        lineHeight: 1.2,
+        color: theme.colors.textDimmed,
+      })
+    }
     {...props}
   />
 );
 
-export const Heading2 = ({ style, ...props }) => (
+export const Heading2 = (props) => (
   <div
-    style={{
-      minWidth: 0,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      fontSize: "2rem",
-      fontWeight: "700",
-      ...style,
-    }}
+    css={(theme) =>
+      css({
+        fontFamily: theme.fontStacks.headers,
+        minWidth: 0,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        fontSize: "2.4rem",
+        lineHeight: 1.2,
+        fontWeight: "600",
+        color: theme.colors.textHeader,
+      })
+    }
     {...props}
   />
 );
@@ -1988,11 +2067,13 @@ const BidsDialog = ({
             </h1>
             {count !== 0 && (
               <div
-                css={css({
-                  color: "hsl(0 0% 56%)",
-                  fontSize: "1.1rem",
-                  transform: "translateY(-0.2rem)",
-                })}
+                css={(theme) =>
+                  css({
+                    color: theme.colors.textDimmed,
+                    fontSize: "1.1rem",
+                    transform: "translateY(-0.2rem)",
+                  })
+                }
               >
                 {count} {count === 1 ? "bid" : "bids"}
               </div>
@@ -2010,11 +2091,13 @@ const BidsDialog = ({
           >
             {count === 0 ? (
               <div
-                css={css({
-                  color: "hsl(0 0% 56%)",
-                  textAlign: "center",
-                  padding: "4rem 0",
-                })}
+                css={(theme) =>
+                  css({
+                    color: theme.colors.textDimmed,
+                    textAlign: "center",
+                    padding: "4rem 0",
+                  })
+                }
               >
                 No bids
               </div>
@@ -2068,56 +2151,67 @@ const BidListItem = ({ bid, bidderNounIds }) => {
         <img
           src={avatarURI}
           alt="ENS Avatar"
-          css={css({
-            display: "block",
-            width: "4rem",
-            height: "4rem",
-            borderRadius: "0.3rem",
-            objectFit: "cover",
-            background: "hsl(0 0% 100% / 10%)",
-          })}
+          css={(theme) =>
+            css({
+              display: "block",
+              width: "4rem",
+              height: "4rem",
+              borderRadius: "0.3rem",
+              objectFit: "cover",
+              background: theme.colors.avatarBackground,
+              overflow: "hidden",
+            })
+          }
         />
       ) : (
         <div
-          css={css({
-            width: "4rem",
-            height: "4rem",
-            borderRadius: "0.3rem",
-            background: "hsl(0 0% 100% / 10%)",
-          })}
+          css={(theme) =>
+            css({
+              width: "4rem",
+              height: "4rem",
+              borderRadius: "0.3rem",
+              background: theme.colors.avatarBackground,
+            })
+          }
         />
       )}
       <div>
         <div
-          css={css({
-            display: "block",
-            fontSize: "1.4rem",
-            fontWeight: "500",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            color: "white",
-          })}
+          css={(theme) =>
+            css({
+              display: "block",
+              fontSize: "1.4rem",
+              fontWeight: "500",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: theme.colors.textNormal,
+            })
+          }
         >
           <span className="bidder">
             {ensName ?? shortenAddress(bid.bidder.address)}
           </span>
           {ensName != null && (
             <span
-              css={css({
-                fontSize: "1.1rem",
-                color: "hsl(0 0% 56%)",
-                marginLeft: "0.5rem",
-              })}
+              css={(theme) =>
+                css({
+                  fontSize: "1.1rem",
+                  color: theme.colors.textDimmed,
+                  marginLeft: "0.5rem",
+                })
+              }
             >
               {shortenAddress(bid.bidder.address)}
             </span>
           )}
         </div>
         <div
-          css={css({
-            fontSize: "1.1rem",
-            color: "hsl(0 0% 56%)",
-          })}
+          css={(theme) =>
+            css({
+              fontSize: "1.1rem",
+              color: theme.colors.textDimmed,
+            })
+          }
         >
           {balance == null
             ? "?"
@@ -2177,12 +2271,14 @@ const BidListItem = ({ bid, bidderNounIds }) => {
         href={getEtherscanLink("tx", bid.transactionHash ?? bid.id)}
         target="_blank"
         rel="noreferrer"
-        css={css({
-          fontSize: "1.5rem",
-          fontWeight: "500",
-          color: "white",
-          ":hover": { textDecoration: "underline" },
-        })}
+        css={(theme) =>
+          css({
+            fontSize: "1.5rem",
+            fontWeight: "500",
+            color: theme.colors.textNormal,
+            ":hover": { textDecoration: "underline" },
+          })
+        }
       >
         {"Ξ"} {formatEther(bid.amount)}
       </a>
@@ -2435,6 +2531,7 @@ const TraitNounListItem = ({ noun: n }) => {
 };
 
 const DarkDialog = ({ isOpen, onRequestClose, children, style, ...props }) => {
+  const theme = useTheme();
   return (
     <Dialog
       isOpen={isOpen}
@@ -2442,8 +2539,8 @@ const DarkDialog = ({ isOpen, onRequestClose, children, style, ...props }) => {
       style={{
         padding: 0,
         maxWidth: "48rem",
-        background: "hsl(0 0% 10%)",
-        color: "white",
+        color: theme.colors.textNormal,
+        background: theme.colors.dialogBackground,
         ...style,
       }}
       {...props}
@@ -2464,22 +2561,29 @@ const FloatingNounTraitLabel = ({
   return (
     <Component
       data-noun-trait
-      css={css({
-        position: "absolute",
-        width: "max-content",
-        padding: "0.6rem 0.8rem 0.6rem 0.6rem",
-        fontSize: "1.5rem",
-        fontWeight: "500",
-        borderRadius: "0.3rem",
-        transform: "translateY(-50%) translateX(-1rem)",
-        zIndex: 2,
-        background: highlight ? highlightGradient : "white",
-        backgroundSize: "600%",
-        animation: `${highlightGradientAnimation} 25s linear infinite`,
-        border: highlight ? "1px solid rgb(0 0 0 / 35%)" : "none",
-        boxShadow: "2px 2px 0 0 rgb(0 0 0 / 10%)",
-        ...positionByPartName[name],
-      })}
+      css={(theme) =>
+        css({
+          font: "inherit",
+          position: "absolute",
+          width: "max-content",
+          padding: "0.7rem 0.9rem 0.7rem 0.7rem",
+          fontSize: "1.4rem",
+          fontWeight: "500",
+          borderRadius: "0.3rem",
+          transform: "translateY(-50%) translateX(-1rem)",
+          zIndex: 2,
+          color: highlight ? "black" : theme.colors.textNormal,
+          background: highlight
+            ? highlightGradient
+            : theme.colors.dialogBackground,
+          backgroundSize: "600%",
+          animation: `${highlightGradientAnimation} 25s linear infinite`,
+          border: highlight ? "1px solid rgb(0 0 0 / 35%)" : "none",
+          boxShadow: theme.shadows.elevationLow, // "2px 2px 0 0 rgb(0 0 0 / 10%)",
+          lineHeight: 1.2,
+          ...positionByPartName[name],
+        })
+      }
       {...props}
     >
       <div style={{ display: "flex", alignItems: "center" }}>
@@ -2490,14 +2594,16 @@ const FloatingNounTraitLabel = ({
       </div>
       {stats != null && (
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            fontSize: "1.3rem",
-            fontWeight: "500",
-            color: highlight ? "currentcolor" : "hsl(0 0% 36%)",
-            margin: "0.3rem 0 0",
-          }}
+          css={(theme) =>
+            css({
+              display: "flex",
+              alignItems: "center",
+              fontSize: theme.fontSizes.small,
+              fontWeight: "400",
+              color: highlight ? "currentcolor" : theme.colors.textDimmed,
+              margin: "0.3rem 0 0",
+            })
+          }
         >
           {stats.count === 1 ? (
             <>
@@ -2535,55 +2641,55 @@ const FloatingNounTraitLabel = ({
   );
 };
 
-const Button = ({
-  component: Component = "button",
-  hint,
-  isLoading = false,
-  children,
-  ...props
-}) => (
-  <Component
-    css={css({
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      height: "4rem",
-      background: "white",
-      border: 0,
-      borderRadius: "0.5rem",
-      fontSize: "1.5rem",
-      fontWeight: "600",
-      fontFamily: "inherit",
-      padding: "0 1.5rem",
-      outline: "none",
-      maxWidth: "100%",
-      background: "#667AF9",
-      color: "white",
-      cursor: "pointer",
-      transition: "0.1s all easy-out",
-      textAlign: "left",
-      ":disabled": {
-        opacity: "0.8",
-        color: "hsl(0 0% 100% / 80%)",
-        pointerEvents: "none",
-      },
-      "@media (hover: hover)": {
-        ":hover": {
-          filter: "brightness(1.03) saturate(1.2)",
-        },
-      },
-    })}
-    {...props}
-  >
-    <div>
-      {children}
-      {hint != null && (
-        <div css={css({ fontSize: "1rem", fontWeight: "500" })}>{hint}</div>
-      )}
-    </div>
-    {isLoading && <Spinner size="1.5rem" style={{ marginLeft: "1rem" }} />}
-  </Component>
-);
+// const Button = ({
+//   component: Component = "button",
+//   hint,
+//   isLoading = false,
+//   children,
+//   ...props
+// }) => (
+//   <Component
+//     css={css({
+//       display: "inline-flex",
+//       alignItems: "center",
+//       justifyContent: "center",
+//       height: "4rem",
+//       background: "white",
+//       border: 0,
+//       borderRadius: "0.5rem",
+//       fontSize: "1.5rem",
+//       fontWeight: "600",
+//       fontFamily: "inherit",
+//       padding: "0 1.5rem",
+//       outline: "none",
+//       maxWidth: "100%",
+//       background: "#667AF9",
+//       color: "white",
+//       cursor: "pointer",
+//       transition: "0.1s all easy-out",
+//       textAlign: "left",
+//       ":disabled": {
+//         opacity: "0.8",
+//         color: "hsl(0 0% 100% / 80%)",
+//         pointerEvents: "none",
+//       },
+//       "@media (hover: hover)": {
+//         ":hover": {
+//           filter: "brightness(1.03) saturate(1.2)",
+//         },
+//       },
+//     })}
+//     {...props}
+//   >
+//     <div>
+//       {children}
+//       {hint != null && (
+//         <div css={css({ fontSize: "1rem", fontWeight: "500" })}>{hint}</div>
+//       )}
+//     </div>
+//     {isLoading && <Spinner size="1.5rem" style={{ marginLeft: "1rem" }} />}
+//   </Component>
+// );
 
 const rotateAnimation = keyframes({
   "100%": {
@@ -2703,77 +2809,44 @@ const GrayButton = React.forwardRef(function GrayButton_(
   );
 });
 
-const Switch = ({ id, label, ...props }) => (
-  <label
-    htmlFor={id}
-    css={css({
-      pointerEvents: "all",
-      fontSize: "1.3rem",
-      fontWeight: "600",
-      color: "hsl(0 0% 46%)",
-      cursor: "pointer",
-      userSelect: "none",
-      transition: "8ms color ease-out",
-      "@media (hover: hover)": {
-        ":hover": { color: "hsl(0 0% 25%)" },
-      },
-    })}
-  >
-    <input
-      id={id}
-      type="checkbox"
-      {...props}
-      css={css({
-        WebkitAppearance: "none",
-        padding: 0,
-        paddingRight: "0.3rem",
-        cursor: "pointer",
-        color: "inherit",
-        outline: "none",
-        transition: "0.1s color ease-out",
-        ":after": {
-          content: '""',
-          display: "inline-flex",
-          background: "currentColor",
-          width: "1rem",
-          height: "1rem",
-          border: "0.2rem solid white",
-          borderRightWidth: "1.2rem",
-        },
-        ":checked:after": {
-          borderRightWidth: "0.2rem",
-          borderLeftWidth: "1.2rem",
-        },
-      })}
-    />
-    {label}
-  </label>
-);
-
 const ProgressBar = ({ disabled, progress = 0, height = "1rem" }) => (
   <div
-    css={css({
-      height,
-      width: "100%",
-      borderRadius: "0.5rem",
-      background: rainbowGradient,
-      animation: `${progressGradientAnimation} 6s linear infinite`,
-      backgroundSize: "200%",
-      position: "relative",
-      overflow: "hidden",
-      border: "1px solid rgb(0 0 0 / 40%)",
-    })}
+    css={(theme) =>
+      css({
+        height,
+        width: "100%",
+        borderRadius: "0.5rem",
+        background: rainbowGradient,
+        animation: `${progressGradientAnimation} 6s linear infinite`,
+        backgroundSize: "200%",
+        position: "relative",
+        overflow: "hidden",
+        filter: disabled ? "saturate(0)" : undefined,
+        border: disabled
+          ? theme.light
+            ? "1px solid hsl(0 0% 50%)"
+            : "1px solid hsl(0 0% 25%)"
+          : "1px solid rgb(0 0 0 / 40%)",
+      })
+    }
   >
     <div
-      css={css({
-        position: "absolute",
-        right: 0,
-        top: 0,
-        bottom: 0,
-        width: `min(calc(100% - 2px),${(1 - progress) * 100}%)`,
-        transition: "0.2s width ease-out, 0.2s background ease-out",
-        background: disabled ? "hsl(0 0% 70%)" : "white",
-      })}
+      css={(theme) =>
+        css({
+          position: "absolute",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          opacity: 0.9,
+          width: `min(calc(100% - 0px),${(1 - progress) * 100}%)`,
+          transition: "0.2s width ease-out, 0.2s background ease-out",
+          background: theme.light
+            ? disabled
+              ? "rgb(150 150 150)"
+              : "rgb(100 100 100)"
+            : theme.colors.backgroundPrimary,
+        })
+      }
     />
   </div>
 );
@@ -2788,4 +2861,18 @@ const Emoji = ({ style, ...props }) => (
     }}
     {...props}
   />
+);
+
+const HeadingEthSymbol = () => (
+  <span
+    css={(theme) =>
+      css({
+        fontFamily: theme.fontStacks.default,
+        fontSize: "0.9em",
+        fontWeight: "800",
+      })
+    }
+  >
+    {"Ξ"}
+  </span>
 );
