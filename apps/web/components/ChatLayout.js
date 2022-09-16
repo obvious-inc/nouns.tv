@@ -185,41 +185,23 @@ const ChatLayout = ({ showLoadingScreen, background, children }) => {
           {children}
 
           <div
-            css={css({
-              position: "absolute",
-              top: "-100px",
-              left: "-100px",
-              width: "calc(100% + 200px)",
-              height: "calc(100% + 200px)",
-              background:
-                "repeating-linear-gradient(#000, #000 50%, white 50%, white)",
-              backgroundSize: "2px 2px",
-              filter: "url(#tv-noise)",
-              zIndex: 1,
-              transition: "1s opacity ease-out",
-            })}
+            css={(theme) =>
+              css({
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                background: theme.colors.backgroundPrimary,
+                zIndex: 1,
+                transition: "1s opacity ease-out",
+              })
+            }
             style={{
               opacity: showLoadingScreen ? 1 : 0,
               pointerEvents: showLoadingScreen ? "all" : "none",
             }}
-          >
-            <svg>
-              <filter id="tv-noise">
-                <feTurbulence id="turbulence">
-                  <animate
-                    attributeName="baseFrequency"
-                    dur="50s"
-                    values="0.5 0.5;0.8 0.8; 0.9 0.9"
-                    repeatCount="indefinite"
-                  ></animate>
-                </feTurbulence>
-                <feDisplacementMap
-                  in="SourceGraphic"
-                  scale="60"
-                ></feDisplacementMap>
-              </filter>
-            </svg>
-          </div>
+          />
         </div>
         <div
           css={css({
