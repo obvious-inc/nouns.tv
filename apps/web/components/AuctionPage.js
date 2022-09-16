@@ -102,214 +102,214 @@ const positionByPartName = {
 const iconByPartName = {
   head: (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect width="3" height="3" fill="black" />
-      <rect y="3" width="3" height="3" fill="black" />
-      <rect y="6" width="3" height="3" fill="black" />
-      <rect y="9" width="3" height="3" fill="black" />
-      <rect y="12" width="3" height="3" fill="black" />
-      <rect x="6" y="12" width="3" height="3" fill="black" />
-      <rect x="9" y="12" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect x="3" width="3" height="3" fill="black" />
-      <rect x="6" width="3" height="3" fill="black" />
-      <rect x="6" y="6" width="3" height="3" fill="black" />
-      <rect x="9" width="3" height="3" fill="black" />
-      <rect x="12" width="3" height="3" fill="black" />
-      <rect x="12" y="6" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" y="3" width="3" height="3" fill="black" />
-      <rect x="15" y="6" width="3" height="3" fill="black" />
-      <rect x="15" y="9" width="3" height="3" fill="black" />
-      <rect x="15" y="12" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="12" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="9" y="15" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="3" y="15" width="3" height="3" fill="black" />
+      <rect width="3" height="3" fill="currentColor" />
+      <rect y="3" width="3" height="3" fill="currentColor" />
+      <rect y="6" width="3" height="3" fill="currentColor" />
+      <rect y="9" width="3" height="3" fill="currentColor" />
+      <rect y="12" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="12" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" width="3" height="3" fill="currentColor" />
+      <rect x="6" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="9" width="3" height="3" fill="currentColor" />
+      <rect x="12" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
     </svg>
   ),
   glasses: (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect width="3" height="3" fill="black" />
-      <rect y="3" width="3" height="3" fill="black" />
-      <rect y="6" width="3" height="3" fill="black" />
-      <rect y="9" width="3" height="3" fill="black" />
-      <rect y="12" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect x="3" width="3" height="3" fill="black" />
-      <rect x="6" width="3" height="3" fill="black" />
-      <rect x="9" width="3" height="3" fill="black" />
-      <rect x="6" y="3" width="3" height="3" fill="black" />
-      <rect x="3" y="3" width="3" height="3" fill="black" />
-      <rect x="6" y="6" width="3" height="3" fill="black" />
-      <rect x="3" y="6" width="3" height="3" fill="black" />
-      <rect x="6" y="9" width="3" height="3" fill="black" />
-      <rect x="3" y="9" width="3" height="3" fill="black" />
-      <rect x="6" y="12" width="3" height="3" fill="black" />
-      <rect x="3" y="12" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="3" y="15" width="3" height="3" fill="black" />
-      <rect x="12" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" y="3" width="3" height="3" fill="black" />
-      <rect x="15" y="6" width="3" height="3" fill="black" />
-      <rect x="15" y="9" width="3" height="3" fill="black" />
-      <rect x="15" y="12" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect x="9" y="15" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="3" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="12" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="9" y="15" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="3" y="15" width="3" height="3" fill="black" />
+      <rect width="3" height="3" fill="currentColor" />
+      <rect y="3" width="3" height="3" fill="currentColor" />
+      <rect y="6" width="3" height="3" fill="currentColor" />
+      <rect y="9" width="3" height="3" fill="currentColor" />
+      <rect y="12" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" width="3" height="3" fill="currentColor" />
+      <rect x="6" width="3" height="3" fill="currentColor" />
+      <rect x="9" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="12" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
     </svg>
   ),
   body: (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect width="3" height="3" fill="black" />
-      <rect y="3" width="3" height="3" fill="black" />
-      <rect y="6" width="3" height="3" fill="black" />
-      <rect y="9" width="3" height="3" fill="black" />
-      <rect y="12" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect x="3" width="3" height="3" fill="black" />
-      <rect x="3" y="3" width="3" height="3" fill="black" />
-      <rect x="6" width="3" height="3" fill="black" />
-      <rect x="9" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="12" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" y="3" width="3" height="3" fill="black" />
-      <rect x="15" y="6" width="3" height="3" fill="black" />
-      <rect x="15" y="9" width="3" height="3" fill="black" />
-      <rect x="15" y="12" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect x="9" y="15" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="12" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="9" y="15" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="6" y="12" width="3" height="3" fill="black" />
-      <rect x="6" y="9" width="3" height="3" fill="black" />
-      <rect x="6" y="6" width="3" height="3" fill="black" />
-      <rect x="6" y="3" width="3" height="3" fill="black" />
-      <rect x="9" y="12" width="3" height="3" fill="black" />
-      <rect x="9" y="9" width="3" height="3" fill="black" />
-      <rect x="9" y="6" width="3" height="3" fill="black" />
-      <rect x="9" y="3" width="3" height="3" fill="black" />
-      <rect x="12" y="12" width="3" height="3" fill="black" />
-      <rect x="12" y="9" width="3" height="3" fill="black" />
-      <rect x="12" y="6" width="3" height="3" fill="black" />
-      <rect x="12" y="3" width="3" height="3" fill="black" />
+      <rect width="3" height="3" fill="currentColor" />
+      <rect y="3" width="3" height="3" fill="currentColor" />
+      <rect y="6" width="3" height="3" fill="currentColor" />
+      <rect y="9" width="3" height="3" fill="currentColor" />
+      <rect y="12" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="6" width="3" height="3" fill="currentColor" />
+      <rect x="9" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="12" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="3" width="3" height="3" fill="currentColor" />
     </svg>
   ),
   accessory: (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect width="3" height="3" fill="black" />
-      <rect y="3" width="3" height="3" fill="black" />
-      <rect y="6" width="3" height="3" fill="black" />
-      <rect x="6" y="6" width="3" height="3" fill="black" />
-      <rect x="9" y="6" width="3" height="3" fill="black" />
-      <rect x="9" y="9" width="3" height="3" fill="black" />
-      <rect x="6" y="9" width="3" height="3" fill="black" />
-      <rect y="9" width="3" height="3" fill="black" />
-      <rect y="12" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect x="3" width="3" height="3" fill="black" />
-      <rect x="6" width="3" height="3" fill="black" />
-      <rect x="9" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="3" y="15" width="3" height="3" fill="black" />
-      <rect x="12" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" y="3" width="3" height="3" fill="black" />
-      <rect x="15" y="6" width="3" height="3" fill="black" />
-      <rect x="15" y="9" width="3" height="3" fill="black" />
-      <rect x="15" y="12" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect x="9" y="15" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="3" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="12" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="9" y="15" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="3" y="15" width="3" height="3" fill="black" />
+      <rect width="3" height="3" fill="currentColor" />
+      <rect y="3" width="3" height="3" fill="currentColor" />
+      <rect y="6" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="9" width="3" height="3" fill="currentColor" />
+      <rect y="9" width="3" height="3" fill="currentColor" />
+      <rect y="12" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" width="3" height="3" fill="currentColor" />
+      <rect x="6" width="3" height="3" fill="currentColor" />
+      <rect x="9" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="12" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
     </svg>
   ),
   background: (
     <svg width="18" height="18" viewBox="0 0 18 18">
       {" "}
-      <rect y="9" width="3" height="3" fill="black" />
-      <rect y="12" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect x="3" width="3" height="3" fill="black" />
-      <rect x="6" width="3" height="3" fill="black" />
-      <rect x="9" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="3" y="15" width="3" height="3" fill="black" />
-      <rect x="12" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="15" width="3" height="3" fill="black" />
-      <rect x="12" y="3" width="3" height="3" fill="black" />
-      <rect x="9" y="6" width="3" height="3" fill="black" />
-      <rect x="6" y="3" width="3" height="3" fill="black" />
-      <rect x="3" y="6" width="3" height="3" fill="black" />
-      <rect x="6" y="9" width="3" height="3" fill="black" />
-      <rect x="9" y="12" width="3" height="3" fill="black" />
-      <rect x="12" y="9" width="3" height="3" fill="black" />
-      <rect x="3" y="12" width="3" height="3" fill="black" />
-      <rect x="15" y="3" width="3" height="3" fill="black" />
-      <rect x="15" y="6" width="3" height="3" fill="black" />
-      <rect x="15" y="9" width="3" height="3" fill="black" />
-      <rect x="15" y="12" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect y="15" width="3" height="3" fill="black" />
-      <rect x="9" y="15" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="3" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="12" y="15" width="3" height="3" fill="black" />
-      <rect x="15" y="15" width="3" height="3" fill="black" />
-      <rect x="9" y="15" width="3" height="3" fill="black" />
-      <rect x="6" y="15" width="3" height="3" fill="black" />
-      <rect x="3" y="15" width="3" height="3" fill="black" />
+      <rect y="9" width="3" height="3" fill="currentColor" />
+      <rect y="12" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" width="3" height="3" fill="currentColor" />
+      <rect x="6" width="3" height="3" fill="currentColor" />
+      <rect x="9" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="12" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="3" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="6" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="9" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="12" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect y="15" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="12" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
+      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
     </svg>
   ),
 };
@@ -1972,40 +1972,47 @@ export const Heading2 = (props) => (
 const NounTraitLabel = ({ highlight = false, name, title, stats }) => {
   return (
     <div
-      css={css({
-        display: "grid",
-        alignItems: "flex-start",
-        gridTemplateColumns: "auto minmax(0,1fr)",
-        gridGap: "0.4rem",
-        width: "max-content",
-        padding: "0 0.4rem",
-        fontSize: "1.2rem",
-        fontWeight: "500",
-        borderRadius: "0.3rem",
-        cursor: "default",
-        background: highlight ? highlightGradient : "white",
-        backgroundSize: "600%",
-        animation: `${highlightGradientAnimation} 25s linear infinite`,
-        border: highlight ? "1px solid rgb(0 0 0 / 35%)" : undefined,
-        boxShadow: "2px 2px 0 0 rgb(0 0 0 / 10%)",
-      })}
+      css={(t) =>
+        css({
+          color: t.colors.textNormal,
+          display: "grid",
+          alignItems: "flex-start",
+          gridTemplateColumns: "auto minmax(0,1fr)",
+          gridGap: "0.4rem",
+          width: "max-content",
+          padding: "0 0.4rem",
+          fontSize: "1.2rem",
+          fontWeight: "500",
+          borderRadius: "0.3rem",
+          cursor: "default",
+          background: highlight ? highlightGradient : t.colors.dialogBackground,
+          backgroundSize: "600%",
+          animation: `${highlightGradientAnimation} 25s linear infinite`,
+          border: highlight ? "1px solid rgb(0 0 0 / 35%)" : undefined,
+          boxShadow: t.shadows.elevationLow,
+        })
+      }
     >
       <div style={{ display: "flex", alignItems: "center" }}>
         <div
-          css={css({
-            marginRight: "0.4rem",
-            svg: {
-              display: "block",
-              padding: "0.4rem 0",
-              width: "1.2rem",
-              height: "auto",
-            },
-          })}
+          css={(t) =>
+            css({
+              marginRight: "0.4rem",
+              color: t.light ? "black" : "white",
+              svg: {
+                display: "block",
+                padding: "0.4rem 0",
+                width: "1.2rem",
+                height: "auto",
+              },
+            })
+          }
         >
           {iconByPartName[name]}
         </div>
         <div style={{ padding: "0.2rem 0" }}>
-          {title} <span style={{ color: "rgb(0 0 0 / 54%)" }}>{name}</span>
+          {title}{" "}
+          <span css={(t) => css({ color: t.colors.textDimmed })}>{name}</span>
           {stats != null && (
             <>
               {" "}
@@ -2057,11 +2064,14 @@ const BidsDialog = ({
           >
             <h1
               {...titleProps}
-              css={css({
-                fontSize: "1.8rem",
-                lineHeight: "1.2",
-                margin: 0,
-              })}
+              css={(theme) =>
+                css({
+                  fontSize: "1.8rem",
+                  lineHeight: "1.2",
+                  margin: 0,
+                  color: theme.colors.textHeader,
+                })
+              }
             >
               Auction bids
             </h1>
@@ -2070,8 +2080,7 @@ const BidsDialog = ({
                 css={(theme) =>
                   css({
                     color: theme.colors.textDimmed,
-                    fontSize: "1.1rem",
-                    transform: "translateY(-0.2rem)",
+                    fontSize: theme.fontSizes.small,
                   })
                 }
               >
@@ -2312,11 +2321,13 @@ const TraitDialog = ({ isOpen, onRequestClose, traitName, noun, nouns }) => {
   }, [nouns, traitName, traitValue]);
 
   const nounCount = traitNouns.length;
+  const gridColumnCount = nounCount > 8 ? 3 : 2;
 
   return (
     <DarkDialog
       isOpen={isOpen}
       onRequestClose={onRequestClose}
+      width={gridColumnCount === 2 ? "48rem" : "64rem"}
       style={{ display: "flex", flexDirection: "column" }}
     >
       {({ titleProps }) => (
@@ -2336,11 +2347,14 @@ const TraitDialog = ({ isOpen, onRequestClose, traitName, noun, nouns }) => {
           >
             <h1
               {...titleProps}
-              css={css({
-                fontSize: "1.8rem",
-                lineHeight: "1.2",
-                margin: 0,
-              })}
+              css={(theme) =>
+                css({
+                  fontSize: "1.8rem",
+                  lineHeight: "1.2",
+                  margin: 0,
+                  color: theme.colors.textHeader,
+                })
+              }
             >
               <span style={{ textTransform: "capitalize" }}>
                 {traitHumanReadableName}
@@ -2348,11 +2362,12 @@ const TraitDialog = ({ isOpen, onRequestClose, traitName, noun, nouns }) => {
               {traitName}
             </h1>
             <div
-              css={css({
-                color: "hsl(0 0% 56%)",
-                fontSize: "1.1rem",
-                transform: "translateY(-0.2rem)",
-              })}
+              css={(theme) =>
+                css({
+                  color: theme.colors.textDimmed,
+                  fontSize: theme.fontSizes.small,
+                })
+              }
             >
               {nounCount} {nounCount === 1 ? "noun" : "nouns"}
             </div>
@@ -2374,6 +2389,9 @@ const TraitDialog = ({ isOpen, onRequestClose, traitName, noun, nouns }) => {
                 display: "grid",
                 gridGap: "1.5rem",
                 gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                [`@media (min-width: 640px)`]: {
+                  gridTemplateColumns: `repeat(${gridColumnCount}, minmax(0,1fr))`,
+                },
               })}
             >
               {traitNouns
@@ -2432,32 +2450,32 @@ const TraitNounListItem = ({ noun: n }) => {
       </Link>
 
       <div
-        css={css({
-          position: "relative",
-          pointerEvents: "none",
-          display: "grid",
-          gridTemplateColumns: "auto minmax(0,1fr)",
-          gridGap: "1.5rem",
-          alignItems: "center",
-          lineHeight: "1.4",
-          whiteSpace: "nowrap",
-          a: {
-            pointerEvents: "all",
-            display: "block",
-            width: "max-content",
-            fontSize: "1.1rem",
-            color: "hsl(0 0% 56%)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            "@media (hover: hover)": {
-              transition: "0.05s color ease-out",
-              ":hover": {
-                color: "hsl(0 0% 70%)",
-                textDecoration: "underline",
+        css={(theme) =>
+          css({
+            position: "relative",
+            pointerEvents: "none",
+            display: "grid",
+            gridTemplateColumns: "auto minmax(0,1fr)",
+            gridGap: "1.5rem",
+            alignItems: "center",
+            lineHeight: "1.4",
+            whiteSpace: "nowrap",
+            a: {
+              pointerEvents: "all",
+              display: "block",
+              width: "max-content",
+              fontSize: "1.1rem",
+              color: theme.colors.textDimmed,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              "@media (hover: hover)": {
+                ":hover": {
+                  textDecoration: "underline",
+                },
               },
             },
-          },
-        })}
+          })
+        }
       >
         <img
           className="avatar"
@@ -2530,15 +2548,22 @@ const TraitNounListItem = ({ noun: n }) => {
   );
 };
 
-const DarkDialog = ({ isOpen, onRequestClose, children, style, ...props }) => {
+const DarkDialog = ({
+  isOpen,
+  onRequestClose,
+  width = "48rem",
+  children,
+  style,
+  ...props
+}) => {
   const theme = useTheme();
   return (
     <Dialog
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       style={{
+        maxWidth: width,
         padding: 0,
-        maxWidth: "48rem",
         color: theme.colors.textNormal,
         background: theme.colors.dialogBackground,
         ...style,

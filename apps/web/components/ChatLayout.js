@@ -178,7 +178,7 @@ const ChatLayout = ({ showLoadingScreen, background, children }) => {
             flexDirection: "column",
             [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
               flex: "1 1 0",
-              minWidth: "64rem",
+              minWidth: "68rem",
             },
           })}
         >
@@ -212,9 +212,9 @@ const ChatLayout = ({ showLoadingScreen, background, children }) => {
               flex: "1 1 0",
               width: "auto",
             },
-            "@media (min-width: 1280px)": {
+            "@media (min-width: 1220px)": {
               flex: "none",
-              width: "58rem",
+              width: "54rem",
             },
           })}
         >

@@ -1,1 +1,1 @@
-export const STACKED_MODE_BREAKPOINT = "1000px";
+export const STACKED_MODE_BREAKPOINT = "1120px";
