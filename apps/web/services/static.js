@@ -17,7 +17,7 @@ export const getStaticAuctionProps = async ({ params }) => {
 
   if (params?.["noun-id"] != null) {
     noun = await service.getNoun(params["noun-id"]);
-    noun.auction = (await service.getAuction(noun.id)) ?? null;
+    noun.auction = (await service.getAuction(params["noun-id"])) ?? null;
     delete noun.auction?.noun;
   }
 

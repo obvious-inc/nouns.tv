@@ -154,19 +154,20 @@ const ChatLayout = ({ showLoadingScreen, background, children }) => {
     >
       {/* <Header /> */}
       <div
-        css={(theme) =>
-          css({
+        css={(theme) => {
+          return css({
             flex: "1 1 0",
             minHeight: 0,
             display: "flex",
             alignItems: "stretch",
             // background: "rgb(25 25 25)",
-            background: background ?? theme.colors.backgroundSecondary,
+            background: theme.colors.backgroundSecondary,
             [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
               flexDirection: "column",
             },
-          })
-        }
+          });
+        }}
+        style={{ background }}
       >
         <div
           css={css({
@@ -177,6 +178,7 @@ const ChatLayout = ({ showLoadingScreen, background, children }) => {
             flexDirection: "column",
             [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
               flex: "1 1 0",
+              minWidth: "64rem",
             },
           })}
         >
@@ -225,8 +227,12 @@ const ChatLayout = ({ showLoadingScreen, background, children }) => {
             maxWidth: "100%",
             minHeight: 0,
             [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-              width: "48rem",
+              flex: "1 1 0",
+              width: "auto",
+            },
+            "@media (min-width: 1280px)": {
               flex: "none",
+              width: "58rem",
             },
           })}
         >

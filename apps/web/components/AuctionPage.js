@@ -1,10 +1,4 @@
-import {
-  css,
-  keyframes,
-  ThemeProvider,
-  useTheme,
-  Global as GlobalStyles,
-} from "@emotion/react";
+import { css, keyframes, useTheme } from "@emotion/react";
 import React from "react";
 import { useRect } from "@reach/rect";
 import Link from "next/link";
@@ -339,7 +333,7 @@ const groupBy = (computeKey, list) =>
     return acc;
   }, {});
 
-export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
+export function AuctionPage({ noun: noun_, nouns: nouns_, setTheme }) {
   const noun = React.useMemo(
     () => (noun_ == null ? null : enhanceNoun(noun_)),
     [noun_]
@@ -425,40 +419,6 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
     }
   }, [screenMode, fomo.noun, auction, noun, nouns]);
 
-  const [isBackgroundActive, setBackgroundActive] = React.useState(true);
-  const toggleBackground = () => setBackgroundActive((s) => !s);
-
-  const defaultTheme = useTheme();
-  const lightTheme = {
-    ...defaultTheme,
-    light: true,
-    colors: {
-      ...defaultTheme.colors,
-      textNormal: "black",
-      textHeader: "black",
-      textDimmed: "hsl(0 0% 35%)",
-      // textMuted,
-      // textHighlight: "#ffd376",
-      // textSelectionBackground: transparentBlue,
-      // backgroundPrimary: "rgb(25, 25, 25)",
-      backgroundPrimary: "white",
-      backgroundSecondary: "white",
-      dialogBackground: "white",
-      // dialogPopoverBackground: "rgb(37, 37, 37)",
-      // channelInputBackground: "rgb(37, 37, 37)",
-      // inputBackground: "rgba(25, 25, 25)",
-      // backgroundModifierSelected: "rgba(255, 255, 255, 0.055)",
-      // backgroundModifierHover: "rgba(255, 255, 255, 0.055)",
-      // memberDisplayName: textNormal,
-    },
-    shadows: {
-      ...defaultTheme.shadows,
-      elevationLow:
-        "rgb(15 15 15 / 5%) 0px 1px 1px 1px, rgb(15 15 15 / 10%) 0px 1px 3px 1px",
-    },
-  };
-  const theme = isBackgroundActive ? lightTheme : defaultTheme;
-
   const [forceStats_, setForceStats] = React.useState(undefined);
   const forceStats =
     typeof forceStats_ === "boolean" ? forceStats_ : screenMode === "fomo";
@@ -466,6 +426,11 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
 
   const [displayBidDialog, setDisplayBidDialog] = React.useState(false);
   const toggleDisplayBidDialog = () => setDisplayBidDialog((s) => !s);
+
+  const theme = useTheme();
+  const isBackgroundActive = theme.light ?? false;
+  const toggleBackground = () =>
+    setTheme((t) => (t === "light" ? "dark" : "light"));
 
   const {
     bid,
@@ -566,10 +531,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
   }, [displayedNoun, stats, setSelectedTrait]);
 
   return (
-    <ThemeProvider theme={theme}>
-      <GlobalStyles
-        styles={() => css({ body: { color: theme.colors.textNormal } })}
-      />
+    <>
       <ChatLayout
         background={
           isBackgroundActive && displayedNoun != null
@@ -678,27 +640,6 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                 }}
               />
             }
-            // controlsElement={
-            //   <div
-            //     css={css({
-            //       display: "grid",
-            //       gridAutoColumns: "auto",
-            //       gridAutoFlow: "column",
-            //       gridGap: "1.5rem",
-            //       pointerEvents: "none",
-            //       [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            //         display: "none",
-            //       },
-            //     })}
-            //   >
-            //     <Switch
-            //       id="stats-switch"
-            //       label="Stats"
-            //       checked={forceStats}
-            //       onChange={toggleForceStats}
-            //     />
-            //   </div>
-            // }
           />
         )}
 
@@ -725,29 +666,24 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
         {/* )} */}
       </ChatLayout>
 
-      <Dialog
+      <DarkDialog
         isOpen={displayBidDialog}
         onRequestClose={toggleDisplayBidDialog}
-        style={{ padding: "2.5rem 2rem 3.5rem", width: "35rem" }}
+        style={{ padding: "2rem", width: "32rem" }}
       >
         {({ titleProps }) => (
           <>
-            <header style={{ textAlign: "center" }}>
-              <h3
+            <header style={{ margin: "0 0 2rem" }}>
+              <h1
                 {...titleProps}
-                style={{ margin: 0, fontSize: "3rem", fontWeight: "900" }}
-              >
-                TV SHOP
-              </h3>
-              <div
-                style={{
-                  fontSize: "1.4rem",
-                  fontWeight: "700",
-                  margin: "0 0 2rem",
-                }}
+                css={css({
+                  fontSize: "1.8rem",
+                  lineHeight: "1.2",
+                  margin: "0",
+                })}
               >
                 Place a bid on noun {auction?.nounId}
-              </div>
+              </h1>
             </header>
             <main>
               <form
@@ -757,38 +693,39 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                     setDisplayBidDialog(false);
                   });
                 }}
-                style={{
-                  width: "25rem",
-                  maxWidth: "100%",
-                  margin: "0 auto",
-                }}
               >
                 <div
-                  css={css({
-                    height: "5rem",
-                    width: "100%",
-                    background: "white",
-                    border: "0.1rem solid black",
-                    borderRadius: "1rem",
-                    fontSize: "1.5rem",
-                    fontWeight: "600",
-                    padding: "0 1rem",
-                    display: "flex",
-                    alignItems: "center",
-                    margin: "0 0 1rem",
-                  })}
-                  style={{
-                    borderColor: hasPendingBid ? "hsl(0 0% 70%)" : undefined,
-                  }}
+                  css={(theme) =>
+                    css({
+                      display: "flex",
+                      alignItems: "center",
+                      height: "4.2rem",
+                      color: theme.colors.textNormal,
+                      background: theme.colors.backgroundSecondary,
+                      fontSize: theme.fontSizes.default,
+                      fontWeight: "400",
+                      borderRadius: "0.3rem",
+                      padding: "0.5rem 0.7rem",
+                      width: "100%",
+                      outline: "none",
+                      border: 0,
+                      margin: "0 0 1rem",
+                      "&:focus-within": {
+                        boxShadow: `0 0 0 0.2rem ${theme.colors.primary}`,
+                      },
+                    })
+                  }
                 >
                   <div
-                    style={{
-                      padding: "0 0.5rem",
-                      color:
-                        hasPendingBid || amount.trim() === ""
-                          ? "rgb(0 0 0 / 54%)"
-                          : "inherit",
-                    }}
+                    css={(theme) =>
+                      css({
+                        padding: "0 0.5rem",
+                        color:
+                          hasPendingBid || amount.trim() === ""
+                            ? theme.colors.textDimmed
+                            : "inherit",
+                      })
+                    }
                   >
                     {"Ξ"}
                   </div>
@@ -814,32 +751,36 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
                           )} or higher`
                     }
                     autoComplete="off"
-                    css={css({
-                      flex: 1,
-                      background: "none",
-                      border: 0,
-                      fontSize: "inherit",
-                      fontWeight: "inherit",
-                      fontFamily: "inherit",
-                      padding: "0",
-                      outline: "none",
-                      "::placeholder": { color: "rgb(0 0 0 / 54%)" },
-                      ":disabled": {
-                        pointerEvents: "none",
-                      },
-                    })}
+                    css={(theme) =>
+                      css({
+                        flex: 1,
+                        background: "none",
+                        border: 0,
+                        fontSize: "inherit",
+                        fontWeight: "inherit",
+                        fontFamily: "inherit",
+                        padding: "0",
+                        outline: "none",
+                        "::placeholder": { color: theme.colors.textDimmed },
+                        ":disabled": {
+                          pointerEvents: "none",
+                        },
+                        // Prevents iOS zooming in on input fields
+                        "@supports (-webkit-touch-callout: none)": {
+                          fontSize: "1.6rem",
+                        },
+                      })
+                    }
                   />
                 </div>
                 <Button
                   type="submit"
+                  size="large"
+                  fullWidth
+                  variant="primary"
                   disabled={!biddingEnabled}
                   isLoading={hasPendingBid}
                   hint={hasPendingBidTransactionCall && "Check your wallet"}
-                  style={{
-                    borderRadius: "1rem",
-                    width: "100%",
-                    minHeight: "5rem",
-                  }}
                 >
                   {hasPendingBid ? "Placing bid..." : "Place bid"}
                 </Button>
@@ -860,7 +801,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
             </main>
           </>
         )}
-      </Dialog>
+      </DarkDialog>
 
       <TraitDialog
         isOpen={showTraitDialog}
@@ -880,14 +821,13 @@ export function AuctionPage({ noun: noun_, nouns: nouns_ }) {
         }
         nounIdsByHolderAddresses={nounIdsByHolderAddresses}
       />
-    </ThemeProvider>
+    </>
   );
 }
 
 const NounScreen = ({
   // noun,
   nounImageElement,
-  controlsElement,
   auctionActionButtonElement,
   staticNounStatsElement,
   backgroundSwitchElement,
@@ -902,12 +842,11 @@ const NounScreen = ({
         display: "flex",
         flexDirection: "column",
         transition: "0.2s background ease-out",
-        // background: noun == null ? "rgb(213, 215, 225)" : `#${noun.background}`,
         minHeight: "12rem",
         position: "relative",
         overflow: "hidden",
-        // Top nav and header + bids banner is 3 x 6rem hight
-        maxHeight: "max(12rem, calc(50vh - 6rem * 3))",
+        // // Top nav and header + bids banner is 3 x 6rem hight
+        // maxHeight: "max(12rem, calc(50vh - 6rem * 3))",
         [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
           flex: "1 1 0",
           flexDirection: "row",
@@ -936,35 +875,34 @@ const NounScreen = ({
         {nounImageElement}
         {isMobileLayout && staticNounStatsElement}
       </div>
-      <div />
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          bottom: 0,
-          padding: "1rem 1.5rem",
-        }}
-      >
-        {controlsElement}
-      </div>
       <div
         css={css({
-          display: "block",
           position: "absolute",
-          bottom: 0,
-          left: 0,
-          padding: "2rem",
+          top: 0,
+          right: 0,
+          padding: "0 1.5rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            padding: "1.8rem",
+            top: "auto",
+            right: "auto",
+            left: 0,
+            bottom: 0,
+          },
         })}
       >
         {auctionActionButtonElement}
       </div>
       <div
         css={css({
-          display: "block",
+          display: "none",
           position: "absolute",
           bottom: 0,
           right: 0,
-          padding: "1.7rem",
+          padding: "0.5rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            display: "block",
+            padding: "1.8rem",
+          },
         })}
       >
         {backgroundSwitchElement}
@@ -1177,7 +1115,7 @@ const FomoScreen = ({
           <div
             css={css({
               width: "100%",
-              padding: "1.5rem",
+              padding: "0.5rem 1.5rem 2.5rem",
               pointerEvents: "all",
             })}
           >
@@ -1265,8 +1203,10 @@ const FomoScreen = ({
             <div
               css={(theme) =>
                 css({
+                  fontFamily: theme.fontStacks.headers,
                   color: theme.colors.textHeader,
-                  fontSize: "2.8rem",
+                  lineHeight: 1.2,
+                  fontSize: "4.6rem",
                   fontWeight: "600",
                 })
               }
@@ -1397,7 +1337,7 @@ const FomoScreen = ({
           flex: "1 1 auto",
           display: "grid",
           gridTemplateColumns: "12rem minmax(0, 1fr)",
-          padding: "0 4.5rem",
+          padding: "0 1.5rem",
           position: "relative",
           minHeight: 0,
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
@@ -1469,17 +1409,25 @@ const FomoScreen = ({
           position: "absolute",
           bottom: 0,
           left: 0,
-          padding: "1.8rem",
+          padding: "0.5rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            padding: "1.8rem",
+          },
         }}
       >
         {controlsElement}
       </div>
       <div
         style={{
+          display: "none",
           position: "absolute",
           bottom: 0,
           right: 0,
-          padding: "1.8rem",
+          padding: "0.5rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            display: "block",
+            padding: "1.8rem",
+          },
         }}
       >
         {backgroundSwitchElement}
@@ -1619,12 +1567,9 @@ const ScreenHeader = ({ children }) => (
   <div
     css={css({
       fontSize: "1rem",
-      // background: "white",
-      // color: "black",
-      // color: "white",
       display: "flex",
       alignItems: "center",
-      padding: "1rem 1.5rem",
+      padding: "0 1.5rem",
       whiteSpace: "nowrap",
       [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
         padding: "0 2rem",
@@ -1701,10 +1646,11 @@ const AuctionScreenHeader = ({
               css({
                 display: "none",
                 [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                  fontFamily: theme.fontStacks.headers,
                   display: "block",
                   textTransform: "uppercase",
-                  fontSize: "2.5rem",
-                  fontWeight: "700",
+                  fontSize: "3.6rem",
+                  fontWeight: "600",
                   marginLeft: "1.5rem",
                   color: theme.colors.textHeader,
                 },
@@ -1722,26 +1668,30 @@ const AuctionScreenHeader = ({
       </div>
       {auction != null && (
         <div
-          css={css({
-            display: "grid",
-            gridAutoFlow: "column",
-            gridAutoColumns: "auto",
-            alignItems: "center",
-            gridGap: "3rem",
-            "& > *": {
-              minWidth: 0,
-              overflow: "hidden",
-            },
-            a: {
-              display: "block",
+          css={(theme) =>
+            css({
+              display: "grid",
+              gridAutoFlow: "column",
+              gridAutoColumns: "auto",
+              alignItems: "center",
+              gridGap: "3rem",
+              "& > *": {
+                minWidth: 0,
+                overflow: "hidden",
+              },
+              a: { display: "block" },
               "@media (hover: hover)": {
-                ":hover [data-address]": {
-                  textDecoration: "underline",
-                  color: "hsl(0 0% 25%)",
+                "a, button": {
+                  ":hover [data-underline]": {
+                    textDecoration: "underline",
+                  },
+                  ":hover [data-dim]": {
+                    color: theme.colors.textDimmed,
+                  },
                 },
               },
-            },
-          })}
+            })
+          }
         >
           <a
             href={`https://etherscan.io/address/${
@@ -1753,7 +1703,7 @@ const AuctionScreenHeader = ({
             rel="noreferrer"
           >
             <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
-            <Heading2 data-address>
+            <Heading2 data-address data-underline data-dim>
               {auction.settled
                 ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
                 : auctionEnded
@@ -1777,12 +1727,12 @@ const AuctionScreenHeader = ({
             {auction?.amount != null && (
               <>
                 <Label>{auctionEnded ? "Winning bid" : "Current bid"}</Label>
-                <Heading2>
+                <Heading2 data-dim>
                   {auction.amount.isZero() ? (
                     "-"
                   ) : (
                     <>
-                      {"Ξ"} {formatEther(auction.amount)}
+                      <HeadingEthSymbol /> {formatEther(auction.amount)}
                     </>
                   )}
                 </Heading2>
@@ -1802,7 +1752,7 @@ const AuctionScreenHeader = ({
               }}
             >
               <Label>{isTimer ? "Auction ends in" : "Auction ends at"}</Label>
-              <Heading2>
+              <Heading2 data-dim>
                 {isTimer ? (
                   <CountdownDisplay to={auction.endTime} />
                 ) : (
@@ -1865,7 +1815,12 @@ const HeaderNounNavigation = ({
         size="default"
         component="a"
         disabled={prevNounId < 0}
-        css={css({ height: "3rem", width: "3rem", minHeight: 0 })}
+        css={css({
+          height: "3rem",
+          width: "3rem",
+          minHeight: 0,
+          "&[disabled]": { pointerEvents: "none" },
+        })}
       >
         &larr;
       </Button>
@@ -1875,7 +1830,12 @@ const HeaderNounNavigation = ({
         size="default"
         component="a"
         disabled={nextNounId > auctionNounId}
-        css={css({ height: "3rem", width: "3rem", minHeight: 0 })}
+        css={css({
+          height: "3rem",
+          width: "3rem",
+          minHeight: 0,
+          "&[disabled]": { pointerEvents: "none" },
+        })}
       >
         &rarr;
       </Button>
@@ -1897,18 +1857,21 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
           alignItems: "center",
         })}
       >
-        <div>{navigationElement}</div>
+        <div css={css({ padding: "2rem 0" })}>{navigationElement}</div>
         <div
-          css={css({
-            marginLeft: "1rem",
-            fontSize: "2.4rem",
-            fontWeight: "700",
-            textTransform: "uppercase",
-            [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-              marginLeft: "1.5rem",
-              fontSize: "2.5rem",
-            },
-          })}
+          css={(theme) =>
+            css({
+              fontFamily: theme.fontStacks.headers,
+              marginLeft: "1rem",
+              fontSize: "3rem",
+              fontWeight: "600",
+              textTransform: "uppercase",
+              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                marginLeft: "1.5rem",
+                fontSize: "3.6rem",
+              },
+            })
+          }
         >
           Noun {noun.id}
         </div>
@@ -1929,9 +1892,13 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
         <div>
           <Label>Winning bid</Label>
           <Heading2>
-            {noun.auction == null
-              ? "-"
-              : `Ξ ${formatEther(noun.auction.amount)}`}
+            {noun.auction == null ? (
+              "-"
+            ) : (
+              <>
+                <HeadingEthSymbol /> {formatEther(noun.auction.amount)}
+              </>
+            )}
           </Heading2>
         </div>
         <Link href={`/holders/${noun.owner.address}`}>
@@ -1976,11 +1943,12 @@ export const Heading2 = (props) => (
   <div
     css={(theme) =>
       css({
+        fontFamily: theme.fontStacks.headers,
         minWidth: 0,
         overflow: "hidden",
         textOverflow: "ellipsis",
-        fontSize: "2rem",
-        lineHeight: 1.3,
+        fontSize: "2.4rem",
+        lineHeight: 1.2,
         fontWeight: "600",
         color: theme.colors.textHeader,
       })
@@ -2087,11 +2055,13 @@ const BidsDialog = ({
             </h1>
             {count !== 0 && (
               <div
-                css={css({
-                  color: "hsl(0 0% 56%)",
-                  fontSize: "1.1rem",
-                  transform: "translateY(-0.2rem)",
-                })}
+                css={(theme) =>
+                  css({
+                    color: theme.colors.textDimmed,
+                    fontSize: "1.1rem",
+                    transform: "translateY(-0.2rem)",
+                  })
+                }
               >
                 {count} {count === 1 ? "bid" : "bids"}
               </div>
@@ -2109,11 +2079,13 @@ const BidsDialog = ({
           >
             {count === 0 ? (
               <div
-                css={css({
-                  color: "hsl(0 0% 56%)",
-                  textAlign: "center",
-                  padding: "4rem 0",
-                })}
+                css={(theme) =>
+                  css({
+                    color: theme.colors.textDimmed,
+                    textAlign: "center",
+                    padding: "4rem 0",
+                  })
+                }
               >
                 No bids
               </div>
@@ -2167,14 +2139,17 @@ const BidListItem = ({ bid, bidderNounIds }) => {
         <img
           src={avatarURI}
           alt="ENS Avatar"
-          css={css({
-            display: "block",
-            width: "4rem",
-            height: "4rem",
-            borderRadius: "0.3rem",
-            objectFit: "cover",
-            background: "hsl(0 0% 100% / 10%)",
-          })}
+          css={(theme) =>
+            css({
+              display: "block",
+              width: "4rem",
+              height: "4rem",
+              borderRadius: "0.3rem",
+              objectFit: "cover",
+              background: theme.colors.textMuted,
+              overflow: "hidden",
+            })
+          }
         />
       ) : (
         <div
@@ -2188,35 +2163,41 @@ const BidListItem = ({ bid, bidderNounIds }) => {
       )}
       <div>
         <div
-          css={css({
-            display: "block",
-            fontSize: "1.4rem",
-            fontWeight: "500",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            color: "white",
-          })}
+          css={(theme) =>
+            css({
+              display: "block",
+              fontSize: "1.4rem",
+              fontWeight: "500",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              color: theme.colors.textNormal,
+            })
+          }
         >
           <span className="bidder">
             {ensName ?? shortenAddress(bid.bidder.address)}
           </span>
           {ensName != null && (
             <span
-              css={css({
-                fontSize: "1.1rem",
-                color: "hsl(0 0% 56%)",
-                marginLeft: "0.5rem",
-              })}
+              css={(theme) =>
+                css({
+                  fontSize: "1.1rem",
+                  color: theme.colors.textDimmed,
+                  marginLeft: "0.5rem",
+                })
+              }
             >
               {shortenAddress(bid.bidder.address)}
             </span>
           )}
         </div>
         <div
-          css={css({
-            fontSize: "1.1rem",
-            color: "hsl(0 0% 56%)",
-          })}
+          css={(theme) =>
+            css({
+              fontSize: "1.1rem",
+              color: theme.colors.textDimmed,
+            })
+          }
         >
           {balance == null
             ? "?"
@@ -2276,12 +2257,14 @@ const BidListItem = ({ bid, bidderNounIds }) => {
         href={getEtherscanLink("tx", bid.transactionHash ?? bid.id)}
         target="_blank"
         rel="noreferrer"
-        css={css({
-          fontSize: "1.5rem",
-          fontWeight: "500",
-          color: "white",
-          ":hover": { textDecoration: "underline" },
-        })}
+        css={(theme) =>
+          css({
+            fontSize: "1.5rem",
+            fontWeight: "500",
+            color: theme.colors.textNormal,
+            ":hover": { textDecoration: "underline" },
+          })
+        }
       >
         {"Ξ"} {formatEther(bid.amount)}
       </a>
@@ -2534,6 +2517,7 @@ const TraitNounListItem = ({ noun: n }) => {
 };
 
 const DarkDialog = ({ isOpen, onRequestClose, children, style, ...props }) => {
+  const theme = useTheme();
   return (
     <Dialog
       isOpen={isOpen}
@@ -2541,8 +2525,8 @@ const DarkDialog = ({ isOpen, onRequestClose, children, style, ...props }) => {
       style={{
         padding: 0,
         maxWidth: "48rem",
-        background: "hsl(0 0% 10%)",
-        color: "white",
+        color: theme.colors.textNormal,
+        background: theme.colors.dialogBackground,
         ...style,
       }}
       {...props}
@@ -2863,4 +2847,18 @@ const Emoji = ({ style, ...props }) => (
     }}
     {...props}
   />
+);
+
+const HeadingEthSymbol = () => (
+  <span
+    css={(theme) =>
+      css({
+        fontFamily: theme.fontStacks.default,
+        fontSize: "0.9em",
+        fontWeight: "800",
+      })
+    }
+  >
+    {"Ξ"}
+  </span>
 );

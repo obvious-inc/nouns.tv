@@ -1,9 +1,6 @@
-import "degen/styles";
 import "@rainbow-me/rainbowkit/styles.css";
 import "../styles/reset.css";
 import "../styles/index.css";
-import "../styles/theme.scss";
-import { ThemeProvider, vars } from "degen";
 import {
   ThemeProvider as EmotionThemeProvider,
   Global as GlobalStyles,
@@ -12,12 +9,15 @@ import {
 import type { AppProps } from "next/app";
 import { WagmiConfig } from "wagmi";
 import { chains, wagmiClient } from "../utils/network";
-import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
+import useCachedState from "../hooks/useCachedState";
+import {
+  RainbowKitProvider,
+  darkTheme as rainbowDarkTheme,
+} from "@rainbow-me/rainbowkit";
 import NextNProgress from "nextjs-progressbar";
-import { useEffect } from "react";
-import { useRouter } from "next/router";
-import * as gtag from "../lib/gtag";
-import Script from "next/script";
+// import { useRouter } from "next/router";
+// import * as gtag from "../lib/gtag";
+// import Script from "next/script";
 
 // const BLUE = "#3336d1";
 
@@ -163,7 +163,7 @@ const createNotion = () => {
       textSelectionBackground: transparentBlue,
       backgroundPrimary: "rgb(25, 25, 25)",
       backgroundSecondary: "rgb(32, 32, 32)",
-      dialogBackground: "rgb(55 55 55)",
+      dialogBackground: "rgb(37 37 37)",
       dialogPopoverBackground: "rgb(37, 37, 37)",
       channelInputBackground: "rgb(37, 37, 37)",
       inputBackground: "rgba(25, 25, 25)",
@@ -204,71 +204,106 @@ const createNotion = () => {
   };
 };
 
-const emotionTheme = createNotion();
+const darkTheme = createNotion();
+const lightTheme = {
+  ...darkTheme,
+  light: true,
+  colors: {
+    ...darkTheme.colors,
+    textNormal: "black",
+    textHeader: "black",
+    textDimmed: "hsl(0 0% 35%)",
+    textMuted: "hsl(0 0% 0% / 10%)",
+    // textMuted,
+    // textHighlight: "#ffd376",
+    // textSelectionBackground: transparentBlue,
+    // backgroundPrimary: "rgb(25, 25, 25)",
+    backgroundPrimary: "white",
+    backgroundSecondary: "white",
+    dialogBackground: "white",
+    // dialogPopoverBackground: "rgb(37, 37, 37)",
+    // channelInputBackground: "rgb(37, 37, 37)",
+    // inputBackground: "rgba(25, 25, 25)",
+    // backgroundModifierSelected: "rgba(255, 255, 255, 0.055)",
+    // backgroundModifierHover: "rgba(255, 255, 255, 0.055)",
+    // memberDisplayName: textNormal,
+  },
+  shadows: {
+    ...darkTheme.shadows,
+    elevationLow:
+      "rgb(15 15 15 / 5%) 0px 1px 1px 1px, rgb(15 15 15 / 10%) 0px 1px 3px 1px",
+  },
+};
+
+const useTheme = () => {
+  const [themeName, setTheme] = useCachedState("theme-preference", "light");
+  const theme = themeName === "dark" ? darkTheme : lightTheme;
+  return [theme, setTheme];
+};
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const router = useRouter();
-  useEffect(() => {
-    const handleRouteChange = (url: string) => {
-      gtag.pageview(url);
-    };
-    router.events.on("routeChangeComplete", handleRouteChange);
-    router.events.on("hashChangeComplete", handleRouteChange);
-    return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
-      router.events.off("hashChangeComplete", handleRouteChange);
-    };
-  }, [router.events]);
+  const [theme, setTheme] = useTheme();
+
+  // const router = useRouter();
+
+  // useEffect(() => {
+  //   const handleRouteChange = (url: string) => {
+  //     gtag.pageview(url);
+  //   };
+  //   router.events.on("routeChangeComplete", handleRouteChange);
+  //   router.events.on("hashChangeComplete", handleRouteChange);
+  //   return () => {
+  //     router.events.off("routeChangeComplete", handleRouteChange);
+  //     router.events.off("hashChangeComplete", handleRouteChange);
+  //   };
+  // }, [router.events]);
 
   return (
     <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider
         chains={chains}
-        theme={darkTheme({
-          accentColor: "#007ab3",
-          // accentColorForeground: "white",
+        theme={rainbowDarkTheme({
+          accentColor: theme.colors.primary,
           borderRadius: "small",
           fontStack: "system",
         })}
       >
-        <ThemeProvider defaultMode="dark" defaultAccent="yellow">
-          <Script
-            strategy="afterInteractive"
-            src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
-          />
-          <Script
-            id="gtag-init"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${gtag.GA_TRACKING_ID}', {
-              page_path: window.location.pathname,
-            });
-          `,
-            }}
-          />
-          <GlobalStyles
-            styles={() =>
-              css({
-                body: {
-                  color: emotionTheme.colors.textNormal,
-                  fontFamily: emotionTheme.fontStacks.default,
-                  "::selection": {
-                    background: emotionTheme.colors.textSelectionBackground,
-                  },
+        {/* <Script */}
+        {/*   strategy="afterInteractive" */}
+        {/*   src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`} */}
+        {/* /> */}
+        {/* <Script */}
+        {/*   id="gtag-init" */}
+        {/*   strategy="afterInteractive" */}
+        {/*   dangerouslySetInnerHTML={{ */}
+        {/*     __html: ` */}
+        {/*     window.dataLayer = window.dataLayer || []; */}
+        {/*     function gtag(){dataLayer.push(arguments);} */}
+        {/*     gtag('js', new Date()); */}
+        {/*     gtag('config', '${gtag.GA_TRACKING_ID}', { */}
+        {/*       page_path: window.location.pathname, */}
+        {/*     }); */}
+        {/*   `, */}
+        {/*   }} */}
+        {/* /> */}
+        <GlobalStyles
+          styles={() =>
+            css({
+              body: {
+                color: theme.colors.textNormal,
+                fontFamily: theme.fontStacks.default,
+                "::selection": {
+                  background: theme.colors.textSelectionBackground,
                 },
-              })
-            }
-          />
+              },
+            })
+          }
+        />
 
-          <NextNProgress color={vars.colors.yellow} />
-          <EmotionThemeProvider theme={emotionTheme}>
-            <Component {...pageProps} />
-          </EmotionThemeProvider>
-        </ThemeProvider>
+        <NextNProgress color={theme.colors.primary} />
+        <EmotionThemeProvider theme={theme}>
+          <Component {...pageProps} setTheme={setTheme} />
+        </EmotionThemeProvider>
       </RainbowKitProvider>
     </WagmiConfig>
   );
