@@ -552,7 +552,8 @@ export function AuctionPage({ noun: noun_, nouns: nouns_, setTheme }) {
             }
           />
         ) : (
-          <AuctionScreenHeader
+          <AuctionAndFomoScreenHeader
+            isFomo={screenMode === "fomo"}
             auction={auction}
             auctionEnded={auctionEnded}
             nounIdsByHolderAddresses={nounIdsByHolderAddresses}
@@ -1208,7 +1209,7 @@ const FomoScreen = ({
             css={css({
               width: "100%",
               textAlign: "center",
-              padding: "2rem 4rem",
+              padding: "3rem 4rem 2rem",
             })}
           >
             <div
@@ -1416,7 +1417,7 @@ const FomoScreen = ({
       </div>
 
       <div
-        style={{
+        css={css({
           position: "absolute",
           bottom: 0,
           left: 0,
@@ -1424,12 +1425,12 @@ const FomoScreen = ({
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
             padding: "1.8rem",
           },
-        }}
+        })}
       >
         {controlsElement}
       </div>
       <div
-        style={{
+        css={css({
           display: "none",
           position: "absolute",
           bottom: 0,
@@ -1439,7 +1440,7 @@ const FomoScreen = ({
             display: "block",
             padding: "1.8rem",
           },
-        }}
+        })}
       >
         {backgroundSwitchElement}
       </div>
@@ -1574,7 +1575,7 @@ const VoteGifButton = ({
   );
 };
 
-const ScreenHeader = ({ children }) => (
+const ScreenHeader = ({ dim, children }) => (
   <div
     css={css({
       fontSize: "1rem",
@@ -1586,15 +1587,23 @@ const ScreenHeader = ({ children }) => (
         padding: "0 2rem",
         minHeight: "6rem",
       },
+      "@media (hover: hover)": {
+        transition: "0.2s opacity ease-out",
+        opacity: dim ? 0.4 : 1,
+        ":hover": {
+          opacity: 1,
+        },
+      },
     })}
   >
     {children}
   </div>
 );
 
-const AuctionScreenHeader = ({
+const AuctionAndFomoScreenHeader = ({
   auction,
   auctionEnded,
+  isFomo,
   // nounIdsByHolderAddresses,
   toggleBidsDialog,
   // auctionActionButtonElement,
@@ -1639,7 +1648,7 @@ const AuctionScreenHeader = ({
   // );
 
   return (
-    <ScreenHeader>
+    <ScreenHeader dim={isFomo}>
       <div
         css={css({
           display: "flex",
@@ -1955,13 +1964,13 @@ export const Heading2 = (props) => (
   <div
     css={(theme) =>
       css({
-        fontFamily: theme.fontStacks.headers,
+        fontFamily: theme.fontStacks.default,
         minWidth: 0,
         overflow: "hidden",
         textOverflow: "ellipsis",
-        fontSize: "2.4rem",
+        fontSize: "2.2rem",
         lineHeight: 1.2,
-        fontWeight: "600",
+        fontWeight: "700",
         color: theme.colors.textHeader,
       })
     }
