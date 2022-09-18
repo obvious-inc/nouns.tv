@@ -1,9 +1,10 @@
+import { getAddress, isAddress } from "@ethersproject/address";
 import { css, keyframes, useTheme } from "@emotion/react";
 import React from "react";
 import { useRect } from "@reach/rect";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEnsName } from "wagmi";
+import { useEnsName, useEnsAddress } from "wagmi";
 import { STACKED_MODE_BREAKPOINT } from "../constants/layout";
 import { getEtherscanLink } from "../utils/url";
 import { useProfile } from "../hooks/useProfile";
@@ -333,12 +334,19 @@ const groupBy = (computeKey, list) =>
     return acc;
   }, {});
 
-export function AuctionPage({ noun: noun_, nouns: nouns_, setTheme }) {
+export function AuctionPage({ noun: noun_, nounsById: nounsById_, setTheme }) {
   const noun = React.useMemo(
     () => (noun_ == null ? null : enhanceNoun(noun_)),
     [noun_]
   );
-  const nouns = React.useMemo(() => nouns_.map(enhanceNoun), [nouns_]);
+  const nounsById = React.useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(nounsById_).map(([id, n]) => [id, enhanceNoun(n)])
+      ),
+    [nounsById_]
+  );
+  const nouns = React.useMemo(() => Object.values(nounsById), [nounsById]);
   const nounIdsByHolderAddresses = React.useMemo(
     () =>
       nouns.reduce((ns, n) => {
@@ -369,9 +377,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_, setTheme }) {
       router.replace(
         [location.pathname, searchParams.toString()].join("?"),
         undefined,
-        {
-          shallow: true,
-        }
+        { shallow: true }
       );
     },
     [router]
@@ -379,6 +385,24 @@ export function AuctionPage({ noun: noun_, nouns: nouns_, setTheme }) {
 
   const showTraitDialog = selectedTraitName != null;
   const closeTraitDialog = () => setSelectedTrait(null);
+
+  const selectedHolderAddressOrName = router.query.holder;
+  const setSelectedHolder = React.useCallback(
+    (holder) => {
+      const searchParams = new URLSearchParams(location.search);
+      if (holder == null) searchParams.delete("holder");
+      else searchParams.set("holder", encodeURIComponent(holder));
+      router.replace(
+        [location.pathname, searchParams.toString()].join("?"),
+        undefined,
+        { shallow: true }
+      );
+    },
+    [router]
+  );
+
+  const showHolderDialog = selectedHolderAddressOrName != null;
+  const closeHolderDialog = () => setSelectedHolder(null);
 
   const [showBidsDialog, setShowBidsDialog] = React.useState(false);
   const toggleBidsDialog = () => setShowBidsDialog((s) => !s);
@@ -821,6 +845,7 @@ export function AuctionPage({ noun: noun_, nouns: nouns_, setTheme }) {
         noun={displayedNoun}
         nouns={nouns}
         traitName={selectedTraitName}
+        setSelectedHolder={setSelectedHolder}
       />
 
       <BidsDialog
@@ -831,6 +856,14 @@ export function AuctionPage({ noun: noun_, nouns: nouns_, setTheme }) {
             ? displayedNoun.auction?.bids
             : auction?.bids
         }
+        nounIdsByHolderAddresses={nounIdsByHolderAddresses}
+      />
+
+      <HolderDialog
+        isOpen={showHolderDialog}
+        onRequestClose={closeHolderDialog}
+        holderAddressOrName={selectedHolderAddressOrName}
+        nounsById={nounsById}
         nounIdsByHolderAddresses={nounIdsByHolderAddresses}
       />
     </>
@@ -2304,7 +2337,14 @@ const BidListItem = ({ bid, bidderNounIds }) => {
   );
 };
 
-const TraitDialog = ({ isOpen, onRequestClose, traitName, noun, nouns }) => {
+const TraitDialog = ({
+  isOpen,
+  onRequestClose,
+  traitName,
+  noun,
+  nouns,
+  setSelectedHolder,
+}) => {
   const traitValue = noun?.seed[traitName];
 
   const traitHumanReadableName = React.useMemo(() => {
@@ -2412,7 +2452,10 @@ const TraitDialog = ({ isOpen, onRequestClose, traitName, noun, nouns }) => {
                 })
                 .map((n) => (
                   <li key={n.id} css={css({ display: "block" })}>
-                    <TraitNounListItem noun={n} />
+                    <TraitNounListItem
+                      noun={n}
+                      setSelectedHolder={setSelectedHolder}
+                    />
                   </li>
                 ))}
             </ul>
@@ -2423,7 +2466,7 @@ const TraitDialog = ({ isOpen, onRequestClose, traitName, noun, nouns }) => {
   );
 };
 
-const TraitNounListItem = ({ noun: n }) => {
+const TraitNounListItem = ({ noun: n, setSelectedHolder }) => {
   const { data: ensName } = useEnsName({ address: n.owner.address });
   const ownerString = ensName ?? shortenAddress(n.owner.address);
   return (
@@ -2469,7 +2512,7 @@ const TraitNounListItem = ({ noun: n }) => {
             alignItems: "center",
             lineHeight: "1.4",
             whiteSpace: "nowrap",
-            a: {
+            "a, [data-link]": {
               pointerEvents: "all",
               display: "block",
               width: "max-content",
@@ -2511,11 +2554,13 @@ const TraitNounListItem = ({ noun: n }) => {
             Noun {n.id}
           </div>
           <div css={css({ display: "flex", alignItems: "center" })}>
-            <Link href={`/holders/${n.owner.address}`}>
-              <a css={css({ cursor: "pointer", paddingRight: "0.2rem" })}>
-                {ownerString}
-              </a>
-            </Link>
+            <button
+              data-link
+              onClick={() => setSelectedHolder(ensName ?? n.owner.address)}
+              css={css({ cursor: "pointer", paddingRight: "0.2rem" })}
+            >
+              {ownerString}
+            </button>
             <a
               href={`https://rainbow.me/${n.owner.address}`}
               target="_blank"
@@ -2551,6 +2596,243 @@ const TraitNounListItem = ({ noun: n }) => {
               />
             </a>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+const HolderDialog = ({
+  isOpen,
+  onRequestClose,
+  holderAddressOrName,
+  nounsById,
+  nounIdsByHolderAddresses,
+}) => {
+  const { data: ensName } = useEnsName({
+    address: holderAddressOrName,
+    enabled: isAddress(holderAddressOrName),
+  });
+  const { data: ensAddress, isLoading: isLoadingEnsAddress } = useEnsAddress({
+    name: holderAddressOrName,
+    enabled: !isAddress(holderAddressOrName),
+  });
+
+  const name = isAddress(holderAddressOrName) ? ensName : holderAddressOrName;
+
+  const address = React.useMemo(() => {
+    if (isAddress(holderAddressOrName)) return getAddress(holderAddressOrName);
+    if (isAddress(ensAddress)) return getAddress(ensAddress);
+    return null;
+  }, [holderAddressOrName, ensAddress]);
+
+  const holderNouns = React.useMemo(() => {
+    if (address == null) return [];
+    const nounIds = nounIdsByHolderAddresses[address.toLowerCase()] ?? [];
+    return nounIds.map((id) => nounsById[id]);
+  }, [address, nounsById, nounIdsByHolderAddresses]);
+
+  const nounCount = holderNouns.length;
+
+  return (
+    <DarkDialog
+      isOpen={isOpen}
+      onRequestClose={onRequestClose}
+      style={{ display: "flex", flexDirection: "column" }}
+    >
+      {({ titleProps }) => (
+        <>
+          <div
+            css={css({
+              display: "grid",
+              gridTemplateColumns: "auto auto",
+              gridGap: "1rem",
+              alignItems: "flex-end",
+              justifyContent: "flex-start",
+              padding: "1.5rem 1.5rem 1rem",
+              "@media (min-width: 600px)": {
+                padding: "2rem 2rem 1.5rem",
+              },
+            })}
+          >
+            <h1
+              {...titleProps}
+              css={(theme) =>
+                css({
+                  fontSize: "1.8rem",
+                  lineHeight: "1.2",
+                  margin: 0,
+                  color: theme.colors.textHeader,
+                })
+              }
+            >
+              {name ?? address == null
+                ? holderAddressOrName
+                : shortenAddress(address)}
+            </h1>
+            <div
+              css={(theme) =>
+                css({
+                  color: theme.colors.textDimmed,
+                  fontSize: theme.fontSizes.small,
+                })
+              }
+            >
+              {nounCount} {nounCount === 1 ? "noun" : "nouns"}
+            </div>
+          </div>
+          <div
+            css={css({
+              flex: "1 1 auto",
+              overflow: "auto",
+              padding: "0.5rem 1.5rem 1.5rem",
+              "@media (min-width: 600px)": {
+                padding: "0.5rem 2rem 2rem",
+              },
+            })}
+          >
+            {isLoadingEnsAddress ? (
+              <div
+                css={css({
+                  height: "9.5rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                })}
+              >
+                <Spinner />
+              </div>
+            ) : (
+              <ul
+                css={css({
+                  margin: 0,
+                  padding: 0,
+                  display: "grid",
+                  gridGap: "1.5rem",
+                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                })}
+              >
+                {holderNouns
+                  ?.sort((n1, n2) => {
+                    const [i1, i2] = [n1, n2].map((n) => Number(n.id));
+                    if (i1 > i2) return 1;
+                    if (i1 < i2) return -1;
+                    return 0;
+                  })
+                  .map((n) => (
+                    <li key={n.id} css={css({ display: "block" })}>
+                      <HolderNounListItem noun={n} />
+                    </li>
+                  ))}
+              </ul>
+            )}
+          </div>
+        </>
+      )}
+    </DarkDialog>
+  );
+};
+
+const HolderNounListItem = ({ noun: n }) => {
+  console.log(n);
+  return (
+    <div
+      css={css({
+        position: "relative",
+        a: { outline: "none" },
+        ".hover-link": { display: "none" },
+        "@media (hover: hover)": {
+          ".hover-link": { display: "block", opacity: 0 },
+          ":hover .hover-link": { opacity: 1 },
+        },
+      })}
+    >
+      <Link href={`/nouns/${n.id}`}>
+        <a
+          style={{
+            cursor: "pointer",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+          css={css({
+            "@media (hover: hover)": {
+              "& + * .avatar": { transition: "0.05s transform ease-out" },
+              ":hover + * .noun-link": { textDecoration: "underline" },
+              ":hover + * .avatar": { transform: "scale(1.1)" },
+            },
+          })}
+        />
+      </Link>
+
+      <div
+        css={(theme) =>
+          css({
+            position: "relative",
+            pointerEvents: "none",
+            display: "grid",
+            gridTemplateColumns: "auto minmax(0,1fr)",
+            gridGap: "1.5rem",
+            alignItems: "center",
+            lineHeight: "1.4",
+            whiteSpace: "nowrap",
+            // a: {
+            //   pointerEvents: "all",
+            //   display: "block",
+            //   width: "max-content",
+            //   fontSize: "1.1rem",
+            //   color: theme.colors.textDimmed,
+            //   overflow: "hidden",
+            //   textOverflow: "ellipsis",
+            //   "@media (hover: hover)": {
+            //     ":hover": {
+            //       textDecoration: "underline",
+            //     },
+            //   },
+            // },
+            time: {
+              display: "block",
+              width: "max-content",
+              fontSize: "1.1rem",
+              color: theme.colors.textDimmed,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            },
+          })
+        }
+      >
+        <img
+          className="avatar"
+          src={n.imageUrl}
+          alt={`Noun ${n.id}`}
+          css={css({
+            display: "block",
+            width: "4rem",
+            borderRadius: "0.3rem",
+          })}
+        />
+
+        <div>
+          <div
+            className="noun-link"
+            css={css({
+              display: "block",
+              fontSize: "1.4rem",
+              fontWeight: "500",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            })}
+          >
+            Noun {n.id}
+          </div>
+          <time>
+            {new Intl.DateTimeFormat(undefined, {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }).format(new Date(n.bornTime * 1000))}
+          </time>
         </div>
       </div>
     </div>

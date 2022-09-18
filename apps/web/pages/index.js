@@ -7,7 +7,7 @@ import { Page } from "../components/Page";
 import { AuctionPage } from "../components/AuctionPage";
 // import { FallbackPage } from "../templates/FallbackPage";
 
-const ViewNouns = ({ nouns, address, config, ...props }) => {
+const ViewNouns = ({ address, config, ...props }) => {
   // const { isFallback } = useRouter();
 
   // if (isFallback) {
@@ -17,7 +17,7 @@ const ViewNouns = ({ nouns, address, config, ...props }) => {
   return (
     <Page>
       <ServiceCtxProvider key={address} address={address} config={config}>
-        <AuctionPage nouns={nouns} {...props} />
+        <AuctionPage {...props} />
       </ServiceCtxProvider>
     </Page>
   );

@@ -11,18 +11,38 @@ export const getStaticAuctionProps = async ({ params }) => {
 
   const client = new GraphQLClient(config.baseURI);
   const service = new SubgraphService(address, client);
+
+  const auctions_ = await service.getAuctions("ASC", 1000);
+  const auctionsByNounId = auctions_.reduce((acc, { noun, ...a }) => {
+    acc[noun.id] = a;
+    return acc;
+  }, {});
+
   const nouns = await service.getNouns();
+  const nounsById = nouns.reduce((acc, n) => {
+    if (n.id <= 1820 && n.id % 10 === 0) {
+      const auction = auctionsByNounId[Number(n.id) + 1];
+      acc[n.id] = { ...n, bornTime: auction.startTime };
+    } else {
+      const auction = auctionsByNounId[n.id];
+      acc[n.id] = { ...n, auction, bornTime: auction.startTime };
+    }
+    return acc;
+  }, {});
 
   let noun = null;
 
   if (params?.["noun-id"] != null) {
-    noun = await service.getNoun(params["noun-id"]);
-    noun.auction = (await service.getAuction(params["noun-id"])) ?? null;
-    delete noun.auction?.noun;
+    noun = nounsById[params["noun-id"]];
   }
 
   return {
-    props: { address, config, noun, nouns },
+    props: {
+      address,
+      config,
+      noun,
+      nounsById,
+    },
     revalidate: 30,
   };
 };
