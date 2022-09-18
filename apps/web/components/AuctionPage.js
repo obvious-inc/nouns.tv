@@ -567,6 +567,8 @@ export function AuctionPage({ noun: noun_, nounsById: nounsById_, setTheme }) {
         {screenMode === "static-noun" ? (
           <NounScreenHeader
             noun={displayedNoun}
+            setSelectedHolder={setSelectedHolder}
+            toggleBidsDialog={toggleBidsDialog}
             navigationElement={
               <HeaderNounNavigation
                 auctionNounId={Number(auction?.noun.id)}
@@ -582,6 +584,7 @@ export function AuctionPage({ noun: noun_, nounsById: nounsById_, setTheme }) {
             auctionEnded={auctionEnded}
             nounIdsByHolderAddresses={nounIdsByHolderAddresses}
             toggleBidsDialog={toggleBidsDialog}
+            setSelectedHolder={setSelectedHolder}
             navigationElement={
               <HeaderNounNavigation
                 auctionNounId={Number(auction?.noun.id)}
@@ -607,14 +610,9 @@ export function AuctionPage({ noun: noun_, nounsById: nounsById_, setTheme }) {
             controlsElement={
               <div
                 css={css({
-                  display: "grid",
-                  gridAutoColumns: "auto",
-                  gridAutoFlow: "column",
-                  gridGap: "1.5rem",
-                  pointerEvents: "none",
-                  [`@media (max-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                    display: "none",
-                  },
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
                 })}
               >
                 <Switch
@@ -622,24 +620,16 @@ export function AuctionPage({ noun: noun_, nounsById: nounsById_, setTheme }) {
                   isActive={forceStats}
                   onClick={toggleForceStats}
                 />
-                {/* <Switch */}
-                {/*   id="fomo-switch" */}
-                {/*   label="FOMO" */}
-                {/*   checked={forceFomo} */}
-                {/*   onChange={toggleForceFomo} */}
-                {/* /> */}
+                <Switch
+                  label="Background"
+                  isActive={isBackgroundActive}
+                  onClick={() => {
+                    toggleBackground();
+                  }}
+                />
               </div>
             }
             auctionActionButtonElement={auctionActionButtonElement}
-            backgroundSwitchElement={
-              <Switch
-                label="Background"
-                isActive={isBackgroundActive}
-                onClick={() => {
-                  toggleBackground();
-                }}
-              />
-            }
           />
         ) : (
           <NounScreen
@@ -656,14 +646,27 @@ export function AuctionPage({ noun: noun_, nounsById: nounsById_, setTheme }) {
             auctionActionButtonElement={
               screenMode === "auction" ? auctionActionButtonElement : null
             }
-            backgroundSwitchElement={
-              <Switch
-                label="Background"
-                isActive={isBackgroundActive}
-                onClick={() => {
-                  toggleBackground();
-                }}
-              />
+            controlsElement={
+              <div
+                css={css({
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                })}
+              >
+                <Switch
+                  label="Stats"
+                  isActive={forceStats}
+                  onClick={toggleForceStats}
+                />
+                <Switch
+                  label="Background"
+                  isActive={isBackgroundActive}
+                  onClick={() => {
+                    toggleBackground();
+                  }}
+                />
+              </div>
             }
           />
         )}
@@ -857,6 +860,7 @@ export function AuctionPage({ noun: noun_, nounsById: nounsById_, setTheme }) {
             : auction?.bids
         }
         nounIdsByHolderAddresses={nounIdsByHolderAddresses}
+        setSelectedHolder={setSelectedHolder}
       />
 
       <HolderDialog
@@ -875,7 +879,7 @@ const NounScreen = ({
   nounImageElement,
   auctionActionButtonElement,
   staticNounStatsElement,
-  backgroundSwitchElement,
+  controlsElement,
 }) => {
   const isMobileLayout = useMediaQuery(
     `(max-width: ${STACKED_MODE_BREAKPOINT})`
@@ -950,7 +954,7 @@ const NounScreen = ({
           },
         })}
       >
-        {backgroundSwitchElement}
+        {controlsElement}
       </div>
     </div>
   );
@@ -1091,7 +1095,6 @@ const FomoScreen = ({
   nounImageElement,
   controlsElement,
   staticNounStatsElement,
-  backgroundSwitchElement,
   // auctionActionButtonElement,
   // reconnect,
 }) => {
@@ -1451,19 +1454,6 @@ const FomoScreen = ({
 
       <div
         css={css({
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          padding: "0.5rem",
-          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-            padding: "1.8rem",
-          },
-        })}
-      >
-        {controlsElement}
-      </div>
-      <div
-        css={css({
           display: "none",
           position: "absolute",
           bottom: 0,
@@ -1475,7 +1465,7 @@ const FomoScreen = ({
           },
         })}
       >
-        {backgroundSwitchElement}
+        {controlsElement}
       </div>
       {/* <div */}
       {/*   css={css({ */}
@@ -1637,10 +1627,11 @@ const AuctionAndFomoScreenHeader = ({
   auction,
   auctionEnded,
   isFomo,
-  // nounIdsByHolderAddresses,
+  nounIdsByHolderAddresses,
   toggleBidsDialog,
   // auctionActionButtonElement,
   navigationElement,
+  setSelectedHolder,
 }) => {
   const [isTimer, setIsTimer] = React.useState(true);
   const toggleTimer = () => setIsTimer((s) => !s);
@@ -1652,33 +1643,33 @@ const AuctionAndFomoScreenHeader = ({
       ? null
       : bidderENSName ?? shortenAddress(auction.bidderAddress);
 
-  // const bidderHasNouns =
-  //   auction != null &&
-  //   (
-  //     nounIdsByHolderAddresses[
-  //       (auction.settled
-  //         ? auction.noun.ownerAddress
-  //         : auction.bidderAddress
-  //       ).toLowerCase()
-  //     ] ?? []
-  //   ).length !== 0;
+  const bidderHasNouns =
+    auction != null &&
+    (
+      nounIdsByHolderAddresses[
+        (auction.settled
+          ? auction.noun.ownerAddress
+          : auction.bidderAddress
+        ).toLowerCase()
+      ] ?? []
+    ).length !== 0;
 
-  // const bidderLinkContent = auction != null && (
-  //   <>
-  //     <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
-  //     <Heading2 data-address>
-  //       {auction.settled
-  //         ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
-  //         : auctionEnded
-  //         ? auction.amount.isZero()
-  //           ? "-"
-  //           : bidderShort
-  //         : auction.amount.isZero()
-  //         ? "No bids"
-  //         : bidderShort}
-  //     </Heading2>
-  //   </>
-  // );
+  const bidderLinkContent = auction != null && (
+    <>
+      <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
+      <Heading2 data-address data-hover-effect>
+        {auction.settled
+          ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
+          : auctionEnded
+          ? auction.amount.isZero()
+            ? "-"
+            : bidderShort
+          : auction.amount.isZero()
+          ? "No bids"
+          : bidderShort}
+      </Heading2>
+    </>
+  );
 
   return (
     <ScreenHeader dim={isFomo}>
@@ -1686,9 +1677,10 @@ const AuctionAndFomoScreenHeader = ({
         css={css({
           display: "flex",
           alignItems: "center",
-          paddingRight: "2rem",
+          paddingRight: "1.5rem",
           [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
             flex: "1 1 auto",
+            paddingRight: "3rem",
           },
         })}
       >
@@ -1727,60 +1719,63 @@ const AuctionAndFomoScreenHeader = ({
               gridAutoFlow: "column",
               gridAutoColumns: "auto",
               alignItems: "center",
-              gridGap: "3rem",
+              gridGap: "1.5rem",
               "& > *": {
                 minWidth: 0,
                 overflow: "hidden",
               },
-              a: { display: "block" },
+              "a, button": { display: "block" },
+              button: { cursor: "pointer" },
+              "button:disabled": { pointerEvents: "none" },
+              [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+                gridGap: "2rem",
+              },
+              "@media (min-width: 1320px)": {
+                gridGap: "3rem",
+              },
               "@media (hover: hover)": {
-                "a, button": {
-                  ":hover [data-underline]": {
-                    textDecoration: "underline",
-                  },
-                  ":hover [data-dim]": {
-                    color: theme.colors.textDimmed,
-                  },
+                "a:hover [data-hover-effect]": {
+                  color: theme.colors.textDimmed,
+                  textDecoration: "underline",
+                },
+                "button:hover [data-hover-effect]": {
+                  color: theme.colors.textDimmed,
                 },
               },
             })
           }
         >
-          <a
-            href={`https://etherscan.io/address/${
-              auction?.settled
-                ? auction?.noun.ownerAddress
-                : auction?.bidderAddress
-            }`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Label>{auctionEnded ? "Winner" : "High-Bidder"}</Label>
-            <Heading2 data-address data-underline data-dim>
-              {auction.settled
-                ? ownerENSName || shortenAddress(auction.noun.ownerAddress)
-                : auctionEnded
-                ? auction.amount.isZero()
-                  ? "-"
-                  : bidderShort
-                : auction.amount.isZero()
-                ? "No bids"
-                : bidderShort}
-            </Heading2>
-          </a>
-          <button
-            onClick={toggleBidsDialog}
-            style={{
-              background: "none",
-              border: 0,
-              padding: 0,
-              cursor: "pointer",
-            }}
-          >
+          {bidderHasNouns ? (
+            <button
+              onClick={() =>
+                setSelectedHolder(
+                  auction?.settled
+                    ? auction?.noun.ownerAddress
+                    : auction?.bidderAddress
+                )
+              }
+              disabled={auction == null || auction.amount.isZero()}
+            >
+              {bidderLinkContent}
+            </button>
+          ) : (
+            <a
+              href={`https://etherscan.io/address/${
+                auction?.settled
+                  ? auction?.noun.ownerAddress
+                  : auction?.bidderAddress
+              }`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {bidderLinkContent}
+            </a>
+          )}
+          <button onClick={toggleBidsDialog}>
             {auction?.amount != null && (
               <>
                 <Label>{auctionEnded ? "Winning bid" : "Current bid"}</Label>
-                <Heading2 data-dim>
+                <Heading2 data-hover-effect>
                   {auction.amount.isZero() ? (
                     "-"
                   ) : (
@@ -1793,19 +1788,9 @@ const AuctionAndFomoScreenHeader = ({
             )}
           </button>
           {!auctionEnded && (
-            <button
-              onClick={toggleTimer}
-              style={{
-                background: "none",
-                padding: 0,
-                border: 0,
-                textAlign: "left",
-                color: "inherit",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={toggleTimer}>
               <Label>{isTimer ? "Auction ends in" : "Auction ends at"}</Label>
-              <Heading2 data-dim>
+              <Heading2 data-hover-effect>
                 {isTimer ? (
                   <CountdownDisplay to={auction.endTime} />
                 ) : (
@@ -1878,6 +1863,31 @@ const HeaderNounNavigation = ({
         &larr;
       </Button>
     </Link>
+    <Link href="/">
+      <Button
+        size="default"
+        component="a"
+        disabled={nextNounId > auctionNounId}
+        css={css({
+          height: "3rem",
+          width: "3rem",
+          minHeight: 0,
+          padding: 0,
+          "&[disabled]": { pointerEvents: "none" },
+        })}
+      >
+        <svg
+          viewBox="0 0 64 64"
+          style={{ display: "block", width: "1.8rem", height: "auto" }}
+        >
+          <path
+            fillRule="evenodd"
+            d="M9.32 54.67h-.001c1.76 1.75 4.61 1.75 6.37-.01 .05-.06.11-.12.16-.18l16.62-18.33h-.001c.71-.8.67-2.01-.08-2.77l-1.8-1.79v0c-.76-.76-1.98-.79-2.78-.08L9.45 48.11h0c-1.86 1.65-2.02 4.49-.36 6.34 .05.06.11.12.17.18Zm16.1-33.27c.78-.79 11.24-11.25 12.02-12.03v0c.78-.78.79-2.05.01-2.84s-2.05-.8-2.84-.02c-.01 0-.01 0-.02.01L22.56 18.54v-.001c-.79.78-.79 2.05-.01 2.83 .78.78 2.05.78 2.83 0Zm2.89.52c-1.14 1.13 1.01 5.14 4.81 8.93 3.79 3.79 7.79 5.95 8.93 4.81l9.62-9.63c1.13-1.14-1.02-5.14-4.82-8.94 -3.8-3.8-7.8-5.96-8.94-4.82Zm14.27 19.47v0c.78.78 2.05.78 2.83 0 0-.01 0-.01 0-.01 .78-.79 11.24-11.25 12.02-12.03v-.001c.78-.78.79-2.05.01-2.84s-2.05-.8-2.84-.02c-.01 0-.01 0-.02.01L42.55 38.51l0-.001c-.79.78-.79 2.05-.01 2.83 0 0 0 0 0 0Z"
+            fill="currentColor"
+          />
+        </svg>
+      </Button>
+    </Link>
     <Link href={nextNounId === auctionNounId ? "/" : `/nouns/${nextNounId}`}>
       <Button
         size="default"
@@ -1896,7 +1906,12 @@ const HeaderNounNavigation = ({
   </div>
 );
 
-const NounScreenHeader = ({ noun, navigationElement }) => {
+const NounScreenHeader = ({
+  noun,
+  setSelectedHolder,
+  toggleBidsDialog,
+  navigationElement,
+}) => {
   const { ensName: ownerENSName } = useProfile(noun.owner.address);
   const ownerName = ownerENSName ?? shortenAddress(noun.owner.address);
 
@@ -1905,9 +1920,12 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
       <div
         css={css({
           flex: "1 1 auto",
-          paddingRight: "2rem",
           display: "flex",
           alignItems: "center",
+          paddingRight: "1.5rem",
+          [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+            paddingRight: "3rem",
+          },
         })}
       >
         <div css={css({ padding: "2rem 0" })}>{navigationElement}</div>
@@ -1915,13 +1933,12 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
           css={(theme) =>
             css({
               fontFamily: theme.fontStacks.headers,
-              marginLeft: "1rem",
+              marginLeft: "1.5rem",
               fontSize: "3rem",
               fontWeight: "600",
               textTransform: "uppercase",
               color: theme.colors.textHeader,
               [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
-                marginLeft: "1.5rem",
                 fontSize: "3.6rem",
               },
             })
@@ -1931,21 +1948,36 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
         </div>
       </div>
       <div
-        css={css({
-          display: "grid",
-          gridAutoFlow: "column",
-          gridAutoColumns: "auto",
-          alignItems: "center",
-          gridGap: "2em",
-          "& > *": {
-            minWidth: 0,
-            overflow: "hidden",
-          },
-        })}
+        css={(t) =>
+          css({
+            display: "grid",
+            gridAutoFlow: "column",
+            gridAutoColumns: "auto",
+            alignItems: "center",
+            gridGap: "1.5rem",
+            "& > *": {
+              minWidth: 0,
+              overflow: "hidden",
+            },
+            button: {
+              cursor: "pointer",
+              display: "block",
+              "&:disabled": { pointerEvents: "none" },
+            },
+            "@media (hover: hover)": {
+              "button:hover [data-hover-effect]": {
+                color: t.colors.textDimmed,
+              },
+            },
+            [`@media (min-width: ${STACKED_MODE_BREAKPOINT})`]: {
+              gridGap: "3rem",
+            },
+          })
+        }
       >
-        <div>
+        <button onClick={toggleBidsDialog} disabled={noun.auction == null}>
           <Label>Winning bid</Label>
-          <Heading2>
+          <Heading2 data-hover-effect>
             {noun.auction == null ? (
               "-"
             ) : (
@@ -1954,24 +1986,13 @@ const NounScreenHeader = ({ noun, navigationElement }) => {
               </>
             )}
           </Heading2>
-        </div>
-        <Link href={`/holders/${noun.owner.address}`}>
-          <a
-            css={css({
-              cursor: "pointer",
-              display: "block",
-              "@media (hover: hover)": {
-                ":hover [data-address]": {
-                  textDecoration: "underline",
-                  color: "hsl(0 0% 25%)",
-                },
-              },
-            })}
-          >
-            <Label>Holder</Label>
-            <Heading2 data-address>{ownerName}</Heading2>
-          </a>
-        </Link>
+        </button>
+        <button
+          onClick={() => setSelectedHolder(ownerENSName ?? noun.owner.address)}
+        >
+          <Label>Holder</Label>
+          <Heading2 data-hover-effect>{ownerName}</Heading2>
+        </button>
       </div>
     </ScreenHeader>
   );
@@ -2080,6 +2101,7 @@ const BidsDialog = ({
   onRequestClose,
   bids,
   nounIdsByHolderAddresses,
+  setSelectedHolder,
 }) => {
   const count = bids?.length;
   return (
@@ -2176,6 +2198,7 @@ const BidsDialog = ({
                             b.bidder.address.toLowerCase()
                           ] ?? []
                         }
+                        setSelectedHolder={setSelectedHolder}
                       />
                     </li>
                   ))}
@@ -2188,7 +2211,7 @@ const BidsDialog = ({
   );
 };
 
-const BidListItem = ({ bid, bidderNounIds }) => {
+const BidListItem = ({ bid, bidderNounIds, setSelectedHolder }) => {
   const { ensName, avatarURI, balance } = useProfile(
     bid.bidder.address,
     bid.blockNumber
@@ -2290,7 +2313,7 @@ const BidListItem = ({ bid, bidderNounIds }) => {
         whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
-        a: {
+        "[data-bidder]": {
           display: "grid",
           gridTemplateColumns: "auto minmax(0,1fr)",
           gridGap: "1.5rem",
@@ -2305,11 +2328,15 @@ const BidListItem = ({ bid, bidderNounIds }) => {
       })}
     >
       {hasNouns ? (
-        <Link href={`/holders/${bid.bidder.address}`}>
-          <a>{bidderLinkContent}</a>
-        </Link>
+        <button
+          data-bidder
+          onClick={() => setSelectedHolder(ensName ?? bid.bidder.address)}
+        >
+          {bidderLinkContent}
+        </button>
       ) : (
         <a
+          data-bidder
           href={`https://etherscan.io/address/${bid.bidder.address}`}
           target="_blank"
           rel="noreferrer"
@@ -2669,16 +2696,18 @@ const HolderDialog = ({
                 ? holderAddressOrName
                 : shortenAddress(address)}
             </h1>
-            <div
-              css={(theme) =>
-                css({
-                  color: theme.colors.textDimmed,
-                  fontSize: theme.fontSizes.small,
-                })
-              }
-            >
-              {nounCount} {nounCount === 1 ? "noun" : "nouns"}
-            </div>
+            {!isLoadingEnsAddress && (
+              <div
+                css={(theme) =>
+                  css({
+                    color: theme.colors.textDimmed,
+                    fontSize: theme.fontSizes.small,
+                  })
+                }
+              >
+                {nounCount} {nounCount === 1 ? "noun" : "nouns"}
+              </div>
+            )}
           </div>
           <div
             css={css({
