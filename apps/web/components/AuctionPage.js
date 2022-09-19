@@ -88,7 +88,7 @@ const preloadGifs = () => {
 
 const TEXT_ERROR = "#e85252";
 
-const positionByPartName = {
+const floatingTraitPositionByName = {
   head: { top: "26%", left: "73%" },
   glasses: { top: "43.8%", left: "69.7%" },
   body: {
@@ -100,217 +100,54 @@ const positionByPartName = {
   background: { top: "82%", left: "8%" },
 };
 
-const iconByPartName = {
+const traitIconByName = {
   head: (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect width="3" height="3" fill="currentColor" />
-      <rect y="3" width="3" height="3" fill="currentColor" />
-      <rect y="6" width="3" height="3" fill="currentColor" />
-      <rect y="9" width="3" height="3" fill="currentColor" />
-      <rect y="12" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="12" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" width="3" height="3" fill="currentColor" />
-      <rect x="6" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="9" width="3" height="3" fill="currentColor" />
-      <rect x="12" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
+      <path d="M9 6H6V9H9V6Z" fill="currentColor" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 0V18H18V0H0ZM3 15H6V12H12V15H15V9H12V6H15V3H3V15Z"
+        fill="currentColor"
+      />
     </svg>
   ),
   glasses: (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect width="3" height="3" fill="currentColor" />
-      <rect y="3" width="3" height="3" fill="currentColor" />
-      <rect y="6" width="3" height="3" fill="currentColor" />
-      <rect y="9" width="3" height="3" fill="currentColor" />
-      <rect y="12" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" width="3" height="3" fill="currentColor" />
-      <rect x="6" width="3" height="3" fill="currentColor" />
-      <rect x="9" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="12" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 0V18H18V0H0ZM9 15V3H15V15H9Z"
+        fill="currentColor"
+      />
     </svg>
   ),
   body: (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect width="3" height="3" fill="currentColor" />
-      <rect y="3" width="3" height="3" fill="currentColor" />
-      <rect y="6" width="3" height="3" fill="currentColor" />
-      <rect y="9" width="3" height="3" fill="currentColor" />
-      <rect y="12" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="6" width="3" height="3" fill="currentColor" />
-      <rect x="9" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="12" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="3" width="3" height="3" fill="currentColor" />
+      <path d="M0 0V18H3V6H6V18H18V0H0Z" fill="currentColor" />
     </svg>
   ),
   accessory: (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect width="3" height="3" fill="currentColor" />
-      <rect y="3" width="3" height="3" fill="currentColor" />
-      <rect y="6" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="9" width="3" height="3" fill="currentColor" />
-      <rect y="9" width="3" height="3" fill="currentColor" />
-      <rect y="12" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" width="3" height="3" fill="currentColor" />
-      <rect x="6" width="3" height="3" fill="currentColor" />
-      <rect x="9" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="12" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
+      <path d="M6 6V12H12V6H6Z" fill="currentColor" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 0V18H18V0H0ZM15 15V3H3V15H15Z"
+        fill="currentColor"
+      />
     </svg>
   ),
   background: (
-    <svg width="18" height="18" viewBox="0 0 18 18">
-      {" "}
-      <rect y="9" width="3" height="3" fill="currentColor" />
-      <rect y="12" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" width="3" height="3" fill="currentColor" />
-      <rect x="6" width="3" height="3" fill="currentColor" />
-      <rect x="9" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="12" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="3" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="6" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="9" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="12" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect y="15" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="12" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="15" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="9" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="6" y="15" width="3" height="3" fill="currentColor" />
-      <rect x="3" y="15" width="3" height="3" fill="currentColor" />
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M9 9V12H6V9H9Z" fill="currentColor" />
+      <path d="M9 9H12V6H9V9Z" fill="currentColor" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 0V18H18V0H0ZM6 15H9V12H12V15H15V12H12V9H15V6H12V3H9V6H6V3H3V6H6V9H3V12H6V15Z"
+        fill="currentColor"
+      />
     </svg>
   ),
 };
@@ -2071,7 +1908,7 @@ const NounTraitLabel = ({ highlight = false, name, title, stats }) => {
             })
           }
         >
-          {iconByPartName[name]}
+          {traitIconByName[name]}
         </div>
         <div style={{ padding: "0.2rem 0" }}>
           {title}{" "}
@@ -2989,14 +2826,14 @@ const FloatingNounTraitLabel = ({
           border: highlight ? "1px solid rgb(0 0 0 / 35%)" : "none",
           boxShadow: theme.shadows.elevationLow, // "2px 2px 0 0 rgb(0 0 0 / 10%)",
           lineHeight: 1.2,
-          ...positionByPartName[name],
+          ...floatingTraitPositionByName[name],
         })
       }
       {...props}
     >
       <div style={{ display: "flex", alignItems: "center" }}>
         <div css={css({ marginRight: "0.5rem", svg: { display: "block" } })}>
-          {iconByPartName[name]}
+          {traitIconByName[name]}
         </div>
         <div>
           {title} {name}
