@@ -2494,6 +2494,7 @@ const TraitDialog = ({
 };
 
 const TraitNounListItem = ({ noun: n, setSelectedHolder }) => {
+  const theme = useTheme();
   const { data: ensName } = useEnsName({ address: n.owner.address });
   const ownerString = ensName ?? shortenAddress(n.owner.address);
   return (
@@ -2611,15 +2612,27 @@ const TraitNounListItem = ({ noun: n, setSelectedHolder }) => {
               rel="noreferrer"
               className="hover-link"
               css={css({
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "1.5rem",
+                height: "1.5rem",
                 padding: "0 0.3rem",
                 transition: "0.1s transform ease-out",
                 ":hover": { transform: "scale(1.2)" },
               })}
             >
               <img
-                src="/etherscan-icon-light.png"
+                src={
+                  theme.light
+                    ? "/etherscan-icon.png"
+                    : "/etherscan-icon-light.png"
+                }
                 alt="Etherscan icon"
-                css={css({ display: "block", width: "1.4rem" })}
+                css={css({
+                  display: "block",
+                  width: theme.light ? "1.5rem" : "1.4rem",
+                })}
               />
             </a>
           </div>
@@ -2635,6 +2648,8 @@ const HolderDialog = ({
   nounsById,
   nounIdsByHolderAddresses,
 }) => {
+  const theme = useTheme();
+
   const { data: ensName } = useEnsName({
     address: holderAddressOrName,
     enabled: isAddress(holderAddressOrName),
@@ -2668,10 +2683,10 @@ const HolderDialog = ({
     >
       {({ titleProps }) => (
         <>
-          <div
+          <header
             css={css({
               display: "grid",
-              gridTemplateColumns: "auto auto",
+              gridTemplateColumns: "auto auto 1fr",
               gridGap: "1rem",
               alignItems: "flex-end",
               justifyContent: "flex-start",
@@ -2708,7 +2723,55 @@ const HolderDialog = ({
                 {nounCount} {nounCount === 1 ? "noun" : "nouns"}
               </div>
             )}
-          </div>
+
+            <div
+              style={{
+                transition: "0.1s opacity ease-out",
+                opacity: isLoadingEnsAddress ? 0 : 1,
+                display: "grid",
+                justifyContent: "flex-end",
+                gridTemplateColumns: "auto auto",
+                gridGap: "0.6rem",
+              }}
+            >
+              <a
+                href={`https://rainbow.me/${holderAddressOrName}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img
+                  src="/rainbow-icon.png"
+                  alt="Rainbow icon"
+                  css={css({ display: "block", width: "2rem" })}
+                />
+              </a>
+              <a
+                href={`https://etherscan.io/address/${address}`}
+                target="_blank"
+                rel="noreferrer"
+                css={css({
+                  width: "2rem",
+                  height: "2rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                })}
+              >
+                <img
+                  src={
+                    theme.light
+                      ? "/etherscan-icon.png"
+                      : "/etherscan-icon-light.png"
+                  }
+                  alt="Etherscan icon"
+                  css={css({
+                    display: "block",
+                    width: theme.light ? "2rem" : "1.8rem",
+                  })}
+                />
+              </a>
+            </div>
+          </header>
           <div
             css={css({
               flex: "1 1 auto",
