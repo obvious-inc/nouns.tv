@@ -97,7 +97,7 @@ const positionByPartName = {
     transform: "translateY(-50%) translateX(-50%)",
   },
   accessory: { top: "78%", left: "66%" },
-  background: { top: "82%", left: "10%" },
+  background: { top: "82%", left: "8%" },
 };
 
 const iconByPartName = {
@@ -2998,7 +2998,9 @@ const FloatingNounTraitLabel = ({
         <div css={css({ marginRight: "0.5rem", svg: { display: "block" } })}>
           {iconByPartName[name]}
         </div>
-        {title}
+        <div>
+          {title} {name}
+        </div>
       </div>
       {stats != null && (
         <div
