@@ -36,6 +36,11 @@ export type Auction = {
   bidder?: Account;
 };
 
+export type Delegate = {
+  id: string;
+  nounsRepresented: { id: string }[];
+};
+
 export type GetBidOptions = {
   address?: string;
   blockNumber?: number | string;

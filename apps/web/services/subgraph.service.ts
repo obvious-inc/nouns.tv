@@ -4,6 +4,7 @@ import {
   GetBidOptions,
   Noun,
   NounService,
+  Delegate,
 } from "./interfaces/noun.service";
 import { gql, GraphQLClient } from "graphql-request";
 import { Agent } from "@zoralabs/nft-metadata";
@@ -121,6 +122,17 @@ const GET_NOUNS_BY_ID = gql`
   ${NOUN_FRAGMENT}
 `;
 
+const GET_DELEGAGES_BY_ID = gql`
+  query GetDelegates {
+    delegates(first: 1000, where: { delegatedVotesRaw_not: "0" }) {
+      id
+      nounsRepresented {
+        id
+      }
+    }
+  }
+`;
+
 const GET_BIDS = gql`
   query GetBids($address: String, $blockNumber: Int, $offset: Int!) {
     bids(
@@ -189,6 +201,11 @@ export class SubgraphService implements NounService {
   public async getNouns(): Promise<Noun[]> {
     const resp = await this.client.request(GET_NOUNS_BY_ID);
     return resp.nouns;
+  }
+
+  public async getAllDelegates(): Promise<Delegate[]> {
+    const resp = await this.client.request(GET_DELEGAGES_BY_ID);
+    return resp.delegates;
   }
 
   public async getAllAuctions(): Promise<Auction[]> {

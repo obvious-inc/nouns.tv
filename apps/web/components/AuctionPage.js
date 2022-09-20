@@ -2635,9 +2635,7 @@ const HolderDialog = ({
                 css={css({
                   margin: 0,
                   padding: 0,
-                  display: "grid",
-                  gridGap: "1.5rem",
-                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                  "li:not(:first-of-type)": { marginTop: "1.5rem" },
                 })}
               >
                 {holderNouns
@@ -2662,18 +2660,29 @@ const HolderDialog = ({
 };
 
 const HolderNounListItem = ({ noun: n }) => {
-  console.log(n);
+  const { data: delegateEnsName } = useEnsName({
+    address: n.delegateAddress,
+    enabled: n.delegateAddress != null,
+  });
+
   return (
     <div
-      css={css({
-        position: "relative",
-        a: { outline: "none" },
-        ".hover-link": { display: "none" },
-        "@media (hover: hover)": {
-          ".hover-link": { display: "block", opacity: 0 },
-          ":hover .hover-link": { opacity: 1 },
-        },
-      })}
+      css={(t) =>
+        css({
+          position: "relative",
+          a: { outline: "none" },
+          ".hover-link": { display: "none" },
+          "[data-amount]": {
+            fontSize: "1.5rem",
+            fontWeight: "500",
+            color: t.colors.textNormal,
+          },
+          "@media (hover: hover)": {
+            ".hover-link": { display: "block", opacity: 0 },
+            ":hover .hover-link": { opacity: 1 },
+          },
+        })
+      }
     >
       <Link href={`/nouns/${n.id}`}>
         <a
@@ -2688,7 +2697,7 @@ const HolderNounListItem = ({ noun: n }) => {
           css={css({
             "@media (hover: hover)": {
               "& + * .avatar": { transition: "0.05s transform ease-out" },
-              ":hover + * .noun-link": { textDecoration: "underline" },
+              ":hover + * [data-noun-id]": { textDecoration: "underline" },
               ":hover + * .avatar": { transform: "scale(1.1)" },
             },
           })}
@@ -2701,27 +2710,20 @@ const HolderNounListItem = ({ noun: n }) => {
             position: "relative",
             pointerEvents: "none",
             display: "grid",
-            gridTemplateColumns: "auto minmax(0,1fr)",
+            gridTemplateColumns: "auto minmax(0,1fr) auto",
             gridGap: "1.5rem",
-            alignItems: "center",
+            alignItems: "flex-start",
             lineHeight: "1.4",
             whiteSpace: "nowrap",
-            // a: {
-            //   pointerEvents: "all",
-            //   display: "block",
-            //   width: "max-content",
-            //   fontSize: "1.1rem",
-            //   color: theme.colors.textDimmed,
-            //   overflow: "hidden",
-            //   textOverflow: "ellipsis",
-            //   "@media (hover: hover)": {
-            //     ":hover": {
-            //       textDecoration: "underline",
-            //     },
-            //   },
-            // },
-            time: {
-              display: "block",
+            a: {
+              pointerEvents: "all",
+              "@media (hover: hover)": {
+                ":hover": {
+                  textDecoration: "underline",
+                },
+              },
+            },
+            "[data-dimmed]": {
               width: "max-content",
               fontSize: "1.1rem",
               color: theme.colors.textDimmed,
@@ -2744,24 +2746,44 @@ const HolderNounListItem = ({ noun: n }) => {
 
         <div>
           <div
-            className="noun-link"
             css={css({
               display: "block",
               fontSize: "1.4rem",
               fontWeight: "500",
               overflow: "hidden",
               textOverflow: "ellipsis",
+              paddingTop: "0.2rem",
             })}
           >
-            Noun {n.id}
+            <span data-noun-id>Noun {n.id}</span>
           </div>
-          <time>
+          <time data-dimmed style={{ display: "block" }}>
             {new Intl.DateTimeFormat(undefined, {
               day: "numeric",
               month: "short",
               year: "numeric",
             }).format(new Date(n.bornTime * 1000))}
           </time>
+          {n.delegateAddress != null && (
+            <div data-dimmed style={{ marginTop: "0.1rem" }}>
+              Delegated to{" "}
+              <a
+                href={`https://etherscan.io/address/${n.delegateAddress}`}
+                target="_blank"
+                rel="noreferrer"
+                css={css({ padding: "0.2rem", margin: "-0.2rem" })}
+              >
+                {delegateEnsName == null
+                  ? shortenAddress(n.delegateAddress)
+                  : delegateEnsName}
+              </a>
+            </div>
+          )}
+        </div>
+        <div data-amount style={{ paddingTop: "0.8rem" }}>
+          {n.auction == null || n.auction.amount === "0"
+            ? "-"
+            : `Ξ ${formatEther(n.auction.amount)}`}
         </div>
       </div>
     </div>

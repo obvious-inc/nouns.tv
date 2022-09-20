@@ -18,15 +18,34 @@ export const getStaticAuctionProps = async ({ params }) => {
     return acc;
   }, {});
 
+  const delegates = await service.getAllDelegates();
+  const delegateAddressByNounId = delegates.reduce((acc, d) => {
+    for (const noun of d.nounsRepresented) acc[noun.id] = d.id;
+    return acc;
+  }, {});
+
   const nouns = await service.getNouns();
+
   const nounsById = nouns.reduce((acc, n) => {
+    let noun;
+
     if (n.id <= 1820 && n.id % 10 === 0) {
       const auction = auctionsByNounId[Number(n.id) + 1];
-      acc[n.id] = { ...n, bornTime: auction.startTime };
+      noun = { ...n, bornTime: auction.startTime };
     } else {
       const auction = auctionsByNounId[n.id];
-      acc[n.id] = { ...n, auction, bornTime: auction.startTime };
+      noun = { ...n, auction, bornTime: auction.startTime };
     }
+
+    acc[n.id] = noun;
+
+    if (
+      delegateAddressByNounId[n.id] != null &&
+      delegateAddressByNounId[n.id].toLowerCase() !==
+        n.owner.address.toLowerCase()
+    )
+      acc[n.id].delegateAddress = delegateAddressByNounId[n.id];
+
     return acc;
   }, {});
 
