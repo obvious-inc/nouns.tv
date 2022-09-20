@@ -453,7 +453,7 @@ export function AuctionPage({ noun: noun_, nounsById: nounsById_, setTheme }) {
                 })}
               >
                 <Switch
-                  label="Stats"
+                  label="Traits"
                   isActive={forceStats}
                   onClick={toggleForceStats}
                 />
@@ -492,7 +492,7 @@ export function AuctionPage({ noun: noun_, nounsById: nounsById_, setTheme }) {
                 })}
               >
                 <Switch
-                  label="Stats"
+                  label="Traits"
                   isActive={forceStats}
                   onClick={toggleForceStats}
                 />
